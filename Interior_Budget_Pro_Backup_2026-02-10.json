@@ -1,0 +1,300 @@
+{
+  "budget": 900000,
+  "projectName": "Casa Eden",
+  "userName": "Sagar Jadhav",
+  "projectAddress": "Wing B.Lodha Upper Thane",
+  "projectTimeline": "2 months=3 Months",
+  "paymentSources": [
+    "Smita Jadhav",
+    "Sagar Jadhav"
+  ],
+  "expenses": [
+    {
+      "id": 1770745821769,
+      "date": "2026-02-10",
+      "amount": 50000,
+      "contractor": "Rahul Bechu Ram",
+      "workType": "Carpentry",
+      "category": "Furniture",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed",
+      "notes": ""
+    },
+    {
+      "id": 1770745833908,
+      "date": "2026-02-10",
+      "amount": 10000,
+      "contractor": "Dhruvesh Namade",
+      "workType": "Electric Work",
+      "category": "Electrical",
+      "paidBy": "Sagar Jadhav",
+      "mode": "UPI",
+      "status": "Completed",
+      "notes": ""
+    },
+    {
+      "id": 1770746194893,
+      "date": "2026-02-10",
+      "amount": 7000,
+      "contractor": "Dhruvesh Namade",
+      "workType": "Electric Work",
+      "category": "Electrical",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed",
+      "notes": ""
+    },
+    {
+      "id": 1770746249152,
+      "date": "2026-02-10",
+      "amount": 15000,
+      "contractor": "Pavan POP",
+      "workType": "Installation",
+      "category": "Material",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed",
+      "notes": ""
+    },
+    {
+      "id": 1770746347651,
+      "date": "2026-02-10",
+      "amount": 25000,
+      "contractor": "Pavan POP",
+      "workType": "Installation",
+      "category": "Material",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed",
+      "notes": ""
+    },
+    {
+      "id": 1770747475196,
+      "date": "2026-02-10",
+      "amount": 10000,
+      "contractor": "Pavan POP",
+      "workType": "Installation",
+      "category": "Material",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed"
+    },
+    {
+      "id": 1770753940151,
+      "date": "2026-02-10",
+      "amount": 50000,
+      "contractor": "Rahul Bechu Ram",
+      "workType": "Carpentry",
+      "category": "Furniture",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed",
+      "notes": "Duplicate transaction"
+    },
+    {
+      "id": 1770753970199,
+      "date": "2026-02-10",
+      "amount": 100000,
+      "contractor": "Rahul Bechu Ram",
+      "workType": "Carpentry",
+      "category": "Furniture",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed",
+      "notes": "Duplicate transaction"
+    },
+    {
+      "id": 1770745503716,
+      "date": "2026-01-01",
+      "amount": 50000,
+      "contractor": "Rahul Bechu Ram",
+      "workType": "Carpentry",
+      "category": "Furniture",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed"
+    },
+    {
+      "id": 1770738943537,
+      "date": "2025-12-30",
+      "amount": 50000,
+      "contractor": "Rahul Bechu Ram",
+      "workType": "Furniture",
+      "category": "Furniture",
+      "paidBy": "Smita Jadhav",
+      "mode": "Bank Transfer",
+      "status": "Completed"
+    }
+  ],
+  "contractors": [
+    {
+      "id": 1770736204295,
+      "name": "Rahul Bechu Ram",
+      "role": "Carpenter",
+      "phone": "+91 75067 68763",
+      "email": "",
+      "company": "",
+      "budget": 700000,
+      "details": ""
+    },
+    {
+      "id": 1770736305140,
+      "name": "Dhruvesh Namade",
+      "role": "Electrician",
+      "phone": "+91 84549 82431",
+      "email": "",
+      "company": "",
+      "budget": 34550,
+      "details": ""
+    },
+    {
+      "id": 1770738704382,
+      "name": "Pavan POP",
+      "role": "POP false celling",
+      "phone": "+91 81089 84933",
+      "email": "",
+      "company": "",
+      "budget": 60000,
+      "details": ""
+    },
+    {
+      "id": 1770746038489,
+      "name": "Yogesh Painter",
+      "role": "",
+      "phone": "+91 90827 79396",
+      "email": "",
+      "company": "",
+      "budget": 100000,
+      "details": ""
+    }
+  ],
+  "components": [
+    {
+      "id": 1770746525766,
+      "date": "2026-02-10",
+      "name": "Fans",
+      "category": "Electrical",
+      "contractor": "Dhruvesh Namade",
+      "workType": "Installaton",
+      "cost": 26449,
+      "progress": 0,
+      "status": "Not Started"
+    },
+    {
+      "id": 1770746900539,
+      "date": "2026-02-10",
+      "name": "Downlights",
+      "category": "Electrical",
+      "contractor": "Dhruvesh Namade",
+      "workType": "Installaton",
+      "cost": 9000,
+      "progress": 42,
+      "status": "In Progress"
+    },
+    {
+      "id": 1770746940230,
+      "date": "2026-02-10",
+      "name": "Light Sample",
+      "category": "Electrical",
+      "contractor": "Dhruvesh Namade",
+      "workType": "Installaton",
+      "cost": 850,
+      "progress": 100,
+      "status": "Completed"
+    },
+    {
+      "id": 1770753262289,
+      "date": "2026-02-10",
+      "name": "Chimney",
+      "category": "Electrical",
+      "contractor": "",
+      "workType": "Kitchen Installation",
+      "cost": 22450,
+      "progress": 100,
+      "status": "Completed"
+    }
+  ],
+  "faults": [
+    {
+      "id": 1770745453765,
+      "date": "2026-02-10",
+      "contractor": "Pavan POP",
+      "desc": "Tiles Issue during work by pavan team will discuss with Yogesh tje price",
+      "cost": 3000,
+      "status": "Open"
+    }
+  ],
+  "notes": [
+    {
+      "id": 1770742825760,
+      "date": "2026-02-11",
+      "text": ""
+    }
+  ],
+  "theme": "midnight",
+  "currency": "₹",
+  "dateFormat": "en-IN",
+  "totalBudget": 900000,
+  "logs": [
+    {
+      "id": 1770736474640,
+      "timestamp": "2026-02-10T15:14:34.640Z",
+      "action": "CSV Exported",
+      "description": "Expense data exported"
+    },
+    {
+      "id": 1770736345683,
+      "timestamp": "2026-02-10T15:12:25.683Z",
+      "action": "Fault Reported",
+      "description": "we - ₹434"
+    },
+    {
+      "id": 1770736305140,
+      "timestamp": "2026-02-10T15:11:45.140Z",
+      "action": "Contractor Added",
+      "description": "we (ee)"
+    },
+    {
+      "id": 1770736263332,
+      "timestamp": "2026-02-10T15:11:03.332Z",
+      "action": "Budget Updated",
+      "description": "Budget set to ₹9,99,899"
+    },
+    {
+      "id": 1770736228988,
+      "timestamp": "2026-02-10T15:10:28.988Z",
+      "action": "Expense Added",
+      "description": "Furniture - ₹3,44,344"
+    },
+    {
+      "id": 1770736204295,
+      "timestamp": "2026-02-10T15:10:04.295Z",
+      "action": "Contractor Added",
+      "description": "we (ewe)"
+    },
+    {
+      "id": 1770736189257,
+      "timestamp": "2026-02-10T15:09:49.257Z",
+      "action": "Budget Updated",
+      "description": "Budget set to ₹3,433"
+    },
+    {
+      "id": 1770736181444,
+      "timestamp": "2026-02-10T15:09:41.444Z",
+      "action": "CSV Exported",
+      "description": "Expense data exported"
+    },
+    {
+      "id": 1770736172375,
+      "timestamp": "2026-02-10T15:09:32.375Z",
+      "action": "Theme Changed",
+      "description": "Switched to dark mode"
+    }
+  ],
+  "paymentMakers": [
+    "Smita Jadhav",
+    "Sagar Jadhav"
+  ],
+  "colorTheme": "blue"
+}
