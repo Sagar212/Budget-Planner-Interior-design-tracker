@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interior Budget Pro - Advanced Edition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+        }
+
+        body.theme-purple {
+            --bg-start: #667eea;
+            --bg-mid: #764ba2;
+            --bg-end: #f093fb;
+            --primary: #667eea;
+        }
+
+        body.theme-blue {
+            --bg-start: #0ea5e9;
+            --bg-mid: #3b82f6;
+            --bg-end: #8b5cf6;
+            --primary: #3b82f6;
+        }
+
+        body.theme-green {
+            --bg-start: #10b981;
+            --bg-mid: #059669;
+            --bg-end: #14b8a6;
+            --primary: #10b981;
+        }
+
+        body.theme-orange {
+            --bg-start: #f59e0b;
+            --bg-mid: #ef4444;
+            --bg-end: #ec4899;
+            --primary: #f59e0b;
+        }
+
+        body.theme-dark {
+            --bg-start: #1e293b;
+            --bg-mid: #0f172a;
+            --bg-end: #020617;
+            --primary: #475569;
+        }
+
+        body.light-mode {
+            --bg: linear-gradient(135deg, var(--bg-start, #667eea) 0%, var(--bg-mid, #764ba2) 50%, var(--bg-end, #f093fb) 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --card: rgba(255, 255, 255, 0.15);
+            --text: #ffffff;
+            --input-bg: rgba(255, 255, 255, 0.12);
+            --option-bg: #4f46e5;
+        }
+
+        body.dark-mode {
+            --bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --glass: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(148, 163, 184, 0.2);
+            --card: rgba(30, 41, 59, 0.6);
+            --text: #e2e8f0;
+            --input-bg: rgba(30, 41, 59, 0.8);
+            --option-bg: #1e293b;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text);
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .container { max-width: 1800px; margin: 0 auto; }
+
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            transition: all 0.4s ease;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            padding: 28px 36px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            animation: slideIn 0.6s ease;
+        }
+
+        .logo {
+            font-size: 34px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon { font-size: 48px; animation: pulse 2.5s infinite; }
+
+        .header-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+        .user-badge {
+            padding: 12px 20px;
+            background: var(--card);
+            border-radius: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 14px 26px;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .btn-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .btn-secondary { background: linear-gradient(135deg, #6b7280, #4b5563); }
+        .btn-sm { padding: 10px 18px; font-size: 13px; border-radius: 10px; }
+
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 12px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 20px;
+            margin-bottom: 32px;
+        }
+
+        .nav-tab {
+            padding: 16px 28px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            background: var(--glass);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .nav-tab:hover { background: var(--card); transform: translateY(-2px); }
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            transform: scale(1.05);
+        }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 24px; }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text);
+        }
+
+        label .optional {
+            font-size: 11px;
+            opacity: 0.6;
+            text-transform: lowercase;
+            font-weight: 400;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid var(--glass-border);
+            border-radius: 14px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--card);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 45px;
+            appearance: none;
+        }
+
+        select option {
+            background: var(--option-bg);
+            color: var(--text);
+            padding: 12px;
+        }
+
+        .dark-mode select option { background: #1e293b; color: #e2e8f0; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-bottom: 32px; }
+
+        .stat-card { text-align: center; position: relative; overflow: hidden; }
+        .stat-icon { font-size: 52px; margin-bottom: 12px; display: block; }
+        .stat-value {
+            font-size: 38px;
+            font-weight: 900;
+            margin: 14px 0;
+            cursor: pointer;
+        }
+        .stat-label { font-size: 13px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+
+        .progress-container {
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 20px;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--info));
+            transition: width 0.8s ease;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .table-container { overflow-x: auto; margin-top: 20px; border-radius: 16px; background: rgba(0,0,0,0.15); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 18px 16px; text-align: left; border-bottom: 1px solid var(--glass-border); }
+        th {
+            background: rgba(102, 126, 234, 0.25);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1.2px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr { transition: all 0.3s ease; }
+        tr:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .badge {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .badge-pending { background: var(--warning); }
+        .badge-completed { background: var(--success); }
+        .badge-in-progress { background: var(--info); }
+        .badge-faulty { background: var(--danger); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            max-width: 900px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 36px;
+            animation: fadeIn 0.4s ease;
+            margin: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        .modal-title { font-size: 28px; font-weight: 900; }
+        .close-btn {
+            font-size: 36px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .close-btn:hover { background: rgba(255, 255, 255, 0.15); transform: rotate(90deg); }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease; }
+
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            font-size: 15px;
+            font-weight: 700;
+            animation: fadeIn 0.4s ease;
+        }
+        .alert-success { background: rgba(16, 185, 129, 0.25); border: 2px solid var(--success); }
+        .alert-error { background: rgba(239, 68, 68, 0.25); border: 2px solid var(--danger); }
+        .alert-info { background: rgba(6, 182, 212, 0.25); border: 2px solid var(--info); }
+
+        .chart-container { padding: 28px; margin-top: 24px; height: 450px; position: relative; }
+
+        .theme-toggle {
+            width: 60px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle-slider {
+            width: 28px;
+            height: 28px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle.dark .theme-toggle-slider { left: 30px; background: #1e293b; }
+
+        .activity-log { max-height: 400px; overflow-y: auto; }
+        .log-item {
+            padding: 14px 18px;
+            background: var(--card);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: 800;
+            padding: 12px;
+            background: var(--card);
+            border-radius: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--glass);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: var(--card);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.has-activity {
+            background: linear-gradient(135deg, var(--info), var(--primary));
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        .calendar-day.today {
+            border: 3px solid var(--warning);
+            font-weight: 900;
+        }
+
+        .calendar-day-number {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .calendar-day-indicator {
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        .payment-card {
+            padding: 20px;
+            background: var(--card);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border-left: 5px solid var(--info);
+        }
+
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .theme-picker {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .theme-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-option.active {
+            border-color: white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .theme-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .theme-blue { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+        .theme-green { background: linear-gradient(135deg, #10b981, #14b8a6); }
+        .theme-orange { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+        .theme-dark { background: linear-gradient(135deg, #1e293b, #020617); }
+
+        .component-progress {
+            margin: 16px 0;
+        }
+
+        .component-progress-bar {
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .component-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: white;
+        }
+
+        @media (max-width: 968px) {
+            .header { flex-direction: column; align-items: flex-start; }
+            .nav-tabs { width: 100%; }
+            .nav-tab { flex: 1; justify-content: center; font-size: 12px; padding: 12px 8px; }
+            .calendar-grid { grid-template-columns: repeat(7, 1fr); gap: 6px; }
+            .logo { font-size: 24px; }
+        }
+
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 10px; }
+    </style>
+</head>
+<body class="light-mode theme-purple">
+    <div class="container">
+        <!-- Header -->
+        <div class="header glass">
+            <div class="logo">
+                <span class="logo-icon">🏠</span>
+                <span id="projectNameDisplay">Interior Budget Pro</span>
+            </div>
+            <div class="header-actions">
+                <div class="user-badge">
+                    <span>👤</span>
+                    <span id="userNameDisplay">User</span>
+                </div>
+                <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                    <div class="theme-toggle-slider"></div>
+                </div>
+                <button class="btn btn-info btn-sm" onclick="exportData()">📥 Export</button>
+                <button class="btn btn-success btn-sm" onclick="importData()">📤 Import</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="glass nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('dashboard', this)">📊 Dashboard</div>
+            <div class="nav-tab" onclick="switchTab('expenses', this)">💰 Expenses</div>
+            <div class="nav-tab" onclick="switchTab('contractors', this)">👷 Contractors</div>
+            <div class="nav-tab" onclick="switchTab('payments', this)">💳 Payments</div>
+            <div class="nav-tab" onclick="switchTab('components', this)">🛠️ Components</div>
+            <div class="nav-tab" onclick="switchTab('faults', this)">⚠️ Faults</div>
+            <div class="nav-tab" onclick="switchTab('notes', this)">📝 Notes</div>
+            <div class="nav-tab" onclick="switchTab('timeline', this)">📅 Timeline</div>
+            <div class="nav-tab" onclick="switchTab('reports', this)">📈 Reports</div>
+            <div class="nav-tab" onclick="switchTab('settings', this)">⚙️ Settings</div>
+        </div>
+
+        <div class="glass" style="padding: 32px;">
+            <!-- Dashboard -->
+            <div id="dashboard" class="content-section active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <h2 style="font-size: 30px; font-weight: 900;">📊 Dashboard</h2>
+                    <button class="btn btn-primary btn-sm" onclick="editBudget()">✏️ Edit Budget</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">💵</span>
+                        <div class="stat-value" id="totalBudget">₹0</div>
+                        <div class="stat-label">Total Budget</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">💸</span>
+                        <div class="stat-value" id="totalSpent">₹0</div>
+                        <div class="stat-label">Total Spent</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">💰</span>
+                        <div class="stat-value" id="remaining">₹0</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">📈</span>
+                        <div class="stat-value" id="percentSpent">0%</div>
+                        <div class="stat-label">Budget Used</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px; font-weight: 800;">Budget Progress</h3>
+                    <div class="progress-container" style="height: 32px;">
+                        <div class="progress-bar" id="budgetProgress"></div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 32px 0 16px; font-weight: 800;">Quick Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">👷</span>
+                        <div class="stat-value" id="totalContractors">0</div>
+                        <div class="stat-label">Contractors</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">🛠️</span>
+                        <div class="stat-value" id="totalComponents">0</div>
+                        <div class="stat-label">Components</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">💳</span>
+                        <div class="stat-value" id="totalPayments">0</div>
+                        <div class="stat-label">Payments Made</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-icon">⚠️</span>
+                        <div class="stat-value" id="totalFaults">0</div>
+                        <div class="stat-label">Faults</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses -->
+            <div id="expenses" class="content-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <h2 style="font-size: 30px; font-weight: 900;">💰 Expenses</h2>
+                    <button class="btn btn-success" onclick="openModal('expenseModal')">➕ Add Expense</button>
+                </div>
+                <div class="glass-card">
+                    <div class="table-container">
+                        <table><thead><tr>
+                            <th>Date</th><th>Category</th><th>Contractor</th><th>Work Type</th>
+                            <th>Amount</th><th>Paid By</th><th>Status</th><th>Actions</th>
+                        </tr></thead><tbody id="expensesTable"></tbody></table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contractors -->
+            <div id="contractors" class="content-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <h2 style="font-size: 30px; font-weight: 900;">👷 Contractors</h2>
+                    <button class="btn btn-success" onclick="openModal('contractorModal')">➕ Add Contractor</button>
+                </div>
+                <div class="category-grid" id="contractorGrid"></div>
+            </div>
+
+            <!-- Payments View -->
+            <div id="payments" class="content-section">
+                <h2 style="font-size: 30px; font-weight: 900; margin-bottom: 24px;">💳 Payment Tracking</h2>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">Contractor-wise Payments</h3>
+                    <div id="contractorPaymentsList"></div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">All Payment Transactions</h3>
+                    <div class="table-container">
+                        <table><thead><tr>
+                            <th>Date</th><th>Contractor</th><th>Work Type</th>
+                            <th>Amount</th><th>Paid By</th><th>Payment Mode</th>
+                        </tr></thead><tbody id="paymentsTable"></tbody></table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Components -->
+            <div id="components" class="content-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <h2 style="font-size: 30px; font-weight: 900;">🛠️ Components & Materials</h2>
+                    <button class="btn btn-success" onclick="openModal('componentModal')">➕ Add Component</button>
+                </div>
+                <div class="glass-card">
+                    <div class="table-container">
+                        <table><thead><tr>
+                            <th>Date</th><th>Component</th><th>Category</th>
+                            <th>Total Cost</th><th>Progress</th><th>Status</th><th>Actions</th>
+                        </tr></thead><tbody id="componentsTable"></tbody></table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faults -->
+            <div id="faults" class="content-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <h2 style="font-size: 30px; font-weight: 900;">⚠️ Faults & Damages</h2>
+                    <button class="btn btn-danger" onclick="openModal('faultModal')">➕ Report Fault</button>
+                </div>
+                <div class="glass-card">
+                    <div class="table-container">
+                        <table><thead><tr>
+                            <th>Date</th><th>Contractor</th><th>Description</th>
+                            <th>Damage Amount</th><th>Status</th><th>Actions</th>
+                        </tr></thead><tbody id="faultsTable"></tbody></table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes & Calendar -->
+            <div id="notes" class="content-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <h2 style="font-size: 30px; font-weight: 900;">📝 Notes & Calendar</h2>
+                    <button class="btn btn-success" onclick="openModal('noteModal')">➕ Add Note</button>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
+                        <h3 style="font-weight: 800;">Calendar View</h3>
+                        <div>
+                            <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀ Prev</button>
+                            <span id="currentMonth" style="margin: 0 16px; font-weight: 800;"></span>
+                            <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">Next ▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">All Notes</h3>
+                    <div id="notesContainer"></div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div id="timeline" class="content-section">
+                <h2 style="font-size: 30px; font-weight: 900; margin-bottom: 24px;">📅 Project Timeline</h2>
+                <div class="glass-card" id="timelineContainer"></div>
+            </div>
+
+            <!-- Reports -->
+            <div id="reports" class="content-section">
+                <h2 style="font-size: 30px; font-weight: 900; margin-bottom: 24px;">📈 Reports & Analytics</h2>
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 20px;">Category-wise Spending</h3>
+                    <div class="chart-container"><canvas id="categoryCanvas"></canvas></div>
+                </div>
+                <div class="glass-card" style="margin-top: 24px;">
+                    <h3 style="margin-bottom: 20px;">Contractor Payment Distribution</h3>
+                    <div class="chart-container"><canvas id="contractorCanvas"></canvas></div>
+                </div>
+                <div class="glass-card" style="margin-top: 24px;" id="summaryReport"></div>
+            </div>
+
+            <!-- Settings -->
+            <div id="settings" class="content-section">
+                <h2 style="font-size: 30px; font-weight: 900; margin-bottom: 24px;">⚙️ Settings</h2>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">Profile Settings</h3>
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" id="settingsProjectName" placeholder="My Dream Home Interior">
+                    </div>
+                    <div class="form-group">
+                        <label>User Name</label>
+                        <input type="text" id="settingsUserName" placeholder="Your Name">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveProfileSettings()">💾 Save Profile</button>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">Theme Settings</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 12px;">Color Theme</label>
+                        <div class="theme-picker">
+                            <div class="theme-option theme-purple active" onclick="changeColorTheme('purple')"></div>
+                            <div class="theme-option theme-blue" onclick="changeColorTheme('blue')"></div>
+                            <div class="theme-option theme-green" onclick="changeColorTheme('green')"></div>
+                            <div class="theme-option theme-orange" onclick="changeColorTheme('orange')"></div>
+                            <div class="theme-option theme-dark" onclick="changeColorTheme('dark')"></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-top: 1px solid var(--glass-border);">
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px;">Light/Dark Mode</div>
+                            <div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Toggle between light and dark interface</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="toggleTheme()">
+                            <span id="themeButtonText">🌙 Dark Mode</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">Payment Makers</h3>
+                    <div class="form-group">
+                        <label>Add Payment Maker (comma separated)</label>
+                        <input type="text" id="paymentMakersInput" placeholder="Self, Spouse, Parent, Friend">
+                    </div>
+                    <button class="btn btn-primary" onclick="savePaymentMakers()">💾 Save Payment Makers</button>
+                    <div id="paymentMakersList" style="margin-top: 16px;"></div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-weight: 800; margin-bottom: 20px;">Data Management</h3>
+                    <div class="form-grid">
+                        <button class="btn btn-info" onclick="exportData()">💾 Backup Data</button>
+                        <button class="btn btn-success" onclick="importData()">📤 Restore Data</button>
+                        <button class="btn btn-warning" onclick="resetData()">🔄 Reset App</button>
+                        <button class="btn btn-danger" onclick="clearData()">🗑️ Clear All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Expense / Payment</h3>
+                <button class="close-btn" onclick="closeModal('expenseModal')">&times;</button>
+            </div>
+            <form id="expenseForm" onsubmit="saveExpense(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Date</label><input type="date" id="expenseDate" required></div>
+                    <div class="form-group"><label>Category <span class="optional">(optional)</span></label>
+                        <select id="expenseCategory">
+                            <option value="">Select Category</option>
+                            <option>Furniture</option><option>Electrical</option><option>False Ceiling</option>
+                            <option>POP Work</option><option>Painting</option><option>Flooring</option>
+                            <option>Plumbing</option><option>Doors & Windows</option><option>Kitchen</option>
+                            <option>Bathroom</option><option>Grills & Safety</option><option>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Contractor *</label>
+                    <select id="expenseContractor" onchange="loadWorkTypes()" required>
+                        <option value="">Select Contractor</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Work Type</label>
+                    <select id="expenseWorkType">
+                        <option value="">Select Work Type</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Work Type (Text) <span class="optional">(if not in list)</span></label>
+                    <input type="text" id="expenseWorkTypeCustom" placeholder="Enter custom work type">
+                </div>
+                <div class="form-group"><label>Description</label>
+                    <textarea id="expenseDescription" rows="3" placeholder="Brief description"></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Amount (₹) *</label><input type="number" id="expenseAmount" step="0.01" required></div>
+                    <div class="form-group"><label>Payment Maker *</label>
+                        <select id="expensePaidBy" required>
+                            <option value="">Who Made Payment?</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Payment Mode</label>
+                        <select id="expensePaymentMode">
+                            <option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Card</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Status</label>
+                        <select id="expenseStatus">
+                            <option>Pending</option><option>In Progress</option><option>Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">💾 Save Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contractor Modal -->
+    <div id="contractorModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Contractor</h3>
+                <button class="close-btn" onclick="closeModal('contractorModal')">&times;</button>
+            </div>
+            <form id="contractorForm" onsubmit="saveContractor(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Name *</label><input type="text" id="contractorName" required></div>
+                    <div class="form-group"><label>Phone *</label><input type="tel" id="contractorPhone" required></div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Individual Budget Allocated (₹) *</label><input type="number" id="contractorBudget" step="0.01" required></div>
+                    <div class="form-group"><label>Specialization <span class="optional">(optional)</span></label>
+                        <select id="contractorSpec">
+                            <option value="">Select Specialization</option>
+                            <option>Electrician</option><option>Plumber</option><option>Carpenter</option>
+                            <option>Painter</option><option>Mason</option><option>Welder</option>
+                            <option>AC Technician</option><option>False Ceiling Expert</option>
+                            <option>Interior Designer</option><option>General Contractor</option>
+                            <option value="custom">Custom (Type below)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="customSpecGroup" style="display: none;">
+                    <label>Custom Specialization</label>
+                    <input type="text" id="contractorSpecCustom" placeholder="Enter custom specialization">
+                </div>
+                <div class="form-group"><label>Email <span class="optional">(optional)</span></label><input type="email" id="contractorEmail"></div>
+                <div class="form-group"><label>Work Types <span class="optional">(optional, comma separated)</span></label>
+                    <input type="text" id="contractorWorkTypes" placeholder="Installation, Repair, Maintenance">
+                </div>
+                <div class="form-group"><label>Team Members <span class="optional">(optional, comma separated)</span></label>
+                    <input type="text" id="contractorTeam" placeholder="John, Mike, Sarah">
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">💾 Save Contractor</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Component Modal -->
+    <div id="componentModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Component/Material</h3>
+                <button class="close-btn" onclick="closeModal('componentModal')">&times;</button>
+            </div>
+            <form id="componentForm" onsubmit="saveComponent(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Date</label><input type="date" id="componentDate" required></div>
+                    <div class="form-group"><label>Component Name *</label><input type="text" id="componentName" required></div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Category</label>
+                        <select id="componentCategory">
+                            <option>Electrical</option><option>Plumbing</option><option>Hardware</option>
+                            <option>Paint</option><option>Tiles</option><option>Wood</option><option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Total Cost (₹) *</label><input type="number" id="componentCost" step="0.01" required></div>
+                </div>
+                <div class="form-group"><label>Work Progress (%) *</label>
+                    <input type="range" id="componentProgress" min="0" max="100" value="0" 
+                           oninput="document.getElementById('progressValue').textContent = this.value + '%'">
+                    <div style="text-align: center; margin-top: 8px; font-weight: 800; font-size: 18px;">
+                        <span id="progressValue">0%</span>
+                    </div>
+                </div>
+                <div class="form-group"><label>Status</label>
+                    <select id="componentStatus">
+                        <option>Not Started</option><option>In Progress</option><option>Completed</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Description</label>
+                    <textarea id="componentDescription" rows="3" placeholder="Details about the component"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">💾 Save Component</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fault Modal -->
+    <div id="faultModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 class="modal-title">Report Fault/Damage</h3>
+                <button class="close-btn" onclick="closeModal('faultModal')">&times;</button>
+            </div>
+            <form id="faultForm" onsubmit="saveFault(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Date</label><input type="date" id="faultDate" required></div>
+                    <div class="form-group"><label>Contractor</label>
+                        <select id="faultContractor" required>
+                            <option value="">Select Contractor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Fault Description</label>
+                    <textarea id="faultDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Damage Amount (₹)</label>
+                        <input type="number" id="faultAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group"><label>Status</label>
+                        <select id="faultStatus" required>
+                            <option>Reported</option><option>Under Review</option><option>Resolved</option><option>Pending</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-danger" style="width: 100%;">💾 Report Fault</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="noteModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Note</h3>
+                <button class="close-btn" onclick="closeModal('noteModal')">&times;</button>
+            </div>
+            <form id="noteForm" onsubmit="saveNote(event)">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="noteDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Note Title</label>
+                    <input type="text" id="noteTitle" placeholder="Brief title" required>
+                </div>
+                <div class="form-group">
+                    <label>Note Content</label>
+                    <textarea id="noteContent" rows="4" placeholder="Add your note here..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Workers on this day <span class="optional">(optional, comma separated)</span></label>
+                    <input type="text" id="noteWorkers" placeholder="John, Mike, Electrician Team">
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">💾 Save Note</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let appData = {
+            totalBudget: 0,
+            expenses: [],
+            contractors: [],
+            components: [],
+            faults: [],
+            notes: [],
+            logs: [],
+            theme: 'light',
+            colorTheme: 'purple',
+            projectName: 'Interior Budget Pro',
+            userName: 'User',
+            paymentMakers: ['Self', 'Spouse', 'Parent', 'Friend'],
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear()
+        };
+
+        const categoryIcons = {
+            'Furniture': '🪑', 'Electrical': '💡', 'False Ceiling': '🏗️', 'POP Work': '🎨',
+            'Painting': '🖌️', 'Flooring': '⬜', 'Plumbing': '🚰', 'Doors & Windows': '🚪',
+            'Kitchen': '🍳', 'Bathroom': '🚿', 'Grills & Safety': '🛡️', 'Other': '📦'
+        };
+
+        function init() {
+            loadData();
+            loadDashboard();
+            loadContractorSelects();
+            loadPaymentMakerSelects();
+            updateProfileDisplay();
+            renderCalendar();
+            displayPaymentMakers();
+
+            if (appData.theme === 'dark') {
+                document.body.classList.replace('light-mode', 'dark-mode');
+                document.getElementById('themeToggle').classList.add('dark');
+                document.getElementById('themeButtonText').textContent = '☀️ Light Mode';
+            }
+
+            // Apply saved color theme
+            document.body.className = document.body.className.replace(/theme-\w+/, '') + ' theme-' + appData.colorTheme;
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelector(\`.theme-\${appData.colorTheme}\`).classList.add('active');
+
+            // Add custom spec listener
+            document.getElementById('contractorSpec').addEventListener('change', function() {
+                const customGroup = document.getElementById('customSpecGroup');
+                customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('interiorBudgetProAdvanced', JSON.stringify(appData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('interiorBudgetProAdvanced');
+            if (saved) {
+                appData = JSON.parse(saved);
+                if (!appData.currentMonth) appData.currentMonth = new Date().getMonth();
+                if (!appData.currentYear) appData.currentYear = new Date().getFullYear();
+                if (!appData.paymentMakers) appData.paymentMakers = ['Self'];
+                if (!appData.colorTheme) appData.colorTheme = 'purple';
+                if (!appData.components) appData.components = [];
+            }
+        }
+
+        function addLog(action, description) {
+            appData.logs.unshift({
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                action,
+                description
+            });
+            if (appData.logs.length > 100) appData.logs.pop();
+            saveData();
+        }
+
+        function updateProfileDisplay() {
+            document.getElementById('projectNameDisplay').textContent = appData.projectName;
+            document.getElementById('userNameDisplay').textContent = appData.userName;
+            document.getElementById('settingsProjectName').value = appData.projectName;
+            document.getElementById('settingsUserName').value = appData.userName;
+            document.getElementById('paymentMakersInput').value = appData.paymentMakers.join(', ');
+        }
+
+        function saveProfileSettings() {
+            appData.projectName = document.getElementById('settingsProjectName').value || 'Interior Budget Pro';
+            appData.userName = document.getElementById('settingsUserName').value || 'User';
+            saveData();
+            updateProfileDisplay();
+            addLog('Profile Updated', `Project: ${appData.projectName}, User: ${appData.userName}`);
+            showToast('Profile settings saved!', 'success');
+        }
+
+        function savePaymentMakers() {
+            const input = document.getElementById('paymentMakersInput').value;
+            appData.paymentMakers = input.split(',').map(s => s.trim()).filter(s => s);
+            if (appData.paymentMakers.length === 0) appData.paymentMakers = ['Self'];
+            saveData();
+            loadPaymentMakerSelects();
+            displayPaymentMakers();
+            addLog('Payment Makers Updated', `${appData.paymentMakers.length} payment makers`);
+            showToast('Payment makers saved!', 'success');
+        }
+
+        function displayPaymentMakers() {
+            const list = document.getElementById('paymentMakersList');
+            list.innerHTML = '<div style="margin-top: 12px; font-size: 14px;"><strong>Current Payment Makers:</strong> ' + 
+                             appData.paymentMakers.join(', ') + '</div>';
+        }
+
+        function loadPaymentMakerSelects() {
+            const select = document.getElementById('expensePaidBy');
+            select.innerHTML = '<option value="">Who Made Payment?</option>';
+            appData.paymentMakers.forEach(pm => {
+                const option = document.createElement('option');
+                option.value = pm;
+                option.textContent = pm;
+                select.appendChild(option);
+            });
+        }
+
+        function changeColorTheme(theme) {
+            appData.colorTheme = theme;
+            document.body.className = document.body.className.replace(/theme-\w+/, '') + ' theme-' + theme;
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelector(\`.theme-\${theme}\`).classList.add('active');
+            saveData();
+            addLog('Theme Changed', `Color theme: ${theme}`);
+            showToast('Color theme changed!', 'success');
+        }
+
+        function toggleTheme() {
+            const toggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const themeBtn = document.getElementById('themeButtonText');
+            if (body.classList.contains('light-mode')) {
+                body.classList.replace('light-mode', 'dark-mode');
+                toggle.classList.add('dark');
+                themeBtn.textContent = '☀️ Light Mode';
+                appData.theme = 'dark';
+            } else {
+                body.classList.replace('dark-mode', 'light-mode');
+                toggle.classList.remove('dark');
+                themeBtn.textContent = '🌙 Dark Mode';
+                appData.theme = 'light';
+            }
+            saveData();
+            addLog('Theme Changed', `Mode: ${appData.theme}`);
+        }
+
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            if (tabName === 'dashboard') loadDashboard();
+            if (tabName === 'expenses') loadExpenses();
+            if (tabName === 'contractors') loadContractors();
+            if (tabName === 'payments') loadPayments();
+            if (tabName === 'components') loadComponents();
+            if (tabName === 'faults') loadFaults();
+            if (tabName === 'notes') { renderCalendar(); loadNotes(); }
+            if (tabName === 'timeline') loadTimeline();
+            if (tabName === 'reports') loadReports();
+        }
+
+        function editBudget() {
+            const newBudget = prompt('Enter Total Budget (₹):', appData.totalBudget || 0);
+            if (newBudget !== null && !isNaN(newBudget)) {
+                appData.totalBudget = parseFloat(newBudget);
+                saveData();
+                loadDashboard();
+                addLog('Budget Updated', `Budget set to ₹${appData.totalBudget.toLocaleString('en-IN')}`);
+                showToast('Budget updated successfully!', 'success');
+            }
+        }
+
+        function loadDashboard() {
+            const totalSpent = appData.expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+            const remaining = appData.totalBudget - totalSpent;
+            const percentSpent = appData.totalBudget > 0 ? (totalSpent / appData.totalBudget * 100) : 0;
+
+            document.getElementById('totalBudget').textContent = `₹${appData.totalBudget.toLocaleString('en-IN')}`;
+            document.getElementById('totalSpent').textContent = `₹${totalSpent.toLocaleString('en-IN')}`;
+            document.getElementById('remaining').textContent = `₹${remaining.toLocaleString('en-IN')}`;
+            document.getElementById('percentSpent').textContent = `${percentSpent.toFixed(1)}%`;
+
+            const progressBar = document.getElementById('budgetProgress');
+            progressBar.style.width = `${Math.min(percentSpent, 100)}%`;
+            progressBar.textContent = `${percentSpent.toFixed(1)}% Used`;
+
+            document.getElementById('totalContractors').textContent = appData.contractors.length;
+            document.getElementById('totalComponents').textContent = appData.components.length;
+            document.getElementById('totalPayments').textContent = appData.expenses.length;
+            document.getElementById('totalFaults').textContent = appData.faults.length;
+        }
+
+        function loadContractorSelects() {
+            const selects = ['expenseContractor', 'faultContractor'];
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">Select Contractor</option>';
+                appData.contractors.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.name;
+                    option.textContent = `${c.name} (${c.specialization || 'Contractor'})`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function loadWorkTypes() {
+            const contractorName = document.getElementById('expenseContractor').value;
+            const contractor = appData.contractors.find(c => c.name === contractorName);
+            const workTypeSelect = document.getElementById('expenseWorkType');
+
+            workTypeSelect.innerHTML = '<option value="">Select Work Type</option>';
+
+            if (contractor && contractor.workTypes && contractor.workTypes.length > 0) {
+                contractor.workTypes.forEach(wt => {
+                    const option = document.createElement('option');
+                    option.value = wt;
+                    option.textContent = wt;
+                    workTypeSelect.appendChild(option);
+                });
+            } else {
+                ['Installation', 'Repair', 'Maintenance', 'Replacement', 'Inspection', 'Custom Work'].forEach(wt => {
+                    const option = document.createElement('option');
+                    option.value = wt;
+                    option.textContent = wt;
+                    workTypeSelect.appendChild(option);
+                });
+            }
+        }
+
+        function saveExpense(e) {
+            e.preventDefault();
+            const workType = document.getElementById('expenseWorkType').value || 
+                             document.getElementById('expenseWorkTypeCustom').value || 'General Work';
+
+            const expense = {
+                id: Date.now(),
+                date: document.getElementById('expenseDate').value,
+                category: document.getElementById('expenseCategory').value || 'Other',
+                contractor: document.getElementById('expenseContractor').value,
+                workType: workType,
+                description: document.getElementById('expenseDescription').value || 'Payment made',
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                paidBy: document.getElementById('expensePaidBy').value,
+                paymentMode: document.getElementById('expensePaymentMode').value,
+                status: document.getElementById('expenseStatus').value
+            };
+            appData.expenses.push(expense);
+            saveData();
+            addLog('Payment Made', `${expense.contractor} - ₹${expense.amount.toLocaleString('en-IN')} by ${expense.paidBy}`);
+            closeModal('expenseModal');
+            showToast('Payment recorded successfully!', 'success');
+            loadDashboard();
+            loadExpenses();
+            loadPayments();
+            document.getElementById('expenseForm').reset();
+        }
+
+        function saveContractor(e) {
+            e.preventDefault();
+            let specialization = document.getElementById('contractorSpec').value;
+            if (specialization === 'custom') {
+                specialization = document.getElementById('contractorSpecCustom').value || 'Contractor';
+            } else if (!specialization) {
+                specialization = 'General Contractor';
+            }
+
+            const contractor = {
+                id: Date.now(),
+                name: document.getElementById('contractorName').value,
+                phone: document.getElementById('contractorPhone').value,
+                specialization: specialization,
+                email: document.getElementById('contractorEmail').value || '',
+                workTypes: document.getElementById('contractorWorkTypes').value.split(',').map(s => s.trim()).filter(s => s),
+                teamMembers: document.getElementById('contractorTeam').value.split(',').map(s => s.trim()).filter(s => s),
+                allocatedBudget: parseFloat(document.getElementById('contractorBudget').value || 0)
+            };
+            appData.contractors.push(contractor);
+            saveData();
+            addLog('Contractor Added', `${contractor.name} - Budget: ₹${contractor.allocatedBudget.toLocaleString('en-IN')}`);
+            closeModal('contractorModal');
+            showToast('Contractor added successfully!', 'success');
+            loadContractors();
+            loadContractorSelects();
+            document.getElementById('contractorForm').reset();
+            document.getElementById('customSpecGroup').style.display = 'none';
+        }
+
+        function saveComponent(e) {
+            e.preventDefault();
+            const component = {
+                id: Date.now(),
+                date: document.getElementById('componentDate').value,
+                name: document.getElementById('componentName').value,
+                category: document.getElementById('componentCategory').value,
+                cost: parseFloat(document.getElementById('componentCost').value),
+                progress: parseInt(document.getElementById('componentProgress').value),
+                status: document.getElementById('componentStatus').value,
+                description: document.getElementById('componentDescription').value
+            };
+            appData.components.push(component);
+            saveData();
+            addLog('Component Added', `${component.name} - ₹${component.cost.toLocaleString('en-IN')}`);
+            closeModal('componentModal');
+            showToast('Component added successfully!', 'success');
+            loadComponents();
+            loadDashboard();
+            document.getElementById('componentForm').reset();
+            document.getElementById('progressValue').textContent = '0%';
+        }
+
+        function saveFault(e) {
+            e.preventDefault();
+            const fault = {
+                id: Date.now(),
+                date: document.getElementById('faultDate').value,
+                contractor: document.getElementById('faultContractor').value,
+                description: document.getElementById('faultDescription').value,
+                damageAmount: parseFloat(document.getElementById('faultAmount').value),
+                status: document.getElementById('faultStatus').value
+            };
+            appData.faults.push(fault);
+            saveData();
+            addLog('Fault Reported', `${fault.contractor} - ₹${fault.damageAmount.toLocaleString('en-IN')}`);
+            closeModal('faultModal');
+            showToast('Fault reported successfully!', 'success');
+            loadFaults();
+            loadDashboard();
+            document.getElementById('faultForm').reset();
+        }
+
+        function saveNote(e) {
+            e.preventDefault();
+            const note = {
+                id: Date.now(),
+                date: document.getElementById('noteDate').value,
+                title: document.getElementById('noteTitle').value,
+                content: document.getElementById('noteContent').value,
+                workers: document.getElementById('noteWorkers').value.split(',').map(s => s.trim()).filter(s => s)
+            };
+            appData.notes.push(note);
+            saveData();
+            addLog('Note Added', `${note.title} - ${note.date}`);
+            closeModal('noteModal');
+            showToast('Note saved successfully!', 'success');
+            renderCalendar();
+            loadNotes();
+            document.getElementById('noteForm').reset();
+        }
+
+        function loadExpenses() {
+            const tbody = document.getElementById('expensesTable');
+            tbody.innerHTML = '';
+            if (appData.expenses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; opacity: 0.7; padding: 30px;">No payments yet.</td></tr>';
+                return;
+            }
+            appData.expenses.slice().reverse().forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
+                    <td>${categoryIcons[e.category] || '📦'} ${e.category}</td>
+                    <td>${e.contractor}</td>
+                    <td>${e.workType}</td>
+                    <td><strong>₹${parseFloat(e.amount).toLocaleString('en-IN')}</strong></td>
+                    <td>👤 ${e.paidBy}</td>
+                    <td><span class="badge badge-${e.status.toLowerCase().replace(' ', '-')}">${e.status}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteExpense(${e.id})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadPayments() {
+            // Contractor-wise payment summary
+            const contractorPayments = {};
+            appData.expenses.forEach(e => {
+                if (!contractorPayments[e.contractor]) {
+                    const contractor = appData.contractors.find(c => c.name === e.contractor);
+                    contractorPayments[e.contractor] = {
+                        total: 0,
+                        allocated: contractor ? contractor.allocatedBudget : 0,
+                        payments: []
+                    };
+                }
+                contractorPayments[e.contractor].total += parseFloat(e.amount || 0);
+                contractorPayments[e.contractor].payments.push(e);
+            });
+
+            const listDiv = document.getElementById('contractorPaymentsList');
+            listDiv.innerHTML = '';
+
+            Object.keys(contractorPayments).sort((a, b) => contractorPayments[b].total - contractorPayments[a].total).forEach(name => {
+                const data = contractorPayments[name];
+                const remaining = data.allocated - data.total;
+                const percent = data.allocated > 0 ? (data.total / data.allocated * 100) : 0;
+
+                const card = document.createElement('div');
+                card.className = 'payment-card';
+                card.innerHTML = `
+                    <div class="payment-header">
+                        <h3 style="margin: 0;">👷 ${name}</h3>
+                        <div style="font-size: 24px; font-weight: 900; color: var(--info);">
+                            ₹${data.total.toLocaleString('en-IN')}
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span><strong>Allocated:</strong> ₹${data.allocated.toLocaleString('en-IN')}</span>
+                            <span><strong>Remaining:</strong> ₹${remaining.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${Math.min(percent, 100)}%">${percent.toFixed(1)}%</div>
+                        </div>
+                        <div style="margin-top: 8px; opacity: 0.9;">
+                            <strong>Total Payments:</strong> ${data.payments.length}
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(card);
+            });
+
+            // All payments table
+            const tbody = document.getElementById('paymentsTable');
+            tbody.innerHTML = '';
+            if (appData.expenses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; opacity: 0.7; padding: 30px;">No payments yet.</td></tr>';
+                return;
+            }
+            appData.expenses.slice().reverse().forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
+                    <td>${e.contractor}</td>
+                    <td>${e.workType}</td>
+                    <td><strong>₹${parseFloat(e.amount).toLocaleString('en-IN')}</strong></td>
+                    <td>👤 ${e.paidBy}</td>
+                    <td>${e.paymentMode}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadContractors() {
+            const grid = document.getElementById('contractorGrid');
+            grid.innerHTML = '';
+            if (appData.contractors.length === 0) {
+                grid.innerHTML = '<div class="glass-card" style="grid-column: 1/-1; text-align: center; opacity: 0.7;">No contractors yet.</div>';
+                return;
+            }
+            appData.contractors.forEach(c => {
+                const spent = appData.expenses.filter(e => e.contractor === c.name)
+                    .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+                const faults = appData.faults.filter(f => f.contractor === c.name).length;
+                const remaining = c.allocatedBudget - spent;
+                const percent = c.allocatedBudget > 0 ? (spent / c.allocatedBudget * 100) : 0;
+
+                const card = document.createElement('div');
+                card.className = 'glass-card';
+                card.innerHTML = `
+                    <h3>👷 ${c.name}</h3>
+                    <p><strong>📞 Phone:</strong> ${c.phone}</p>
+                    <p><strong>🔧 Specialization:</strong> ${c.specialization}</p>
+                    ${c.email ? `<p><strong>📧 Email:</strong> ${c.email}</p>` : ''}
+                    ${c.workTypes.length ? `<p><strong>🛠️ Work Types:</strong> ${c.workTypes.join(', ')}</p>` : ''}
+                    ${c.teamMembers.length ? `<p><strong>👥 Team:</strong> ${c.teamMembers.join(', ')} (${c.teamMembers.length})</p>` : ''}
+                    <div style="margin: 16px 0;">
+                        <p><strong>💵 Individual Budget:</strong> ₹${c.allocatedBudget.toLocaleString('en-IN')}</p>
+                        <p><strong>💸 Total Paid:</strong> ₹${spent.toLocaleString('en-IN')}</p>
+                        <p><strong>💰 Remaining:</strong> ₹${remaining.toLocaleString('en-IN')}</p>
+                        <div class="progress-container" style="margin-top: 12px;">
+                            <div class="progress-bar" style="width: ${Math.min(percent, 100)}%">${percent.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    <p><strong>⚠️ Faults:</strong> ${faults}</p>
+                    <button class="btn btn-danger btn-sm" style="margin-top: 10px;" onclick="deleteContractor(${c.id})">🗑️ Delete</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function loadComponents() {
+            const tbody = document.getElementById('componentsTable');
+            tbody.innerHTML = '';
+            if (appData.components.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; opacity: 0.7; padding: 30px;">No components yet.</td></tr>';
+                return;
+            }
+            appData.components.slice().reverse().forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(c.date).toLocaleDateString('en-IN')}</td>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.category}</td>
+                    <td><strong>₹${parseFloat(c.cost).toLocaleString('en-IN')}</strong></td>
+                    <td>
+                        <div class="component-progress">
+                            <div class="component-progress-bar">
+                                <div class="component-progress-fill" style="width: ${c.progress}%">${c.progress}%</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '-')}">${c.status}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteComponent(${c.id})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadFaults() {
+            const tbody = document.getElementById('faultsTable');
+            tbody.innerHTML = '';
+            if (appData.faults.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; opacity: 0.7; padding: 30px;">No faults reported yet.</td></tr>';
+                return;
+            }
+            appData.faults.slice().reverse().forEach(f => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(f.date).toLocaleDateString('en-IN')}</td>
+                    <td>${f.contractor}</td>
+                    <td>${f.description}</td>
+                    <td><strong>₹${parseFloat(f.damageAmount).toLocaleString('en-IN')}</strong></td>
+                    <td><span class="badge badge-${f.status.toLowerCase().replace(' ', '-')}">${f.status}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteFault(${f.id})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCalendar() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('currentMonth').textContent = `${monthNames[appData.currentMonth]} ${appData.currentYear}`;
+
+            const firstDay = new Date(appData.currentYear, appData.currentMonth, 1).getDay();
+            const daysInMonth = new Date(appData.currentYear, appData.currentMonth + 1, 0).getDate();
+            const today = new Date();
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${appData.currentYear}-${String(appData.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasNote = appData.notes.some(n => n.date === dateStr);
+                const hasPayment = appData.expenses.some(e => e.date === dateStr);
+                const hasActivity = hasNote || hasPayment;
+                const workersToday = appData.notes.filter(n => n.date === dateStr).flatMap(n => n.workers);
+                const paymentsToday = appData.expenses.filter(e => e.date === dateStr);
+                const isToday = today.getDate() === day && today.getMonth() === appData.currentMonth && today.getFullYear() === appData.currentYear;
+
+                const dayEl = document.createElement('div');
+                dayEl.className = `calendar-day ${hasActivity ? 'has-activity' : ''} ${isToday ? 'today' : ''}`;
+                dayEl.onclick = () => viewDayDetails(dateStr);
+                let indicators = '';
+                if (hasNote) indicators += '<div class="calendar-day-indicator">📝</div>';
+                if (hasPayment) indicators += `<div class="calendar-day-indicator">💳 ${paymentsToday.length}</div>`;
+                if (workersToday.length) indicators += `<div class="calendar-day-indicator">👷 ${workersToday.length}</div>`;
+
+                dayEl.innerHTML = `
+                    <div class="calendar-day-number">${day}</div>
+                    ${indicators}
+                `;
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function changeMonth(delta) {
+            appData.currentMonth += delta;
+            if (appData.currentMonth > 11) {
+                appData.currentMonth = 0;
+                appData.currentYear++;
+            } else if (appData.currentMonth < 0) {
+                appData.currentMonth = 11;
+                appData.currentYear--;
+            }
+            saveData();
+            renderCalendar();
+        }
+
+        function viewDayDetails(dateStr) {
+            const notes = appData.notes.filter(n => n.date === dateStr);
+            const payments = appData.expenses.filter(e => e.date === dateStr);
+
+            if (notes.length === 0 && payments.length === 0) {
+                showToast('No activity for this day', 'error');
+                return;
+            }
+
+            let msg = `Activity on ${dateStr}:\n\n`;
+
+            if (payments.length > 0) {
+                msg += `💳 PAYMENTS (${payments.length}):\n`;
+                payments.forEach((p, i) => {
+                    msg += `${i + 1}. ₹${p.amount.toLocaleString('en-IN')} to ${p.contractor}\n`;
+                    msg += `   Work: ${p.workType} | By: ${p.paidBy}\n`;
+                });
+                msg += '\n';
+            }
+
+            if (notes.length > 0) {
+                msg += `📝 NOTES (${notes.length}):\n`;
+                notes.forEach((n, i) => {
+                    msg += `${i + 1}. ${n.title}\n${n.content}\n`;
+                    if (n.workers.length) msg += `Workers: ${n.workers.join(', ')}\n`;
+                    msg += '\n';
+                });
+            }
+
+            alert(msg);
+        }
+
+        function loadNotes() {
+            const container = document.getElementById('notesContainer');
+            container.innerHTML = '';
+            if (appData.notes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7;">No notes yet.</p>';
+                return;
+            }
+            appData.notes.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(note => {
+                const div = document.createElement('div');
+                div.className = 'payment-card';
+                div.innerHTML = `
+                    <div class="payment-header">
+                        <div style="font-size: 16px; font-weight: 800;">📅 ${new Date(note.date).toLocaleDateString('en-IN')} - ${note.title}</div>
+                        <button class="btn btn-danger btn-sm" onclick="deleteNote(${note.id})">🗑️</button>
+                    </div>
+                    <div style="margin-top: 12px; opacity: 0.9;">${note.content}</div>
+                    ${note.workers.length ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border); font-size: 13px; opacity: 0.85;">👷 Workers: ${note.workers.join(', ')}</div>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const allActivity = [];
+
+            appData.expenses.forEach(e => {
+                allActivity.push({
+                    date: e.date,
+                    type: 'payment',
+                    icon: '💳',
+                    title: `Payment to ${e.contractor}`,
+                    details: `₹${parseFloat(e.amount).toLocaleString('en-IN')} for ${e.workType} | Paid by: ${e.paidBy}`,
+                    status: e.status
+                });
+            });
+
+            appData.components.forEach(c => {
+                allActivity.push({
+                    date: c.date,
+                    type: 'component',
+                    icon: '🛠️',
+                    title: `Component: ${c.name}`,
+                    details: `${c.category} | ₹${parseFloat(c.cost).toLocaleString('en-IN')} | Progress: ${c.progress}%`,
+                    status: c.status
+                });
+            });
+
+            appData.faults.forEach(f => {
+                allActivity.push({
+                    date: f.date,
+                    type: 'fault',
+                    icon: '⚠️',
+                    title: `Fault: ${f.contractor}`,
+                    details: `${f.description} | Damage: ₹${parseFloat(f.damageAmount).toLocaleString('en-IN')}`,
+                    status: f.status
+                });
+            });
+
+            appData.notes.forEach(n => {
+                allActivity.push({
+                    date: n.date,
+                    type: 'note',
+                    icon: '📝',
+                    title: n.title,
+                    details: n.content,
+                    status: ''
+                });
+            });
+
+            allActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            container.innerHTML = allActivity.length ? '' : '<p style="text-align: center; opacity: 0.7;">No timeline data yet.</p>';
+            allActivity.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <div><strong>${item.icon} ${item.title}</strong></div>
+                        <div>${new Date(item.date).toLocaleDateString('en-IN')}</div>
+                    </div>
+                    <p style="margin-top: 8px; opacity: 0.9;">${item.details}</p>
+                    ${item.status ? `<span class="badge badge-${item.status.toLowerCase().replace(' ', '-')}" style="margin-top: 8px;">${item.status}</span>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadReports() {
+            const catData = {};
+            appData.expenses.forEach(e => {
+                const cat = e.category || 'Other';
+                catData[cat] = (catData[cat] || 0) + parseFloat(e.amount || 0);
+            });
+
+            const contData = {};
+            appData.contractors.forEach(c => {
+                const spent = appData.expenses.filter(e => e.contractor === c.name)
+                    .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+                if (spent > 0) contData[c.name] = spent;
+            });
+
+            drawChart('categoryCanvas', Object.keys(catData), Object.values(catData), 'Category Spending');
+            drawChart('contractorCanvas', Object.keys(contData), Object.values(contData), 'Contractor Payment Distribution');
+
+            const summary = document.getElementById('summaryReport');
+            const totalSpent = appData.expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+            const totalDamage = appData.faults.reduce((s, f) => s + parseFloat(f.damageAmount || 0), 0);
+            const totalComponentCost = appData.components.reduce((s, c) => s + parseFloat(c.cost || 0), 0);
+            const avgProgress = appData.components.length > 0 ? 
+                appData.components.reduce((s, c) => s + c.progress, 0) / appData.components.length : 0;
+
+            summary.innerHTML = `
+                <h3 style="margin-bottom: 16px;">Detailed Summary Report</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div>
+                        <p><strong>💵 Total Budget:</strong></p>
+                        <p style="font-size: 24px; font-weight: 900; color: var(--info);">₹${appData.totalBudget.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div>
+                        <p><strong>💸 Total Paid:</strong></p>
+                        <p style="font-size: 24px; font-weight: 900; color: var(--warning);">₹${totalSpent.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div>
+                        <p><strong>💰 Remaining:</strong></p>
+                        <p style="font-size: 24px; font-weight: 900; color: var(--success);">₹${(appData.totalBudget - totalSpent).toLocaleString('en-IN')}</p>
+                    </div>
+                    <div>
+                        <p><strong>🛠️ Components Cost:</strong></p>
+                        <p style="font-size: 24px; font-weight: 900;">₹${totalComponentCost.toLocaleString('en-IN')}</p>
+                    </div>
+                </div>
+                <div style="margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                    <p><strong>👷 Contractors:</strong> ${appData.contractors.length}</p>
+                    <p><strong>💳 Payments:</strong> ${appData.expenses.length}</p>
+                    <p><strong>🛠️ Components:</strong> ${appData.components.length}</p>
+                    <p><strong>⚠️ Faults:</strong> ${appData.faults.length}</p>
+                    <p><strong>💔 Damage Cost:</strong> ₹${totalDamage.toLocaleString('en-IN')}</p>
+                    <p><strong>📝 Notes:</strong> ${appData.notes.length}</p>
+                    <p><strong>📊 Avg Component Progress:</strong> ${avgProgress.toFixed(1)}%</p>
+                </div>
+            `;
+        }
+
+        function drawChart(canvasId, labels, data, title) {
+            const ctx = document.getElementById(canvasId);
+            if (!labels.length) {
+                ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                return;
+            }
+            if (ctx.chart) ctx.chart.destroy();
+            ctx.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: title,
+                        data,
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#fff', font: { size: 14 } } } },
+                    scales: { 
+                        y: { 
+                            ticks: { color: '#fff', callback: function(value) { return '₹' + value.toLocaleString('en-IN'); } }, 
+                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        }, 
+                        x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } } 
+                    }
+                }
+            });
+        }
+
+        function deleteExpense(id) {
+            if (confirm('Delete this payment record?')) {
+                appData.expenses = appData.expenses.filter(e => e.id !== id);
+                saveData();
+                addLog('Payment Deleted', 'A payment record was removed');
+                loadExpenses();
+                loadDashboard();
+                loadPayments();
+            }
+        }
+
+        function deleteContractor(id) {
+            if (confirm('Delete this contractor?')) {
+                appData.contractors = appData.contractors.filter(c => c.id !== id);
+                saveData();
+                addLog('Contractor Deleted', 'A contractor was removed');
+                loadContractors();
+                loadContractorSelects();
+            }
+        }
+
+        function deleteComponent(id) {
+            if (confirm('Delete this component?')) {
+                appData.components = appData.components.filter(c => c.id !== id);
+                saveData();
+                addLog('Component Deleted', 'A component was removed');
+                loadComponents();
+                loadDashboard();
+            }
+        }
+
+        function deleteFault(id) {
+            if (confirm('Delete this fault report?')) {
+                appData.faults = appData.faults.filter(f => f.id !== id);
+                saveData();
+                addLog('Fault Deleted', 'A fault report was removed');
+                loadFaults();
+                loadDashboard();
+            }
+        }
+
+        function deleteNote(id) {
+            if (confirm('Delete this note?')) {
+                appData.notes = appData.notes.filter(n => n.id !== id);
+                saveData();
+                addLog('Note Deleted', 'A note was removed');
+                renderCalendar();
+                loadNotes();
+            }
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${appData.projectName.replace(/\s+/g, '-')}-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            addLog('Data Exported', 'Full backup created');
+            showToast('Data exported successfully!', 'success');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        appData = JSON.parse(event.target.result);
+                        saveData();
+                        addLog('Data Imported', 'Backup restored successfully');
+                        showToast('Data imported successfully!', 'success');
+                        location.reload();
+                    } catch (err) {
+                        showToast('Error importing data!', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function resetData() {
+            if (confirm('Reset all data? This will clear everything except settings.')) {
+                appData.expenses = [];
+                appData.contractors = [];
+                appData.components = [];
+                appData.faults = [];
+                appData.notes = [];
+                appData.logs = [];
+                appData.totalBudget = 0;
+                saveData();
+                addLog('App Reset', 'All data cleared');
+                showToast('App reset successfully!', 'success');
+                location.reload();
+            }
+        }
+
+        function clearData() {
+            if (confirm('Clear ALL data permanently? This cannot be undone!')) {
+                localStorage.removeItem('interiorBudgetProAdvanced');
+                location.reload();
+            }
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            if (id === 'expenseModal') {
+                document.getElementById('expenseDate').valueAsDate = new Date();
+            } else if (id === 'faultModal') {
+                document.getElementById('faultDate').valueAsDate = new Date();
+            } else if (id === 'noteModal') {
+                document.getElementById('noteDate').valueAsDate = new Date();
+            } else if (id === 'componentModal') {
+                document.getElementById('componentDate').valueAsDate = new Date();
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type}`;
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '10000';
+            toast.style.minWidth = '300px';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
