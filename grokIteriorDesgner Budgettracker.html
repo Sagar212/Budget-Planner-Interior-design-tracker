@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interior Budget Pro - Definitive Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- CORE VARIABLES & THEMES --- */
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --dark: #1e293b;
+            --text-light: #ffffff;
+            --text-muted: rgba(255,255,255,0.8);
+        }
+
+        body.theme-purple { --bg-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --btn-primary: #667eea; }
+        body.theme-blue { --bg-grad: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); --btn-primary: #3b82f6; }
+        body.theme-green { --bg-grad: linear-gradient(135deg, #10b981 0%, #059669 100%); --btn-primary: #10b981; }
+        body.theme-orange { --bg-grad: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); --btn-primary: #f59e0b; }
+        body.theme-teal { --bg-grad: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); --btn-primary: #14b8a6; }
+        body.theme-midnight { --bg-grad: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --btn-primary: #64748b; --text-light: #e2e8f0; --text-muted: rgba(226,232,240,0.8); }
+
+        /* --- GLOBAL STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-grad);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-light);
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        /* --- GLASSMORPHISM CONTAINERS --- */
+        .glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .glass-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        /* --- HEADER --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
+        .logo { font-size: 28px; font-weight: 900; display: flex; align-items: center; gap: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+
+        /* --- NAVIGATION --- */
+        .nav-tabs { display: flex; gap: 10px; padding: 10px; margin-bottom: 30px; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 16px; }
+        .nav-tab {
+            padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px; 
+            white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+            border: 1px solid transparent; opacity: 0.8;
+        }
+        .nav-tab:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+        .nav-tab.active { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); opacity: 1; font-weight: 800; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 10px 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 13px;
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.3); filter: brightness(1.1); }
+        .btn:active { transform: translateY(0); }
+        
+        .btn-icon { padding: 8px; border-radius: 8px; font-size: 14px; }
+        .btn-edit { background: var(--warning); color: #000; }
+        .btn-delete { background: var(--danger); }
+        .btn-primary { background: var(--btn-primary); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-info { background: var(--info); }
+        
+        /* --- FORMS & INPUTS --- */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 700; opacity: 0.9; color: var(--text-light); }
+        input, select, textarea {
+            width: 100%; padding: 12px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15); color: var(--text-light); font-family: inherit; font-size: 14px;
+        }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.6); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: white; background: rgba(255,255,255,0.25); }
+        option { background: #333; color: white; }
+
+        /* --- DASHBOARD STATS --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .stat-card { text-align: center; padding: 20px; }
+        .stat-value { font-size: 32px; font-weight: 900; margin: 10px 0; color: var(--text-light); }
+        .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; color: var(--text-muted); }
+        
+        .budget-bar-container { background: rgba(0,0,0,0.3); height: 26px; border-radius: 13px; overflow: hidden; position: relative; margin-top: 10px; }
+        .budget-bar-fill { height: 100%; background: linear-gradient(90deg, var(--success), var(--info)); width: 0%; transition: width 1s ease; }
+        .budget-bar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.5); color: var(--text-light); }
+
+        /* --- TABLES --- */
+        .table-wrap { overflow-x: auto; border-radius: 12px; background: rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: var(--text-light); }
+        th { background: rgba(0,0,0,0.3); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; cursor: pointer; color: var(--text-muted); }
+        th:hover { background: rgba(0,0,0,0.4); }
+        tr:hover { background: rgba(255,255,255,0.05); }
+
+        /* --- PAYMENTS & CONTRACTORS --- */
+        .payment-summary-card { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; border-left: 4px solid var(--info); margin-bottom: 15px; }
+        .prog-track { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; opacity: 0.9; color: var(--text-light); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #000; }
+        .badge-pending { background: var(--warning); }
+        .badge-completed { background: var(--success); }
+        .badge-inprogress { background: #3b82f6; color: #ffffff; }
+        .badge-faulty { background: var(--danger); color: #fff; }
+
+        /* --- CALENDAR --- */
+        .calendar-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
+        .cal-day { 
+            aspect-ratio: 1; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; padding: 8px; cursor: pointer; transition: all 0.2s;
+        }
+        .cal-day:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+        .cal-day.today { border-color: var(--accent); background: rgba(240, 147, 251, 0.1); }
+        .cal-day.selected { border-color: var(--success); background: rgba(16, 185, 129, 0.2); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+        .cal-dots { display: flex; gap: 4px; margin-top: auto; justify-content: center; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .dot-note { background: var(--warning); }
+        .dot-pay { background: var(--success); }
+        .dot-comp { background: var(--info); }
+        
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal.active { display: flex; animation: fadeIn 0.3s; }
+        .modal-box { background: rgba(45,55,72,0.95); width: 100%; max-width: 650px; padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+        /* --- CHARTS --- */
+        .chart-container { position: relative; height: 350px; margin-top: 20px; }
+
+        /* --- TIMELINE --- */
+        .timeline-event { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; padding: 12px; background: rgba(255,255,255,0.08); border-radius: 12px; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) { .calendar-layout { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: flex-start; } }
+    </style>
+</head>
+<body class="theme-purple">
+
+    <div class="container">
+        <div class="header glass">
+            <div class="logo"><i class="fas fa-home"></i> <span id="projectNameDisplay">Interior Budget Pro</span></div>
+            <div class="header-actions">
+                <div style="background:rgba(0,0,0,0.3); padding:8px 16px; border-radius:20px; font-size:14px;">
+                    <i class="fas fa-user-circle"></i> <span id="userNameDisplay">User</span>
+                </div>
+                <button class="btn btn-info" onclick="exportData()"><i class="fas fa-download"></i> Backup JSON</button>
+                <button class="btn btn-success" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('dashboard', this)"><i class="fas fa-chart-pie"></i> Dashboard</div>
+            <div class="nav-tab" onclick="switchTab('expenses', this)"><i class="fas fa-wallet"></i> Expenses</div>
+            <div class="nav-tab" onclick="switchTab('contractors', this)"><i class="fas fa-hard-hat"></i> Contractors</div>
+            <div class="nav-tab" onclick="switchTab('payments', this)"><i class="fas fa-credit-card"></i> Payments</div>
+            <div class="nav-tab" onclick="switchTab('components', this)"><i class="fas fa-couch"></i> Components</div>
+            <div class="nav-tab" onclick="switchTab('faults', this)"><i class="fas fa-exclamation-triangle"></i> Faults</div>
+            <div class="nav-tab" onclick="switchTab('calendar', this)"><i class="fas fa-calendar-alt"></i> Calendar</div>
+            <div class="nav-tab" onclick="switchTab('timeline', this)"><i class="fas fa-stream"></i> Timeline</div>
+            <div class="nav-tab" onclick="switchTab('reports', this)"><i class="fas fa-chart-bar"></i> Reports</div>
+            <div class="nav-tab" onclick="switchTab('settings', this)"><i class="fas fa-cogs"></i> Settings</div>
+        </div>
+
+        <div id="dashboard" class="view-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2>📊 Project Overview</h2>
+                <button class="btn btn-primary" onclick="editTotalBudget()"><i class="fas fa-edit"></i> Edit Budget</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-label">Total Budget</div>
+                    <div class="stat-value" style="color:var(--primary)" id="d-budget">₹0</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-label">Contractor Expenses</div>
+                    <div class="stat-value" style="color:var(--warning)" id="d-spent">₹0</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-label">Component Investment</div>
+                    <div class="stat-value" style="color:var(--accent)" id="d-comp-total">₹0</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-label">Remaining Balance</div>
+                    <div class="stat-value" style="color:var(--success)" id="d-remain">₹0</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-label">Total Consumption</div>
+                    <div class="budget-bar-container">
+                        <div class="budget-bar-fill" id="d-bar"></div>
+                        <div class="budget-bar-text" id="d-percent">0% Used</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:10px;">Quick Stats</h3>
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <i class="fas fa-hard-hat fa-2x" style="margin-bottom:10px; opacity:0.7"></i>
+                    <div class="stat-value" id="qs-contractors">0</div>
+                    <div class="stat-label">Contractors</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <i class="fas fa-receipt fa-2x" style="margin-bottom:10px; opacity:0.7"></i>
+                    <div class="stat-value" id="qs-payments">0</div>
+                    <div class="stat-label">Transactions</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <i class="fas fa-couch fa-2x" style="margin-bottom:10px; opacity:0.7"></i>
+                    <div class="stat-value" id="qs-components">0</div>
+                    <div class="stat-label">Components</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:10px; opacity:0.7; color:var(--danger)"></i>
+                    <div class="stat-value" id="qs-faults">0</div>
+                    <div class="stat-label">Active Faults</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="expenses" class="view-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2>💰 Expense Tracker</h2>
+                <button class="btn btn-success" onclick="openModal('expenseModal')"><i class="fas fa-plus"></i> Add Expense</button>
+            </div>
+            <div class="glass-card table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th><th>Category</th><th>Contractor</th><th>Work Type</th><th>Amount</th><th>Paid By</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="contractors" class="view-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2>👷 Contractors</h2>
+                <button class="btn btn-success" onclick="openModal('contractorModal')"><i class="fas fa-plus"></i> Add Contractor</button>
+            </div>
+            <div id="contractorGrid" class="stats-grid"></div>
+        </div>
+
+        <div id="payments" class="view-section" style="display:none;">
+            <h2>💳 Payments & Transactions</h2>
+            
+            <div class="glass-card" style="margin-top:20px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                    <h3>Contractor Payment Status</h3>
+                    <select id="paymentFilter" onchange="renderPayments()" style="width:250px; padding:8px; border-radius:8px;">
+                        <option value="all">Show All Transactions</option>
+                    </select>
+                </div>
+                <div id="paymentBarsContainer"></div>
+            </div>
+
+            <div class="glass-card table-wrap">
+                <h3>Transaction History</h3>
+                <table>
+                    <thead>
+                        <tr><th>Date</th><th>Contractor</th><th>Work Type</th><th>Amount</th><th>Paid By</th><th>Mode</th></tr>
+                    </thead>
+                    <tbody id="paymentTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="components" class="view-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2>🛠️ Components & Materials</h2>
+                <button class="btn btn-success" onclick="openModal('componentModal')"><i class="fas fa-plus"></i> Add Component</button>
+            </div>
+            <div class="glass-card table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Date</th><th>Name</th><th>Category</th><th>Contractor</th><th>Work Type</th><th>Cost</th><th>Progress</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="componentTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="faults" class="view-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2>⚠️ Faults & Issues</h2>
+                <button class="btn btn-danger" onclick="openModal('faultModal')"><i class="fas fa-exclamation"></i> Report Fault</button>
+            </div>
+            <div class="glass-card table-wrap">
+                <table>
+                    <thead><tr><th>Date</th><th>Contractor</th><th>Issue</th><th>Cost</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="faultTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="calendar" class="view-section" style="display:none;">
+            <h2>📅 Project Calendar</h2>
+            <div class="calendar-layout">
+                <div class="glass-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <button class="btn btn-primary" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="calMonthYear">Month Year</h3>
+                        <button class="btn btn-primary" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="cal-grid" id="calGrid"></div>
+                </div>
+                <div class="glass-card">
+                    <h3 id="selectedDateDisplay" style="border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:10px; margin-bottom:15px;">Select a Date</h3>
+                    <div id="dateContent"></div>
+                    <button class="btn btn-success" style="width:100%; margin-top:20px;" onclick="addNote()">
+                        <i class="fas fa-sticky-note"></i> Add Note / Reminder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="timeline" class="view-section" style="display:none;">
+            <h2>📅 Activity Timeline</h2>
+            <div class="glass-card">
+                <div id="timelineList"></div>
+            </div>
+        </div>
+
+        <div id="reports" class="view-section" style="display:none;">
+            <h2>📈 Analytics & Reports</h2>
+            <div class="glass-card">
+                <h3>Spending by Category</h3>
+                <div class="chart-container"><canvas id="catChart"></canvas></div>
+            </div>
+            <div class="glass-card">
+                <h3>Spending by Contractor</h3>
+                <div class="chart-container"><canvas id="contChart"></canvas></div>
+            </div>
+            <div class="glass-card">
+                <h3>Component Progress Overview</h3>
+                <div class="chart-container"><canvas id="compChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="settings" class="view-section" style="display:none;">
+            <h2>⚙️ Settings</h2>
+            
+            <div class="glass-card">
+                <h3>Profile</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" id="setProjectName" placeholder="e.g. My Dream Home">
+                    </div>
+                    <div class="form-group">
+                        <label>User Name</label>
+                        <input type="text" id="setUserName" placeholder="Your Name">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+            </div>
+
+            <div class="glass-card">
+                <h3>Payment Sources</h3>
+                <div class="form-group">
+                    <label>Payment Sources (comma separated)</label>
+                    <input type="text" id="setPaymentSources" placeholder="Self, Spouse, Parent, Bank Loan">
+                </div>
+                <button class="btn btn-primary" onclick="savePaymentSources()">Save Sources</button>
+                <div style="margin-top:10px; opacity:0.8;" id="currentSources">Current: Self</div>
+            </div>
+
+            <div class="glass-card">
+                <h3>Theme Selection</h3>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <button class="btn" style="background:#667eea" onclick="setTheme('purple')">Purple</button>
+                    <button class="btn" style="background:#0ea5e9" onclick="setTheme('blue')">Blue</button>
+                    <button class="btn" style="background:#10b981" onclick="setTheme('green')">Green</button>
+                    <button class="btn" style="background:#f59e0b" onclick="setTheme('orange')">Orange</button>
+                    <button class="btn" style="background:#14b8a6" onclick="setTheme('teal')">Teal</button>
+                    <button class="btn" style="background:#1e293b" onclick="setTheme('midnight')">Midnight</button>
+                </div>
+            </div>
+            
+            <div class="glass-card">
+                <h3>Data Management</h3>
+                <p style="opacity:0.7; font-size:13px; margin-bottom:15px;">Backup or reset your data.</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                     <button class="btn btn-info" onclick="exportData()">Backup JSON</button>
+                     <input type="file" id="importFile" style="display:none" onchange="importData(this)">
+                     <button class="btn btn-primary" onclick="document.getElementById('importFile').click()">Restore JSON</button>
+                     <button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
+                     <button class="btn btn-danger" onclick="resetApp()"><i class="fas fa-trash-alt"></i> Factory Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="expenseModal" class="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px">Expense / Payment</h3>
+            <form onsubmit="saveExpense(event)">
+                <input type="hidden" id="expId">
+                <div class="form-grid">
+                    <div><label>Date</label><input type="date" id="expDate" required></div>
+                    <div><label>Amount (₹)</label><input type="number" id="expAmount" step="0.01" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Contractor</label>
+                    <select id="expContractor" required><option value="">Select...</option></select>
+                </div>
+                <div class="form-grid">
+                    <div><label>Work Type</label><input type="text" id="expWorkType" placeholder="e.g. Painting" list="commonWorkTypes"></div>
+                    <div><label>Category</label>
+                        <select id="expCategory">
+                            <option>Material</option><option>Labor</option><option>Furniture</option><option>Electrical</option><option>Plumbing</option><option>Painting</option><option>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div><label>Paid By</label>
+                        <select id="expPaidBy" required></select>
+                    </div>
+                    <div><label>Mode</label><select id="expMode"><option>UPI</option><option>Cash</option><option>Bank Transfer</option><option>Card</option></select></div>
+                </div>
+                <div class="form-group"><label>Status</label><select id="expStatus"><option>Completed</option><option>Pending</option><option>In Progress</option></select></div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('expenseModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success" style="flex:1">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <datalist id="commonWorkTypes">
+        <option>Material Purchase</option>
+        <option>Labor Payment</option>
+        <option>Advance</option>
+        <option>Final Settlement</option>
+        <option>Installation</option>
+        <option>Repair</option>
+    </datalist>
+
+    <div id="contractorModal" class="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px">Contractor Details</h3>
+            <form onsubmit="saveContractor(event)">
+                <input type="hidden" id="contId">
+                <div class="form-group"><label>Name *</label><input type="text" id="contName" required></div>
+                <div class="form-grid">
+                    <div><label>Specialization</label><input type="text" id="contRole" placeholder="e.g. Electrician"></div>
+                    <div><label>Phone</label><input type="text" id="contPhone"></div>
+                </div>
+                <div class="form-group"><label>Allocated Budget (₹)</label><input type="number" id="contBudget" step="0.01" value="0"></div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('contractorModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success" style="flex:1">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="componentModal" class="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px">Component / Material</h3>
+            <form onsubmit="saveComponent(event)">
+                <input type="hidden" id="compId">
+                <div class="form-grid">
+                    <div><label>Date</label><input type="date" id="compDate" required></div>
+                    <div><label>Name *</label><input type="text" id="compName" required></div>
+                </div>
+                <div class="form-grid">
+                    <div><label>Category</label>
+                        <select id="compCategory">
+                            <option>Electrical</option><option>Plumbing</option><option>Furniture</option><option>Paint</option><option>Tiles</option><option>Other</option>
+                        </select>
+                    </div>
+                    <div><label>Cost (₹)</label><input type="number" id="compCost" step="0.01" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Contractor</label>
+                    <select id="compContractor"><option value="">None</option></select>
+                </div>
+                <div class="form-group"><label>Work Type</label><input type="text" id="compWorkType" placeholder="e.g. Kitchen Installation"></div>
+                <div class="form-group">
+                    <label>Progress (%)</label>
+                    <input type="range" id="compProgress" min="0" max="100" value="0" style="width:100%">
+                    <div style="text-align:center; font-size:18px; margin-top:8px;" id="compProgDisplay">0%</div>
+                </div>
+                <div class="form-group"><label>Status</label>
+                    <select id="compStatus">
+                        <option>Not Started</option><option>In Progress</option><option>Completed</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('componentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success" style="flex:1">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="faultModal" class="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px">Report Fault</h3>
+            <form onsubmit="saveFault(event)">
+                <input type="hidden" id="faultId">
+                <div class="form-grid">
+                    <div><label>Date</label><input type="date" id="faultDate" required></div>
+                    <div><label>Contractor</label><select id="faultContractor" required><option value="">Select...</option></select></div>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="faultDesc" rows="3" required></textarea></div>
+                <div class="form-grid">
+                    <div><label>Est. Cost (₹)</label><input type="number" id="faultCost" step="0.01"></div>
+                    <div><label>Status</label><select id="faultStatus"><option>Open</option><option>In Review</option><option>Resolved</option></select></div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('faultModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success" style="flex:1">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="noteModal" class="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px">Note / Reminder</h3>
+            <textarea id="noteText" rows="6" placeholder="Enter note..." style="width:100%"></textarea>
+            <input type="hidden" id="noteEditId">
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn btn-danger" onclick="closeModal('noteModal')">Cancel</button>
+                <button class="btn btn-success" style="flex:1" onclick="saveNote()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- APP STATE ---
+        let app = {
+            budget: 0,
+            projectName: 'Interior Budget Pro',
+            userName: 'User',
+            paymentSources: ['Self', 'Spouse', 'Parent', 'Bank Loan'],
+            expenses: [],
+            contractors: [],
+            components: [],
+            faults: [],
+            notes: [],
+            theme: 'purple'
+        };
+
+        let currentDate = new Date();
+        let selectedDate = new Date().toISOString().split('T')[0];
+
+        let catChart = null, contChart = null, compChart = null;
+
+        // --- INIT ---
+        window.onload = function() {
+            if(localStorage.getItem('ibp_data')) {
+                const saved = JSON.parse(localStorage.getItem('ibp_data'));
+                app = { ...app, ...saved };
+                if(!app.components) app.components = [];
+                if(!app.notes) app.notes = [];
+                if(!app.paymentSources) app.paymentSources = ['Self'];
+            }
+            setTheme(app.theme || 'purple');
+            updateDisplays();
+            populateSelects();
+            renderAll();
+        };
+
+        function saveData() {
+            localStorage.setItem('ibp_data', JSON.stringify(app));
+        }
+
+        function updateDisplays() {
+            document.getElementById('projectNameDisplay').textContent = app.projectName;
+            document.getElementById('userNameDisplay').textContent = app.userName;
+            document.getElementById('setProjectName').value = app.projectName;
+            document.getElementById('setUserName').value = app.userName;
+            document.getElementById('setPaymentSources').value = app.paymentSources.join(', ');
+            document.getElementById('currentSources').textContent = 'Current: ' + app.paymentSources.join(', ');
+        }
+
+        function saveProfile() {
+            app.projectName = document.getElementById('setProjectName').value.trim() || 'Interior Budget Pro';
+            app.userName = document.getElementById('setUserName').value.trim() || 'User';
+            saveData();
+            updateDisplays();
+        }
+
+        function savePaymentSources() {
+            const val = document.getElementById('setPaymentSources').value;
+            app.paymentSources = val.split(',').map(s => s.trim()).filter(s => s);
+            if(app.paymentSources.length === 0) app.paymentSources = ['Self'];
+            saveData();
+            updateDisplays();
+            populateSelects();
+        }
+
+        function populateSelects() {
+            // Contractors for forms
+            const contSelects = ['expContractor', 'faultContractor', 'compContractor'];
+            const contractorOptions = app.contractors.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            contSelects.forEach(id => {
+                const sel = document.getElementById(id);
+                const extra = id === 'compContractor' ? '<option value="">None</option>' : '';
+                sel.innerHTML = extra + contractorOptions;
+            });
+
+            // FIXED: Populate Payment Filter in Transaction Tab
+            const payFilter = document.getElementById('paymentFilter');
+            if(payFilter) {
+                const currentVal = payFilter.value;
+                payFilter.innerHTML = '<option value="all">Show All Transactions</option>' + contractorOptions;
+                payFilter.value = currentVal;
+            }
+
+            // Paid By
+            const paidSel = document.getElementById('expPaidBy');
+            paidSel.innerHTML = app.paymentSources.map(p => `<option>${p}</option>`).join('');
+        }
+
+        function switchTab(id, el) {
+            document.querySelectorAll('.view-section').forEach(x => x.style.display='none');
+            document.getElementById(id).style.display='block';
+            document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+
+            if(id === 'dashboard') renderDashboard();
+            if(id === 'calendar') renderCalendar();
+            if(id === 'timeline') renderTimeline();
+            if(id === 'reports') renderReports();
+            if(id === 'payments') renderPayments();
+        }
+
+        function renderAll() {
+            renderDashboard();
+            renderExpenses();
+            renderContractors();
+            renderPayments();
+            renderComponents();
+            renderFaults();
+            renderCalendar();
+            renderTimeline();
+            populateSelects();
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const spent = app.expenses.reduce((a,b) => a + parseFloat(b.amount || 0), 0);
+            const compCost = app.components.reduce((a,b) => a + parseFloat(b.cost || 0), 0);
+            
+            // Separation logic: Remain is budget minus (expenses + materials)
+            const totalOut = spent + compCost;
+            const remain = app.budget - totalOut;
+            const percent = app.budget > 0 ? ((totalOut/app.budget)*100).toFixed(1) : 0;
+
+            document.getElementById('d-budget').innerText = '₹' + parseFloat(app.budget).toLocaleString('en-IN');
+            document.getElementById('d-spent').innerText = '₹' + spent.toLocaleString('en-IN');
+            document.getElementById('d-comp-total').innerText = '₹' + compCost.toLocaleString('en-IN');
+            document.getElementById('d-remain').innerText = '₹' + remain.toLocaleString('en-IN');
+            
+            document.getElementById('d-bar').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('d-percent').innerText = percent + '% Used';
+
+            document.getElementById('qs-contractors').innerText = app.contractors.length;
+            document.getElementById('qs-payments').innerText = app.expenses.length;
+            document.getElementById('qs-components').innerText = app.components.length;
+            document.getElementById('qs-faults').innerText = app.faults.filter(f => f.status !== 'Resolved').length;
+        }
+
+        // Expenses
+        function renderExpenses() {
+            const tbody = document.getElementById('expenseTableBody');
+            tbody.innerHTML = app.expenses.sort((a,b) => b.date.localeCompare(a.date)).map(e => {
+                const statusClass = e.status === 'Completed' ? 'badge-completed' : (e.status === 'In Progress' ? 'badge-inprogress' : 'badge-pending');
+                return `
+                <tr>
+                    <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
+                    <td><span class="badge" style="background:#555">${e.category || 'Other'}</span></td>
+                    <td>${e.contractor || '-'}</td>
+                    <td>${e.workType}</td>
+                    <td><b>₹${parseFloat(e.amount).toLocaleString('en-IN')}</b></td>
+                    <td>${e.paidBy}</td>
+                    <td><span class="badge ${statusClass}">${e.status}</span></td>
+                    <td>
+                        <button class="btn-icon btn-edit" onclick="editExpense(${e.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon btn-delete" onclick="deleteExpense(${e.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Contractors
+        function renderContractors() {
+            const grid = document.getElementById('contractorGrid');
+            grid.innerHTML = app.contractors.map(c => {
+                const paid = app.expenses.filter(e => e.contractor === c.name).reduce((a,b)=>a+parseFloat(b.amount||0),0);
+                const percent = c.budget > 0 ? ((paid / c.budget) * 100).toFixed(1) : 0;
+                return `
+                <div class="glass-card stat-card" style="text-align:left">
+                    <div style="display:flex; justify-content:space-between; align-items:start">
+                        <div>
+                            <h3>${c.name}</h3>
+                            <div style="font-size:12px; opacity:0.7">${c.role || 'Contractor'} • ${c.phone || '-'}</div>
+                        </div>
+                        <div>
+                            <button class="btn-icon btn-edit" onclick="editContractor(${c.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon btn-delete" onclick="deleteContractor(${c.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="prog-track"><span>Paid: ₹${paid.toLocaleString('en-IN')}</span><span>Budget: ₹${parseFloat(c.budget).toLocaleString('en-IN')}</span></div>
+                    <div class="budget-bar-container" style="height:12px; margin:8px 0">
+                        <div class="budget-bar-fill" style="width:${Math.min(percent,100)}%"></div>
+                    </div>
+                    <div style="text-align:right; font-size:11px">${percent}% used</div>
+                </div>`;
+            }).join('');
+        }
+
+        // Components
+        function renderComponents() {
+            const tbody = document.getElementById('componentTableBody');
+            tbody.innerHTML = app.components.sort((a,b) => b.date.localeCompare(a.date)).map(c => {
+                const statusClass = c.status === 'Completed' ? 'badge-completed' : (c.status === 'In Progress' ? 'badge-inprogress' : 'badge-pending');
+                return `
+                <tr>
+                    <td>${new Date(c.date).toLocaleDateString('en-IN')}</td>
+                    <td><b>${c.name}</b></td>
+                    <td>${c.category || 'Other'}</td>
+                    <td>${c.contractor || '-'}</td>
+                    <td>${c.workType || '-'}</td>
+                    <td>₹${parseFloat(c.cost).toLocaleString('en-IN')}</td>
+                    <td>
+                        <div class="budget-bar-container" style="height:20px">
+                            <div class="budget-bar-fill" style="width:${c.progress}%"></div>
+                            <div class="budget-bar-text">${c.progress}%</div>
+                        </div>
+                    </td>
+                    <td><span class="badge ${statusClass}">${c.status}</span></td>
+                    <td>
+                        <button class="btn-icon btn-edit" onclick="editComponent(${c.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon btn-delete" onclick="deleteComponent(${c.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Payments
+        function renderPayments() {
+            const filterName = document.getElementById('paymentFilter').value;
+            const container = document.getElementById('paymentBarsContainer');
+            const relevant = filterName === 'all' ? app.contractors : app.contractors.filter(c => c.name === filterName);
+
+            container.innerHTML = relevant.map(c => {
+                const paid = app.expenses.filter(e => e.contractor === c.name).reduce((a,b)=>a+parseFloat(b.amount||0),0);
+                const percent = c.budget > 0 ? ((paid / c.budget) * 100).toFixed(1) : 0;
+                return `
+                <div class="payment-summary-card">
+                    <div style="font-weight:bold; font-size:15px">${c.name}</div>
+                    <div class="prog-track"><span>₹${paid.toLocaleString('en-IN')}</span><span>${percent}%</span></div>
+                    <div class="budget-bar-container" style="height:14px">
+                        <div class="budget-bar-fill" style="width:${Math.min(percent,100)}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const tbody = document.getElementById('paymentTableBody');
+            let txs = app.expenses;
+            if(filterName !== 'all') txs = txs.filter(e => e.contractor === filterName);
+            tbody.innerHTML = txs.sort((a,b) => b.date.localeCompare(a.date)).map(e => `
+                <tr>
+                    <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
+                    <td>${e.contractor || '-'}</td>
+                    <td>${e.workType}</td>
+                    <td><b>₹${parseFloat(e.amount).toLocaleString('en-IN')}</b></td>
+                    <td>${e.paidBy}</td>
+                    <td>${e.mode}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Faults
+        function renderFaults() {
+            const tbody = document.getElementById('faultTableBody');
+            tbody.innerHTML = app.faults.sort((a,b) => b.date.localeCompare(a.date)).map(f => {
+                const statusClass = f.status === 'Resolved' ? 'badge-completed' : (f.status === 'In Review' || f.status === 'In Progress' ? 'badge-inprogress' : 'badge-faulty');
+                return `
+                <tr>
+                    <td>${new Date(f.date).toLocaleDateString('en-IN')}</td>
+                    <td>${f.contractor}</td>
+                    <td>${f.desc}</td>
+                    <td>₹${parseFloat(f.cost||0).toLocaleString('en-IN')}</td>
+                    <td><span class="badge ${statusClass}">${f.status}</span></td>
+                    <td>
+                        <button class="btn-icon btn-edit" onclick="editFault(${f.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon btn-delete" onclick="deleteFault(${f.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Reports
+        function renderReports() {
+            // Category Pie
+            const catData = {};
+            app.expenses.forEach(e => {
+                const cat = e.category || 'Other';
+                catData[cat] = (catData[cat] || 0) + parseFloat(e.amount || 0);
+            });
+
+            if(catChart) catChart.destroy();
+            catChart = new Chart(document.getElementById('catChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(catData),
+                    datasets: [{
+                        data: Object.values(catData),
+                        backgroundColor: ['#667eea','#764ba2','#f093fb','#10b981','#f59e0b','#ef4444','#06b6d4']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+            });
+
+            // Contractor Doughnut
+            const contData = {};
+            app.contractors.forEach(c => {
+                const spent = app.expenses.filter(e => e.contractor === c.name).reduce((a,b)=>a+parseFloat(b.amount||0),0);
+                if(spent > 0) contData[c.name] = spent;
+            });
+
+            if(contChart) contChart.destroy();
+            contChart = new Chart(document.getElementById('contChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(contData),
+                    datasets: [{
+                        data: Object.values(contData),
+                        backgroundColor: ['#667eea','#10b981','#f59e0b','#ef4444','#06b6d4','#f093fb']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+            });
+
+            // Component Progress
+            const compStatus = { 'Not Started': 0, 'In Progress': 0, 'Completed': 0 };
+            app.components.forEach(c => compStatus[c.status]++);
+            if(compChart) compChart.destroy();
+            compChart = new Chart(document.getElementById('compChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(compStatus),
+                    datasets: [{
+                        label: 'Components',
+                        data: Object.values(compStatus),
+                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+                    }]
+                },
+                options: { responsive: true, scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } } }
+            });
+        }
+
+        // Timeline
+        function renderTimeline() {
+            let events = [];
+
+            app.expenses.forEach(e => events.push({date: e.date, type: 'Payment', icon: '💳', desc: `₹${parseFloat(e.amount).toLocaleString('en-IN')} to ${e.contractor} (${e.workType}) - ${e.paidBy}`, color: 'var(--success)'}));
+            app.faults.forEach(f => events.push({date: f.date, type: 'Fault', icon: '⚠️', desc: f.desc + (f.cost ? ` (₹${f.cost})` : ''), color: 'var(--danger)'}));
+            app.notes.forEach(n => events.push({date: n.date, type: 'Note', icon: '📝', desc: n.text, color: 'var(--warning)'}));
+            app.components.forEach(c => events.push({date: c.date, type: 'Component', icon: '🛠️', desc: `${c.name} - ₹${parseFloat(c.cost).toLocaleString('en-IN')} (${c.progress}%)`, color: 'var(--info)'}));
+
+            events.sort((a,b) => b.date.localeCompare(a.date));
+
+            const list = document.getElementById('timelineList');
+            list.innerHTML = events.map(ev => `
+                <div class="timeline-event">
+                    <div style="background:${ev.color}; width:8px; height:100%; border-radius:4px; align-self:stretch;"></div>
+                    <div style="flex:1">
+                        <div style="font-weight:bold; margin-bottom:4px">${ev.icon} ${ev.type} • ${new Date(ev.date).toLocaleDateString('en-IN')}</div>
+                        <div style="opacity:0.9">${ev.desc}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Calendar
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('calMonthYear').innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const grid = document.getElementById('calGrid');
+            grid.innerHTML = '';
+
+            for(let i = 0; i < firstDay; i++) grid.innerHTML += '<div></div>';
+
+            for(let d = 1; d <= daysInMonth; d++) {
+                const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasPay = app.expenses.some(e => e.date === dayStr);
+                const hasNote = app.notes.some(n => n.date === dayStr);
+                const hasComp = app.components.some(c => c.date === dayStr);
+
+                let dots = '';
+                if(hasPay) dots += '<div class="dot dot-pay"></div>';
+                if(hasNote) dots += '<div class="dot dot-note"></div>';
+                if(hasComp) dots += '<div class="dot dot-comp"></div>';
+
+                const classes = ['cal-day'];
+                if(dayStr === new Date().toISOString().split('T')[0]) classes.push('today');
+                if(dayStr === selectedDate) classes.push('selected');
+
+                grid.innerHTML += `<div class="${classes.join(' ')}" onclick="selectDate('${dayStr}')">
+                    <span style="font-weight:bold">${d}</span>
+                    <div class="cal-dots">${dots}</div>
+                </div>`;
+            }
+            renderDateDetails();
+        }
+
+        function selectDate(str) {
+            selectedDate = str;
+            renderCalendar();
+        }
+
+        function renderDateDetails() {
+            document.getElementById('selectedDateDisplay').innerText = new Date(selectedDate).toDateString();
+            const content = document.getElementById('dateContent');
+            content.innerHTML = '';
+
+            const notes = app.notes.filter(n => n.date === selectedDate);
+            const pays = app.expenses.filter(e => e.date === selectedDate);
+            const comps = app.components.filter(c => c.date === selectedDate);
+
+            if(notes.length) {
+                content.innerHTML += '<h4 style="margin:15px 0 8px">📝 Notes</h4>';
+                notes.forEach(n => content.innerHTML += `<div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between">
+                    <span>${n.text}</span>
+                    <div><i class="fas fa-edit" style="cursor:pointer; color:var(--warning); margin-right:10px" onclick="editNote(${n.id})"></i>
+                    <i class="fas fa-trash" style="cursor:pointer; color:var(--danger)" onclick="deleteNote(${n.id})"></i></div>
+                </div>`);
+            }
+
+            if(pays.length) {
+                content.innerHTML += '<h4 style="margin:15px 0 8px">💳 Payments</h4>';
+                pays.forEach(p => content.innerHTML += `<div style="background:rgba(16,185,129,0.15); padding:10px; border-radius:8px; margin-bottom:8px">
+                    ₹${parseFloat(p.amount).toLocaleString('en-IN')} → ${p.contractor} (${p.workType}) by ${p.paidBy}
+                </div>`);
+            }
+
+            if(comps.length) {
+                content.innerHTML += '<h4 style="margin:15px 0 8px">🛠️ Components</h4>';
+                comps.forEach(c => content.innerHTML += `<div style="background:rgba(6,182,212,0.15); padding:10px; border-radius:8px; margin-bottom:8px">
+                    ${c.name} - ₹${parseFloat(c.cost).toLocaleString('en-IN')} (${c.progress}%)
+                </div>`);
+            }
+
+            if(!notes.length && !pays.length && !comps.length) content.innerHTML = '<p style="opacity:0.6; text-align:center; padding:20px">No activity on this date.</p>';
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            if(id === 'expenseModal') document.getElementById('expDate').valueAsDate = new Date();
+            if(id === 'componentModal') {
+                document.getElementById('compDate').valueAsDate = new Date();
+                document.getElementById('compProgress').value = 0;
+                document.getElementById('compProgDisplay').innerText = '0%';
+            }
+            if(id === 'faultModal') document.getElementById('faultDate').valueAsDate = new Date();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            // Reset forms
+            document.querySelectorAll(`#${id} form`).forEach(f => f.reset());
+            document.querySelectorAll(`#${id} [type=hidden]`).forEach(h => h.value = '');
+        }
+
+        // CRUD Functions
+        function saveExpense(e) {
+            e.preventDefault();
+            const id = document.getElementById('expId').value || Date.now();
+            const data = {
+                id: parseInt(id),
+                date: document.getElementById('expDate').value,
+                amount: parseFloat(document.getElementById('expAmount').value),
+                contractor: document.getElementById('expContractor').value || '',
+                workType: document.getElementById('expWorkType').value || 'General',
+                category: document.getElementById('expCategory').value,
+                paidBy: document.getElementById('expPaidBy').value,
+                mode: document.getElementById('expMode').value,
+                status: document.getElementById('expStatus').value
+            };
+            const idx = app.expenses.findIndex(x => x.id === data.id);
+            if(idx > -1) app.expenses[idx] = data;
+            else app.expenses.push(data);
+            saveData();
+            renderAll();
+            closeModal('expenseModal');
+        }
+
+        function editExpense(id) {
+            const e = app.expenses.find(x => x.id === id);
+            if(!e) return;
+            document.getElementById('expId').value = e.id;
+            document.getElementById('expDate').value = e.date;
+            document.getElementById('expAmount').value = e.amount;
+            document.getElementById('expContractor').value = e.contractor;
+            document.getElementById('expWorkType').value = e.workType;
+            document.getElementById('expCategory').value = e.category;
+            document.getElementById('expPaidBy').value = e.paidBy;
+            document.getElementById('expMode').value = e.mode;
+            document.getElementById('expStatus').value = e.status;
+            openModal('expenseModal');
+        }
+
+        function deleteExpense(id) {
+            if(confirm('Delete this expense?')) {
+                app.expenses = app.expenses.filter(x => x.id !== id);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function saveContractor(e) {
+            e.preventDefault();
+            const id = document.getElementById('contId').value || Date.now();
+            const data = {
+                id: parseInt(id),
+                name: document.getElementById('contName').value.trim(),
+                role: document.getElementById('contRole').value.trim(),
+                phone: document.getElementById('contPhone').value.trim(),
+                budget: parseFloat(document.getElementById('contBudget').value || 0)
+            };
+            const idx = app.contractors.findIndex(x => x.id === data.id);
+            if(idx > -1) app.contractors[idx] = data;
+            else app.contractors.push(data);
+            saveData();
+            renderAll();
+            closeModal('contractorModal');
+        }
+
+        function editContractor(id) {
+            const c = app.contractors.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('contId').value = c.id;
+            document.getElementById('contName').value = c.name;
+            document.getElementById('contRole').value = c.role || '';
+            document.getElementById('contPhone').value = c.phone || '';
+            document.getElementById('contBudget').value = c.budget;
+            openModal('contractorModal');
+        }
+
+        function deleteContractor(id) {
+            if(confirm('Delete contractor? (Expenses will remain)')) {
+                app.contractors = app.contractors.filter(x => x.id !== id);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function saveComponent(e) {
+            e.preventDefault();
+            const id = document.getElementById('compId').value || Date.now();
+            const data = {
+                id: parseInt(id),
+                date: document.getElementById('compDate').value,
+                name: document.getElementById('compName').value.trim(),
+                category: document.getElementById('compCategory').value,
+                contractor: document.getElementById('compContractor').value || '',
+                workType: document.getElementById('compWorkType').value.trim() || '',
+                cost: parseFloat(document.getElementById('compCost').value),
+                progress: parseInt(document.getElementById('compProgress').value),
+                status: document.getElementById('compStatus').value
+            };
+            const idx = app.components.findIndex(x => x.id === data.id);
+            if(idx > -1) app.components[idx] = data;
+            else app.components.push(data);
+            saveData();
+            renderAll();
+            closeModal('componentModal');
+        }
+
+        function editComponent(id) {
+            const c = app.components.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('compId').value = c.id;
+            document.getElementById('compDate').value = c.date;
+            document.getElementById('compName').value = c.name;
+            document.getElementById('compCategory').value = c.category;
+            document.getElementById('compContractor').value = c.contractor;
+            document.getElementById('compWorkType').value = c.workType;
+            document.getElementById('compCost').value = c.cost;
+            document.getElementById('compProgress').value = c.progress;
+            document.getElementById('compProgDisplay').innerText = c.progress + '%';
+            document.getElementById('compStatus').value = c.status;
+            openModal('componentModal');
+        }
+
+        function deleteComponent(id) {
+            if(confirm('Delete component?')) {
+                app.components = app.components.filter(x => x.id !== id);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function saveFault(e) {
+            e.preventDefault();
+            const id = document.getElementById('faultId').value || Date.now();
+            const data = {
+                id: parseInt(id),
+                date: document.getElementById('faultDate').value,
+                contractor: document.getElementById('faultContractor').value,
+                desc: document.getElementById('faultDesc').value.trim(),
+                cost: parseFloat(document.getElementById('faultCost').value || 0),
+                status: document.getElementById('faultStatus').value
+            };
+            const idx = app.faults.findIndex(x => x.id === data.id);
+            if(idx > -1) app.faults[idx] = data;
+            else app.faults.push(data);
+            saveData();
+            renderAll();
+            closeModal('faultModal');
+        }
+
+        function editFault(id) {
+            const f = app.faults.find(x => x.id === id);
+            if(!f) return;
+            document.getElementById('faultId').value = f.id;
+            document.getElementById('faultDate').value = f.date;
+            document.getElementById('faultContractor').value = f.contractor;
+            document.getElementById('faultDesc').value = f.desc;
+            document.getElementById('faultCost').value = f.cost || '';
+            document.getElementById('faultStatus').value = f.status;
+            openModal('faultModal');
+        }
+
+        function deleteFault(id) {
+            if(confirm('Delete fault report?')) {
+                app.faults = app.faults.filter(x => x.id !== id);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function addNote() {
+            document.getElementById('noteEditId').value = '';
+            document.getElementById('noteText').value = '';
+            openModal('noteModal');
+        }
+
+        function editNote(id) {
+            const n = app.notes.find(x => x.id === id);
+            if(!n) return;
+            document.getElementById('noteEditId').value = n.id;
+            document.getElementById('noteText').value = n.text;
+            openModal('noteModal');
+        }
+
+        function saveNote() {
+            const id = document.getElementById('noteEditId').value || Date.now();
+            const text = document.getElementById('noteText').value.trim();
+            if(!text) return;
+            const idx = app.notes.findIndex(x => x.id == id);
+            if(idx > -1) app.notes[idx].text = text;
+            else app.notes.push({id: parseInt(id), date: selectedDate, text});
+            saveData();
+            renderCalendar();
+            closeModal('noteModal');
+        }
+
+        function deleteNote(id) {
+            if(confirm('Delete note?')) {
+                app.notes = app.notes.filter(x => x.id !== id);
+                saveData();
+                renderCalendar();
+            }
+        }
+
+        // Utils
+        function setTheme(name) {
+            app.theme = name;
+            document.body.className = 'theme-' + name;
+            saveData();
+        }
+
+        function editTotalBudget() {
+            const v = prompt('Enter Total Project Budget (₹):', app.budget);
+            if(v !== null && !isNaN(v)) {
+                app.budget = parseFloat(v) || 0;
+                saveData();
+                renderDashboard();
+            }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `${app.projectName.replace(/\s/g,'_')}_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function exportExcel() {
+            const wb = XLSX.utils.book_new();
+
+            const expWS = XLSX.utils.json_to_sheet(app.expenses.map(e => ({
+                Date: e.date,
+                Contractor: e.contractor,
+                Work_Type: e.workType,
+                Category: e.category,
+                Amount: e.amount,
+                Paid_By: e.paidBy,
+                Mode: e.mode,
+                Status: e.status
+            })));
+            XLSX.utils.book_append_sheet(wb, expWS, "Expenses");
+
+            const contWS = XLSX.utils.json_to_sheet(app.contractors.map(c => ({
+                Name: c.name,
+                Specialization: c.role,
+                Phone: c.phone,
+                Allocated_Budget: c.budget,
+                Spent: app.expenses.filter(e => e.contractor === c.name).reduce((a,b)=>a+parseFloat(b.amount||0),0)
+            })));
+            XLSX.utils.book_append_sheet(wb, contWS, "Contractors");
+
+            const compWS = XLSX.utils.json_to_sheet(app.components);
+            XLSX.utils.book_append_sheet(wb, compWS, "Components");
+
+            const faultWS = XLSX.utils.json_to_sheet(app.faults);
+            XLSX.utils.book_append_sheet(wb, faultWS, "Faults");
+
+            XLSX.writeFile(wb, `${app.projectName.replace(/\s/g,'_')}_report_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    app = { ...app, ...imported };
+                    saveData();
+                    alert('Data imported successfully!');
+                    location.reload();
+                } catch(err) {
+                    alert('Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetApp() {
+            if(confirm('PERMANENTLY delete all data? This cannot be undone.')) {
+                localStorage.removeItem('ibp_data');
+                location.reload();
+            }
+        }
+
+        // Progress slider live update
+        document.getElementById('compProgress')?.addEventListener('input', function() {
+            document.getElementById('compProgDisplay').innerText = this.value + '%';
+        });
+    </script>
+</body>
+</html>

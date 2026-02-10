@@ -490,7 +490,206 @@
         ::-webkit-scrollbar { width: 12px; height: 12px; }
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 10px; }
-    </style>
+    
+
+/* ============================================
+   CALENDAR NOTES PREVIEW & EDIT STYLES
+   ============================================ */
+.calendar-note-preview {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid var(--info);
+}
+
+.calendar-note-preview:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(3px);
+}
+
+.calendar-note-preview.empty {
+    font-style: italic;
+    opacity: 0.6;
+    border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.calendar-event-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* ============================================
+   ANIMATED ICON STYLES
+   ============================================ */
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+@keyframes iconRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.btn:hover svg {
+    animation: iconPulse 0.6s ease;
+}
+
+.btn-danger:hover svg {
+    animation: iconRotate 0.5s ease;
+}
+
+/* ============================================
+   PAYMENT FILTER STYLES
+   ============================================ */
+.filter-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid var(--glass-border);
+}
+
+.filter-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.filter-section select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--glass-border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.filter-section select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+/* ============================================
+   ANALYTICS & PIE CHART STYLES
+   ============================================ */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin: 24px 0;
+}
+
+.analytics-card {
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.analytics-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.analytics-card h3 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.analytics-stat {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin: 12px 0;
+    border-left: 4px solid;
+}
+
+.analytics-stat.primary { border-left-color: var(--primary); }
+.analytics-stat.success { border-left-color: var(--success); }
+.analytics-stat.warning { border-left-color: var(--warning); }
+.analytics-stat.info { border-left-color: var(--info); }
+
+.analytics-stat h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.analytics-stat .stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.pie-chart-container {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.chart-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   ENHANCED BUTTON STYLES
+   ============================================ */
+.btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    display: inline-block;
+    vertical-align: middle;
+    transition: transform 0.3s ease;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+</style>
 </head>
 <body class="light-mode theme-purple">
     <div class="container">
@@ -1603,7 +1802,211 @@
             }
         }
 
-        function deleteComponent(id) {
+        
+
+// ============================================
+// EDIT FUNCTIONALITY FOR ALL SECTIONS
+// ============================================
+
+function editExpense(id) {
+    const expense = appData.expenses.find(e => e.id === id);
+    if (!expense) {
+        showToast('Expense not found!', 'error');
+        return;
+    }
+
+    // Populate the form with existing data
+    document.getElementById('expenseDate').value = expense.date;
+    document.getElementById('expenseCategory').value = expense.category || '';
+    document.getElementById('expenseContractor').value = expense.contractor;
+
+    // Load work types for this contractor
+    loadWorkTypes();
+
+    // Set work type after a small delay to ensure dropdown is populated
+    setTimeout(() => {
+        document.getElementById('expenseWorkType').value = expense.workType || '';
+        document.getElementById('expenseWorkTypeCustom').value = '';
+    }, 100);
+
+    document.getElementById('expenseDescription').value = expense.description || '';
+    document.getElementById('expenseAmount').value = expense.amount;
+    document.getElementById('expensePaidBy').value = expense.paidBy;
+    document.getElementById('expensePaymentMode').value = expense.paymentMode || 'Cash';
+    document.getElementById('expenseStatus').value = expense.status || 'Pending';
+
+    // Remove the expense temporarily (will be re-added when saved)
+    appData.expenses = appData.expenses.filter(e => e.id !== id);
+    saveData();
+
+    // Open the modal for editing
+    openModal('expenseModal');
+    showToast('Edit expense details and click Save', 'info');
+}
+
+function editComponent(id) {
+    const component = appData.components.find(c => c.id === id);
+    if (!component) {
+        showToast('Component not found!', 'error');
+        return;
+    }
+
+    // Populate the form
+    document.getElementById('componentDate').value = component.date;
+    document.getElementById('componentName').value = component.name;
+    document.getElementById('componentCategory').value = component.category;
+    document.getElementById('componentCost').value = component.cost;
+    document.getElementById('componentProgress').value = component.progress;
+    document.getElementById('progressValue').textContent = component.progress + '%';
+    document.getElementById('componentStatus').value = component.status;
+    document.getElementById('componentDescription').value = component.description || '';
+
+    // Remove temporarily
+    appData.components = appData.components.filter(c => c.id !== id);
+    saveData();
+
+    openModal('componentModal');
+    showToast('Edit component details and click Save', 'info');
+}
+
+function editFault(id) {
+    const fault = appData.faults.find(f => f.id === id);
+    if (!fault) {
+        showToast('Fault not found!', 'error');
+        return;
+    }
+
+    // Populate the form
+    document.getElementById('faultDate').value = fault.date;
+    document.getElementById('faultContractor').value = fault.contractor;
+    document.getElementById('faultDescription').value = fault.description;
+    document.getElementById('faultAmount').value = fault.damageAmount || 0;
+    document.getElementById('faultStatus').value = fault.status;
+
+    // Remove temporarily
+    appData.faults = appData.faults.filter(f => f.id !== id);
+    saveData();
+
+    openModal('faultModal');
+    showToast('Edit fault details and click Save', 'info');
+}
+
+// ============================================
+// ENHANCED TABLE RENDERING WITH EDIT BUTTONS
+// ============================================
+
+// Override loadExpenses to add edit buttons
+const originalLoadExpenses = loadExpenses;
+loadExpenses = function() {
+    const tbody = document.getElementById('expensesTable');
+    tbody.innerHTML = '';
+
+    if (appData.expenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;opacity:0.7;padding:30px">No payments yet.</td></tr>';
+        return;
+    }
+
+    appData.expenses.slice().reverse().forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
+            <td>${categoryIcons[e.category] || '📦'} ${e.category}</td>
+            <td>${e.contractor}</td>
+            <td>${e.workType}</td>
+            <td><strong>₹${parseFloat(e.amount).toLocaleString('en-IN')}</strong></td>
+            <td>${e.paidBy}</td>
+            <td><span class="badge badge-${e.status.toLowerCase().replace(' ', '-')}">${e.status}</span></td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editExpense(${e.id})" style="margin-right: 5px;">
+                    <svg style="width: 16px; height: 16px; fill: currentColor; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteExpense(${e.id})">
+                    <svg style="width: 16px; height: 16px; fill: currentColor; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+// Override loadComponents to add edit buttons
+const originalLoadComponents = loadComponents;
+loadComponents = function() {
+    const tbody = document.getElementById('componentsTable');
+    tbody.innerHTML = '';
+
+    if (appData.components.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:0.7;padding:30px">No components yet.</td></tr>';
+        return;
+    }
+
+    appData.components.slice().reverse().forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${new Date(c.date).toLocaleDateString('en-IN')}</td>
+            <td><strong>${c.name}</strong></td>
+            <td>${c.category}</td>
+            <td><strong>₹${parseFloat(c.cost).toLocaleString('en-IN')}</strong></td>
+            <td><div class="component-progress"><div class="component-progress-bar"><div class="component-progress-fill" style="width:${c.progress}%">${c.progress}%</div></div></div></td>
+            <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '-')}">${c.status}</span></td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editComponent(${c.id})" style="margin-right: 5px;">
+                    <svg style="width: 16px; height: 16px; fill: currentColor; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteComponent(${c.id})">
+                    <svg style="width: 16px; height: 16px; fill: currentColor; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+// Override loadFaults to add edit buttons
+const originalLoadFaults = loadFaults;
+loadFaults = function() {
+    const tbody = document.getElementById('faultsTable');
+    tbody.innerHTML = '';
+
+    if (appData.faults.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.7;padding:30px">No faults reported yet.</td></tr>';
+        return;
+    }
+
+    appData.faults.slice().reverse().forEach(f => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${new Date(f.date).toLocaleDateString('en-IN')}</td>
+            <td>${f.contractor}</td>
+            <td>${f.description}</td>
+            <td><strong>₹${parseFloat(f.damageAmount).toLocaleString('en-IN')}</strong></td>
+            <td><span class="badge badge-${f.status.toLowerCase().replace(' ', '-')}">${f.status}</span></td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editFault(${f.id})" style="margin-right: 5px;">
+                    <svg style="width: 16px; height: 16px; fill: currentColor; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteFault(${f.id})">
+                    <svg style="width: 16px; height: 16px; fill: currentColor; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+function deleteComponent(id) {
             if (confirm('Delete this component?')) {
                 appData.components = appData.components.filter(c => c.id !== id);
                 saveData();
@@ -1704,6 +2107,471 @@
         }
 
         window.addEventListener('load', init);
-    </script>
+    
+
+// ============================================
+// CALENDAR NOTES PREVIEW & EDIT
+// ============================================
+
+// Store notes in timeline items
+if (!appData.timelineNotes) {
+    appData.timelineNotes = {};
+}
+
+// Enhanced loadTimeline with notes preview
+const originalLoadTimeline = loadTimeline;
+loadTimeline = function() {
+    // Call original function first
+    originalLoadTimeline();
+
+    // Add notes preview to each timeline item
+    setTimeout(() => {
+        const container = document.getElementById('timelineContainer');
+        if (!container) return;
+
+        const activityCards = container.querySelectorAll('.payment-card');
+        const allActivity = [];
+
+        // Rebuild activity array
+        appData.expenses.forEach(e => {
+            allActivity.push({
+                id: `expense-${e.id}`,
+                date: e.date,
+                type: 'payment',
+                title: `Payment to ${e.contractor}`,
+                details: `₹${parseFloat(e.amount).toLocaleString('en-IN')} for ${e.workType}`
+            });
+        });
+
+        appData.components.forEach(c => {
+            allActivity.push({
+                id: `component-${c.id}`,
+                date: c.date,
+                type: 'component',
+                title: `Component: ${c.name}`,
+                details: `${c.category} - ₹${parseFloat(c.cost).toLocaleString('en-IN')}`
+            });
+        });
+
+        appData.faults.forEach(f => {
+            allActivity.push({
+                id: `fault-${f.id}`,
+                date: f.date,
+                type: 'fault',
+                title: `Fault: ${f.contractor}`,
+                details: f.description
+            });
+        });
+
+        allActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        activityCards.forEach((card, index) => {
+            if (index >= allActivity.length) return;
+
+            const activity = allActivity[index];
+            const activityId = activity.id;
+
+            // Check if notes preview already exists
+            if (card.querySelector('.calendar-note-preview')) return;
+
+            // Get notes for this activity
+            const notes = appData.timelineNotes[activityId] || '';
+
+            // Create notes preview
+            const notesDiv = document.createElement('div');
+            notesDiv.className = 'calendar-note-preview' + (notes ? '' : ' empty');
+            notesDiv.textContent = notes || '📝 Click to add notes';
+            notesDiv.onclick = () => editTimelineNotes(activityId, activity.title);
+
+            // Create action buttons
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'calendar-event-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-info btn-sm';
+            editBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor; display: inline-block; vertical-align: middle;">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg> Edit Notes
+            `;
+            editBtn.onclick = () => editTimelineNotes(activityId, activity.title);
+
+            actionsDiv.appendChild(editBtn);
+
+            card.appendChild(notesDiv);
+            card.appendChild(actionsDiv);
+        });
+    }, 100);
+};
+
+function editTimelineNotes(activityId, title) {
+    const currentNotes = appData.timelineNotes[activityId] || '';
+    const newNotes = prompt(`Edit notes for: ${title}`, currentNotes);
+
+    if (newNotes !== null) {
+        appData.timelineNotes[activityId] = newNotes;
+        saveData();
+        loadTimeline();
+        showToast('Timeline notes updated!', 'success');
+    }
+}
+
+// ============================================
+// PAYMENT CONTRACTOR FILTER
+// ============================================
+
+let currentContractorFilter = 'all';
+
+function initializePaymentFilter() {
+    const paymentsSection = document.getElementById('payments');
+    if (!paymentsSection) return;
+
+    // Check if filter already exists
+    let filterDiv = paymentsSection.querySelector('.filter-section');
+    if (!filterDiv) {
+        filterDiv = document.createElement('div');
+        filterDiv.className = 'filter-section';
+        filterDiv.innerHTML = `
+            <label for="contractorFilterPayment">
+                🔍 Filter by Contractor
+            </label>
+            <select id="contractorFilterPayment" onchange="filterPaymentsByContractor(this.value)">
+                <option value="all">All Contractors</option>
+            </select>
+        `;
+
+        // Insert after h2
+        const h2 = paymentsSection.querySelector('h2');
+        if (h2 && h2.nextSibling) {
+            paymentsSection.insertBefore(filterDiv, h2.nextSibling);
+        }
+    }
+
+    updateContractorFilterOptions();
+}
+
+function updateContractorFilterOptions() {
+    const filterSelect = document.getElementById('contractorFilterPayment');
+    if (!filterSelect) return;
+
+    const contractors = [...new Set(appData.expenses.map(e => e.contractor))];
+    const currentValue = filterSelect.value;
+
+    filterSelect.innerHTML = '<option value="all">All Contractors</option>';
+    contractors.forEach(contractor => {
+        const option = document.createElement('option');
+        option.value = contractor;
+        option.textContent = contractor;
+        if (contractor === currentValue) option.selected = true;
+        filterSelect.appendChild(option);
+    });
+}
+
+function filterPaymentsByContractor(contractorName) {
+    currentContractorFilter = contractorName;
+    loadPayments();
+}
+
+// Enhanced loadPayments with filtering
+const originalLoadPayments = loadPayments;
+loadPayments = function() {
+    initializePaymentFilter();
+
+    // Filter expenses
+    let filteredExpenses = appData.expenses;
+    if (currentContractorFilter !== 'all') {
+        filteredExpenses = appData.expenses.filter(e => e.contractor === currentContractorFilter);
+    }
+
+    // Contractor-wise payment summary (filtered)
+    const contractorPayments = {};
+    filteredExpenses.forEach(e => {
+        if (!contractorPayments[e.contractor]) {
+            const contractor = appData.contractors.find(c => c.name === e.contractor);
+            contractorPayments[e.contractor] = {
+                total: 0,
+                allocated: contractor ? contractor.allocatedBudget : 0,
+                payments: []
+            };
+        }
+        contractorPayments[e.contractor].total += parseFloat(e.amount) || 0;
+        contractorPayments[e.contractor].payments.push(e);
+    });
+
+    const listDiv = document.getElementById('contractorPaymentsList');
+    listDiv.innerHTML = '';
+
+    if (Object.keys(contractorPayments).length === 0) {
+        listDiv.innerHTML = '<p style="text-align:center;opacity:0.7">No payments yet.</p>';
+    } else {
+        Object.keys(contractorPayments).sort((a, b) => 
+            contractorPayments[b].total - contractorPayments[a].total
+        ).forEach(name => {
+            const data = contractorPayments[name];
+            const remaining = data.allocated - data.total;
+            const percent = data.allocated > 0 ? (data.total / data.allocated * 100) : 0;
+
+            const card = document.createElement('div');
+            card.className = 'payment-card';
+            card.innerHTML = `
+                <div class="payment-header">
+                    <h3 style="margin:0">${name}</h3>
+                    <div style="font-size:24px;font-weight:900;color:var(--info)">₹${data.total.toLocaleString('en-IN')}</div>
+                </div>
+                <div style="margin-top:12px">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                        <span><strong>Allocated:</strong> ₹${data.allocated.toLocaleString('en-IN')}</span>
+                        <span><strong>Remaining:</strong> ₹${remaining.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width:${Math.min(percent, 100)}%">${percent.toFixed(1)}%</div>
+                    </div>
+                </div>
+                <div style="margin-top:8px;opacity:0.9"><strong>Total Payments:</strong> ${data.payments.length}</div>
+            `;
+            listDiv.appendChild(card);
+        });
+    }
+
+    // All payments table (filtered)
+    const tbody = document.getElementById('paymentsTable');
+    tbody.innerHTML = '';
+
+    if (filteredExpenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.7;padding:30px">No payments yet.</td></tr>';
+        return;
+    }
+
+    filteredExpenses.slice().reverse().forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
+            <td>${e.contractor}</td>
+            <td>${e.workType}</td>
+            <td><strong>₹${parseFloat(e.amount).toLocaleString('en-IN')}</strong></td>
+            <td>${e.paidBy}</td>
+            <td>${e.paymentMode || 'Cash'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    updateContractorFilterOptions();
+};
+
+// ============================================
+// ANALYTICS & PIE CHARTS
+// ============================================
+
+// Enhanced loadReports with analytics
+const originalLoadReports = loadReports;
+loadReports = function() {
+    // Add analytics section first
+    const reportsSection = document.getElementById('reports');
+    if (reportsSection && !document.getElementById('analyticsSection')) {
+        const analyticsHTML = `
+            <div id="analyticsSection">
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>📊 Spending Analytics</h3>
+                        <div id="spendingStats"></div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>💰 Payment Distribution</h3>
+                        <div id="paymentDistStats"></div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid" style="margin-top: 30px;">
+                    <div class="analytics-card">
+                        <h3>📈 Category Distribution</h3>
+                        <canvas id="categoryPieChart" width="300" height="300"></canvas>
+                        <div id="categoryLegend" class="chart-legend"></div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>👷 Contractor Distribution</h3>
+                        <canvas id="contractorPieChart" width="300" height="300"></canvas>
+                        <div id="contractorLegend" class="chart-legend"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const h2 = reportsSection.querySelector('h2');
+        if (h2 && h2.nextSibling) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = analyticsHTML;
+            reportsSection.insertBefore(tempDiv.firstChild, h2.nextSibling);
+        }
+    }
+
+    // Render analytics
+    renderSpendingAnalytics();
+    renderPaymentDistribution();
+    renderPieCharts();
+
+    // Call original function for existing charts
+    originalLoadReports();
+};
+
+function renderSpendingAnalytics() {
+    const container = document.getElementById('spendingStats');
+    if (!container) return;
+
+    const totalSpent = appData.expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+    const avgTransaction = totalSpent / (appData.expenses.length || 1);
+    const categories = [...new Set(appData.expenses.map(e => e.category))].length;
+    const highestExpense = Math.max(...appData.expenses.map(e => parseFloat(e.amount) || 0), 0);
+
+    container.innerHTML = `
+        <div class="analytics-stat primary">
+            <h4>💵 Total Spending</h4>
+            <p class="stat-value">₹${totalSpent.toLocaleString('en-IN')}</p>
+        </div>
+        <div class="analytics-stat warning">
+            <h4>📊 Average Transaction</h4>
+            <p class="stat-value">₹${Math.round(avgTransaction).toLocaleString('en-IN')}</p>
+        </div>
+        <div class="analytics-stat success">
+            <h4>🏷️ Active Categories</h4>
+            <p class="stat-value">${categories}</p>
+        </div>
+        <div class="analytics-stat info">
+            <h4>🔝 Highest Expense</h4>
+            <p class="stat-value">₹${highestExpense.toLocaleString('en-IN')}</p>
+        </div>
+    `;
+}
+
+function renderPaymentDistribution() {
+    const container = document.getElementById('paymentDistStats');
+    if (!container) return;
+
+    const paidByStats = {};
+    appData.expenses.forEach(e => {
+        if (!paidByStats[e.paidBy]) paidByStats[e.paidBy] = 0;
+        paidByStats[e.paidBy] += parseFloat(e.amount) || 0;
+    });
+
+    const colors = ['primary', 'success', 'warning', 'info'];
+    container.innerHTML = Object.entries(paidByStats).map(([payer, amount], index) => `
+        <div class="analytics-stat ${colors[index % colors.length]}">
+            <h4>👤 ${payer}</h4>
+            <p class="stat-value">₹${amount.toLocaleString('en-IN')}</p>
+        </div>
+    `).join('');
+}
+
+function renderPieCharts() {
+    renderCategoryPieChart();
+    renderContractorPieChart();
+}
+
+function renderCategoryPieChart() {
+    const canvas = document.getElementById('categoryPieChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const categoryData = {};
+
+    appData.expenses.forEach(e => {
+        const cat = e.category || 'Other';
+        if (!categoryData[cat]) categoryData[cat] = 0;
+        categoryData[cat] += parseFloat(e.amount) || 0;
+    });
+
+    drawPieChart(ctx, categoryData, canvas.width, canvas.height);
+    renderLegend('categoryLegend', categoryData);
+}
+
+function renderContractorPieChart() {
+    const canvas = document.getElementById('contractorPieChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const contractorData = {};
+
+    appData.expenses.forEach(e => {
+        if (!contractorData[e.contractor]) contractorData[e.contractor] = 0;
+        contractorData[e.contractor] += parseFloat(e.amount) || 0;
+    });
+
+    drawPieChart(ctx, contractorData, canvas.width, canvas.height);
+    renderLegend('contractorLegend', contractorData);
+}
+
+function drawPieChart(ctx, data, width, height) {
+    ctx.clearRect(0, 0, width, height);
+
+    const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+    if (total === 0) {
+        ctx.fillStyle = '#888';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No data available', width / 2, height / 2);
+        return;
+    }
+
+    const colors = ['#667eea', '#f093fb', '#feca57', '#48dbfb', '#ff6b6b', '#4ecdc4', '#a29bfe', '#fd79a8', '#fdcb6e', '#6c5ce7'];
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 2 - 30;
+
+    let currentAngle = -Math.PI / 2;
+
+    Object.entries(data).forEach(([label, value], index) => {
+        const sliceAngle = (value / total) * 2 * Math.PI;
+
+        // Draw slice
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw border
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        currentAngle += sliceAngle;
+    });
+}
+
+function renderLegend(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const colors = ['#667eea', '#f093fb', '#feca57', '#48dbfb', '#ff6b6b', '#4ecdc4', '#a29bfe', '#fd79a8', '#fdcb6e', '#6c5ce7'];
+    const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+
+    container.innerHTML = Object.entries(data).map(([label, value], index) => {
+        const percentage = ((value / total) * 100).toFixed(1);
+        return `
+            <div class="legend-item">
+                <div class="legend-color" style="background: ${colors[index % colors.length]}"></div>
+                <span><strong>${label}:</strong> ₹${value.toLocaleString('en-IN')} (${percentage}%)</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// INITIALIZE ALL ENHANCEMENTS
+// ============================================
+
+// Add to init function
+const originalInit = init;
+init = function() {
+    originalInit();
+    setTimeout(() => {
+        initializePaymentFilter();
+    }, 500);
+};
+
+console.log('✅ All enhancements loaded successfully!');
+
+</script>
 </body>
 </html>
