@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interior Budget Pro - Advanced Edition</title>
+    <title>Interior Budget Pro - Complete Working Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -75,8 +75,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -323,6 +321,7 @@
         .badge-completed { background: var(--success); }
         .badge-in-progress { background: var(--info); }
         .badge-faulty { background: var(--danger); }
+        .badge-not-started { background: var(--secondary); }
 
         .modal {
             display: none;
@@ -411,69 +410,6 @@
 
         .theme-toggle.dark .theme-toggle-slider { left: 30px; background: #1e293b; }
 
-        .activity-log { max-height: 400px; overflow-y: auto; }
-        .log-item {
-            padding: 14px 18px;
-            background: var(--card);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .calendar-header {
-            text-align: center;
-            font-weight: 800;
-            padding: 12px;
-            background: var(--card);
-            border-radius: 10px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: var(--glass);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px;
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            background: var(--card);
-            transform: scale(1.05);
-        }
-
-        .calendar-day.has-activity {
-            background: linear-gradient(135deg, var(--info), var(--primary));
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
-        }
-
-        .calendar-day.today {
-            border: 3px solid var(--warning);
-            font-weight: 900;
-        }
-
-        .calendar-day-number {
-            font-size: 18px;
-            font-weight: 800;
-        }
-
-        .calendar-day-indicator {
-            font-size: 10px;
-            margin-top: 4px;
-        }
-
         .payment-card {
             padding: 20px;
             background: var(--card);
@@ -548,7 +484,6 @@
             .header { flex-direction: column; align-items: flex-start; }
             .nav-tabs { width: 100%; }
             .nav-tab { flex: 1; justify-content: center; font-size: 12px; padding: 12px 8px; }
-            .calendar-grid { grid-template-columns: repeat(7, 1fr); gap: 6px; }
             .logo { font-size: 24px; }
         }
 
@@ -586,7 +521,6 @@
             <div class="nav-tab" onclick="switchTab('payments', this)">💳 Payments</div>
             <div class="nav-tab" onclick="switchTab('components', this)">🛠️ Components</div>
             <div class="nav-tab" onclick="switchTab('faults', this)">⚠️ Faults</div>
-            <div class="nav-tab" onclick="switchTab('notes', this)">📝 Notes</div>
             <div class="nav-tab" onclick="switchTab('timeline', this)">📅 Timeline</div>
             <div class="nav-tab" onclick="switchTab('reports', this)">📈 Reports</div>
             <div class="nav-tab" onclick="switchTab('settings', this)">⚙️ Settings</div>
@@ -732,31 +666,6 @@
                 </div>
             </div>
 
-            <!-- Notes & Calendar -->
-            <div id="notes" class="content-section">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-                    <h2 style="font-size: 30px; font-weight: 900;">📝 Notes & Calendar</h2>
-                    <button class="btn btn-success" onclick="openModal('noteModal')">➕ Add Note</button>
-                </div>
-
-                <div class="glass-card" style="margin-bottom: 24px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
-                        <h3 style="font-weight: 800;">Calendar View</h3>
-                        <div>
-                            <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀ Prev</button>
-                            <span id="currentMonth" style="margin: 0 16px; font-weight: 800;"></span>
-                            <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">Next ▶</button>
-                        </div>
-                    </div>
-                    <div class="calendar-grid" id="calendarGrid"></div>
-                </div>
-
-                <div class="glass-card">
-                    <h3 style="font-weight: 800; margin-bottom: 20px;">All Notes</h3>
-                    <div id="notesContainer"></div>
-                </div>
-            </div>
-
             <!-- Timeline -->
             <div id="timeline" class="content-section">
                 <h2 style="font-size: 30px; font-weight: 900; margin-bottom: 24px;">📅 Project Timeline</h2>
@@ -799,11 +708,11 @@
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 12px;">Color Theme</label>
                         <div class="theme-picker">
-                            <div class="theme-option theme-purple active" onclick="changeColorTheme('purple')"></div>
-                            <div class="theme-option theme-blue" onclick="changeColorTheme('blue')"></div>
-                            <div class="theme-option theme-green" onclick="changeColorTheme('green')"></div>
-                            <div class="theme-option theme-orange" onclick="changeColorTheme('orange')"></div>
-                            <div class="theme-option theme-dark" onclick="changeColorTheme('dark')"></div>
+                            <div class="theme-option theme-purple active" onclick="changeColorTheme('purple')" title="Purple"></div>
+                            <div class="theme-option theme-blue" onclick="changeColorTheme('blue')" title="Blue"></div>
+                            <div class="theme-option theme-green" onclick="changeColorTheme('green')" title="Green"></div>
+                            <div class="theme-option theme-orange" onclick="changeColorTheme('orange')" title="Orange"></div>
+                            <div class="theme-option theme-dark" onclick="changeColorTheme('dark')" title="Dark"></div>
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-top: 1px solid var(--glass-border);">
@@ -905,10 +814,11 @@
     <div id="contractorModal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header">
-                <h3 class="modal-title">Add Contractor</h3>
+                <h3 class="modal-title" id="contractorModalTitle">Add Contractor</h3>
                 <button class="close-btn" onclick="closeModal('contractorModal')">&times;</button>
             </div>
             <form id="contractorForm" onsubmit="saveContractor(event)">
+                <input type="hidden" id="contractorEditId">
                 <div class="form-grid">
                     <div class="form-group"><label>Name *</label><input type="text" id="contractorName" required></div>
                     <div class="form-group"><label>Phone *</label><input type="tel" id="contractorPhone" required></div>
@@ -937,7 +847,7 @@
                 <div class="form-group"><label>Team Members <span class="optional">(optional, comma separated)</span></label>
                     <input type="text" id="contractorTeam" placeholder="John, Mike, Sarah">
                 </div>
-                <button type="submit" class="btn btn-success" style="width: 100%;">💾 Save Contractor</button>
+                <button type="submit" class="btn btn-success" style="width: 100%;" id="contractorSubmitBtn">💾 Save Contractor</button>
             </form>
         </div>
     </div>
@@ -1017,35 +927,6 @@
         </div>
     </div>
 
-    <!-- Note Modal -->
-    <div id="noteModal" class="modal">
-        <div class="modal-content glass">
-            <div class="modal-header">
-                <h3 class="modal-title">Add Note</h3>
-                <button class="close-btn" onclick="closeModal('noteModal')">&times;</button>
-            </div>
-            <form id="noteForm" onsubmit="saveNote(event)">
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="noteDate" required>
-                </div>
-                <div class="form-group">
-                    <label>Note Title</label>
-                    <input type="text" id="noteTitle" placeholder="Brief title" required>
-                </div>
-                <div class="form-group">
-                    <label>Note Content</label>
-                    <textarea id="noteContent" rows="4" placeholder="Add your note here..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Workers on this day <span class="optional">(optional, comma separated)</span></label>
-                    <input type="text" id="noteWorkers" placeholder="John, Mike, Electrician Team">
-                </div>
-                <button type="submit" class="btn btn-success" style="width: 100%;">💾 Save Note</button>
-            </form>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let appData = {
@@ -1054,15 +935,11 @@
             contractors: [],
             components: [],
             faults: [],
-            notes: [],
-            logs: [],
             theme: 'light',
             colorTheme: 'purple',
             projectName: 'Interior Budget Pro',
             userName: 'User',
-            paymentMakers: ['Self', 'Spouse', 'Parent', 'Friend'],
-            currentMonth: new Date().getMonth(),
-            currentYear: new Date().getFullYear()
+            paymentMakers: ['Self', 'Spouse', 'Parent', 'Friend']
         };
 
         const categoryIcons = {
@@ -1077,7 +954,6 @@
             loadContractorSelects();
             loadPaymentMakerSelects();
             updateProfileDisplay();
-            renderCalendar();
             displayPaymentMakers();
 
             if (appData.theme === 'dark') {
@@ -1089,7 +965,8 @@
             // Apply saved color theme
             document.body.className = document.body.className.replace(/theme-\w+/, '') + ' theme-' + appData.colorTheme;
             document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-            document.querySelector(\`.theme-\${appData.colorTheme}\`).classList.add('active');
+            const activeTheme = document.querySelector('.theme-' + appData.colorTheme);
+            if (activeTheme) activeTheme.classList.add('active');
 
             // Add custom spec listener
             document.getElementById('contractorSpec').addEventListener('change', function() {
@@ -1099,30 +976,17 @@
         }
 
         function saveData() {
-            localStorage.setItem('interiorBudgetProAdvanced', JSON.stringify(appData));
+            localStorage.setItem('interiorBudgetProFixed', JSON.stringify(appData));
         }
 
         function loadData() {
-            const saved = localStorage.getItem('interiorBudgetProAdvanced');
+            const saved = localStorage.getItem('interiorBudgetProFixed');
             if (saved) {
                 appData = JSON.parse(saved);
-                if (!appData.currentMonth) appData.currentMonth = new Date().getMonth();
-                if (!appData.currentYear) appData.currentYear = new Date().getFullYear();
                 if (!appData.paymentMakers) appData.paymentMakers = ['Self'];
                 if (!appData.colorTheme) appData.colorTheme = 'purple';
                 if (!appData.components) appData.components = [];
             }
-        }
-
-        function addLog(action, description) {
-            appData.logs.unshift({
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                action,
-                description
-            });
-            if (appData.logs.length > 100) appData.logs.pop();
-            saveData();
         }
 
         function updateProfileDisplay() {
@@ -1138,7 +1002,6 @@
             appData.userName = document.getElementById('settingsUserName').value || 'User';
             saveData();
             updateProfileDisplay();
-            addLog('Profile Updated', `Project: ${appData.projectName}, User: ${appData.userName}`);
             showToast('Profile settings saved!', 'success');
         }
 
@@ -1149,7 +1012,6 @@
             saveData();
             loadPaymentMakerSelects();
             displayPaymentMakers();
-            addLog('Payment Makers Updated', `${appData.paymentMakers.length} payment makers`);
             showToast('Payment makers saved!', 'success');
         }
 
@@ -1174,9 +1036,8 @@
             appData.colorTheme = theme;
             document.body.className = document.body.className.replace(/theme-\w+/, '') + ' theme-' + theme;
             document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-            document.querySelector(\`.theme-\${theme}\`).classList.add('active');
+            document.querySelector('.theme-' + theme).classList.add('active');
             saveData();
-            addLog('Theme Changed', `Color theme: ${theme}`);
             showToast('Color theme changed!', 'success');
         }
 
@@ -1196,7 +1057,6 @@
                 appData.theme = 'light';
             }
             saveData();
-            addLog('Theme Changed', `Mode: ${appData.theme}`);
         }
 
         function switchTab(tabName, el) {
@@ -1211,7 +1071,6 @@
             if (tabName === 'payments') loadPayments();
             if (tabName === 'components') loadComponents();
             if (tabName === 'faults') loadFaults();
-            if (tabName === 'notes') { renderCalendar(); loadNotes(); }
             if (tabName === 'timeline') loadTimeline();
             if (tabName === 'reports') loadReports();
         }
@@ -1222,7 +1081,6 @@
                 appData.totalBudget = parseFloat(newBudget);
                 saveData();
                 loadDashboard();
-                addLog('Budget Updated', `Budget set to ₹${appData.totalBudget.toLocaleString('en-IN')}`);
                 showToast('Budget updated successfully!', 'success');
             }
         }
@@ -1232,14 +1090,14 @@
             const remaining = appData.totalBudget - totalSpent;
             const percentSpent = appData.totalBudget > 0 ? (totalSpent / appData.totalBudget * 100) : 0;
 
-            document.getElementById('totalBudget').textContent = `₹${appData.totalBudget.toLocaleString('en-IN')}`;
-            document.getElementById('totalSpent').textContent = `₹${totalSpent.toLocaleString('en-IN')}`;
-            document.getElementById('remaining').textContent = `₹${remaining.toLocaleString('en-IN')}`;
-            document.getElementById('percentSpent').textContent = `${percentSpent.toFixed(1)}%`;
+            document.getElementById('totalBudget').textContent = '₹' + appData.totalBudget.toLocaleString('en-IN');
+            document.getElementById('totalSpent').textContent = '₹' + totalSpent.toLocaleString('en-IN');
+            document.getElementById('remaining').textContent = '₹' + remaining.toLocaleString('en-IN');
+            document.getElementById('percentSpent').textContent = percentSpent.toFixed(1) + '%';
 
             const progressBar = document.getElementById('budgetProgress');
-            progressBar.style.width = `${Math.min(percentSpent, 100)}%`;
-            progressBar.textContent = `${percentSpent.toFixed(1)}% Used`;
+            progressBar.style.width = Math.min(percentSpent, 100) + '%';
+            progressBar.textContent = percentSpent.toFixed(1) + '% Used';
 
             document.getElementById('totalContractors').textContent = appData.contractors.length;
             document.getElementById('totalComponents').textContent = appData.components.length;
@@ -1255,7 +1113,7 @@
                 appData.contractors.forEach(c => {
                     const option = document.createElement('option');
                     option.value = c.name;
-                    option.textContent = `${c.name} (${c.specialization || 'Contractor'})`;
+                    option.textContent = c.name + ' (' + (c.specialization || 'Contractor') + ')';
                     select.appendChild(option);
                 });
             });
@@ -1304,13 +1162,38 @@
             };
             appData.expenses.push(expense);
             saveData();
-            addLog('Payment Made', `${expense.contractor} - ₹${expense.amount.toLocaleString('en-IN')} by ${expense.paidBy}`);
             closeModal('expenseModal');
             showToast('Payment recorded successfully!', 'success');
             loadDashboard();
             loadExpenses();
             loadPayments();
             document.getElementById('expenseForm').reset();
+        }
+
+        function editContractor(id) {
+            const contractor = appData.contractors.find(c => c.id === id);
+            if (!contractor) return;
+
+            document.getElementById('contractorModalTitle').textContent = 'Edit Contractor';
+            document.getElementById('contractorSubmitBtn').textContent = '💾 Update Contractor';
+            document.getElementById('contractorEditId').value = id;
+
+            document.getElementById('contractorName').value = contractor.name;
+            document.getElementById('contractorPhone').value = contractor.phone;
+            document.getElementById('contractorBudget').value = contractor.allocatedBudget;
+            document.getElementById('contractorEmail').value = contractor.email || '';
+            document.getElementById('contractorWorkTypes').value = contractor.workTypes.join(', ');
+            document.getElementById('contractorTeam').value = contractor.teamMembers.join(', ');
+
+            if (['Electrician', 'Plumber', 'Carpenter', 'Painter', 'Mason', 'Welder', 'AC Technician', 'False Ceiling Expert', 'Interior Designer', 'General Contractor'].includes(contractor.specialization)) {
+                document.getElementById('contractorSpec').value = contractor.specialization;
+            } else {
+                document.getElementById('contractorSpec').value = 'custom';
+                document.getElementById('contractorSpecCustom').value = contractor.specialization;
+                document.getElementById('customSpecGroup').style.display = 'block';
+            }
+
+            openModal('contractorModal');
         }
 
         function saveContractor(e) {
@@ -1322,8 +1205,9 @@
                 specialization = 'General Contractor';
             }
 
-            const contractor = {
-                id: Date.now(),
+            const editId = document.getElementById('contractorEditId').value;
+
+            const contractorData = {
                 name: document.getElementById('contractorName').value,
                 phone: document.getElementById('contractorPhone').value,
                 specialization: specialization,
@@ -1332,14 +1216,29 @@
                 teamMembers: document.getElementById('contractorTeam').value.split(',').map(s => s.trim()).filter(s => s),
                 allocatedBudget: parseFloat(document.getElementById('contractorBudget').value || 0)
             };
-            appData.contractors.push(contractor);
+
+            if (editId) {
+                // Update existing
+                const index = appData.contractors.findIndex(c => c.id == editId);
+                if (index !== -1) {
+                    appData.contractors[index] = { ...appData.contractors[index], ...contractorData };
+                    showToast('Contractor updated successfully!', 'success');
+                }
+            } else {
+                // Add new
+                contractorData.id = Date.now();
+                appData.contractors.push(contractorData);
+                showToast('Contractor added successfully!', 'success');
+            }
+
             saveData();
-            addLog('Contractor Added', `${contractor.name} - Budget: ₹${contractor.allocatedBudget.toLocaleString('en-IN')}`);
             closeModal('contractorModal');
-            showToast('Contractor added successfully!', 'success');
             loadContractors();
             loadContractorSelects();
             document.getElementById('contractorForm').reset();
+            document.getElementById('contractorEditId').value = '';
+            document.getElementById('contractorModalTitle').textContent = 'Add Contractor';
+            document.getElementById('contractorSubmitBtn').textContent = '💾 Save Contractor';
             document.getElementById('customSpecGroup').style.display = 'none';
         }
 
@@ -1357,7 +1256,6 @@
             };
             appData.components.push(component);
             saveData();
-            addLog('Component Added', `${component.name} - ₹${component.cost.toLocaleString('en-IN')}`);
             closeModal('componentModal');
             showToast('Component added successfully!', 'success');
             loadComponents();
@@ -1378,31 +1276,11 @@
             };
             appData.faults.push(fault);
             saveData();
-            addLog('Fault Reported', `${fault.contractor} - ₹${fault.damageAmount.toLocaleString('en-IN')}`);
             closeModal('faultModal');
             showToast('Fault reported successfully!', 'success');
             loadFaults();
             loadDashboard();
             document.getElementById('faultForm').reset();
-        }
-
-        function saveNote(e) {
-            e.preventDefault();
-            const note = {
-                id: Date.now(),
-                date: document.getElementById('noteDate').value,
-                title: document.getElementById('noteTitle').value,
-                content: document.getElementById('noteContent').value,
-                workers: document.getElementById('noteWorkers').value.split(',').map(s => s.trim()).filter(s => s)
-            };
-            appData.notes.push(note);
-            saveData();
-            addLog('Note Added', `${note.title} - ${note.date}`);
-            closeModal('noteModal');
-            showToast('Note saved successfully!', 'success');
-            renderCalendar();
-            loadNotes();
-            document.getElementById('noteForm').reset();
         }
 
         function loadExpenses() {
@@ -1414,16 +1292,15 @@
             }
             appData.expenses.slice().reverse().forEach(e => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
-                    <td>${categoryIcons[e.category] || '📦'} ${e.category}</td>
-                    <td>${e.contractor}</td>
-                    <td>${e.workType}</td>
-                    <td><strong>₹${parseFloat(e.amount).toLocaleString('en-IN')}</strong></td>
-                    <td>👤 ${e.paidBy}</td>
-                    <td><span class="badge badge-${e.status.toLowerCase().replace(' ', '-')}">${e.status}</span></td>
-                    <td><button class="btn btn-danger btn-sm" onclick="deleteExpense(${e.id})">🗑️</button></td>
-                `;
+                tr.innerHTML = 
+                    '<td>' + new Date(e.date).toLocaleDateString('en-IN') + '</td>' +
+                    '<td>' + (categoryIcons[e.category] || '📦') + ' ' + e.category + '</td>' +
+                    '<td>' + e.contractor + '</td>' +
+                    '<td>' + e.workType + '</td>' +
+                    '<td><strong>₹' + parseFloat(e.amount).toLocaleString('en-IN') + '</strong></td>' +
+                    '<td>👤 ' + e.paidBy + '</td>' +
+                    '<td><span class="badge badge-' + e.status.toLowerCase().replace(' ', '-') + '">' + e.status + '</span></td>' +
+                    '<td><button class="btn btn-danger btn-sm" onclick="deleteExpense(' + e.id + ')">🗑️</button></td>';
                 tbody.appendChild(tr);
             });
         }
@@ -1447,35 +1324,34 @@
             const listDiv = document.getElementById('contractorPaymentsList');
             listDiv.innerHTML = '';
 
-            Object.keys(contractorPayments).sort((a, b) => contractorPayments[b].total - contractorPayments[a].total).forEach(name => {
-                const data = contractorPayments[name];
-                const remaining = data.allocated - data.total;
-                const percent = data.allocated > 0 ? (data.total / data.allocated * 100) : 0;
+            if (Object.keys(contractorPayments).length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; opacity: 0.7;">No payments yet.</p>';
+            } else {
+                Object.keys(contractorPayments).sort((a, b) => contractorPayments[b].total - contractorPayments[a].total).forEach(name => {
+                    const data = contractorPayments[name];
+                    const remaining = data.allocated - data.total;
+                    const percent = data.allocated > 0 ? (data.total / data.allocated * 100) : 0;
 
-                const card = document.createElement('div');
-                card.className = 'payment-card';
-                card.innerHTML = `
-                    <div class="payment-header">
-                        <h3 style="margin: 0;">👷 ${name}</h3>
-                        <div style="font-size: 24px; font-weight: 900; color: var(--info);">
-                            ₹${data.total.toLocaleString('en-IN')}
-                        </div>
-                    </div>
-                    <div style="margin-top: 12px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span><strong>Allocated:</strong> ₹${data.allocated.toLocaleString('en-IN')}</span>
-                            <span><strong>Remaining:</strong> ₹${remaining.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar" style="width: ${Math.min(percent, 100)}%">${percent.toFixed(1)}%</div>
-                        </div>
-                        <div style="margin-top: 8px; opacity: 0.9;">
-                            <strong>Total Payments:</strong> ${data.payments.length}
-                        </div>
-                    </div>
-                `;
-                listDiv.appendChild(card);
-            });
+                    const card = document.createElement('div');
+                    card.className = 'payment-card';
+                    card.innerHTML = 
+                        '<div class="payment-header">' +
+                        '<h3 style="margin: 0;">👷 ' + name + '</h3>' +
+                        '<div style="font-size: 24px; font-weight: 900; color: var(--info);">₹' + data.total.toLocaleString('en-IN') + '</div>' +
+                        '</div>' +
+                        '<div style="margin-top: 12px;">' +
+                        '<div style="display: flex; justify-content: space-between; margin-bottom: 8px;">' +
+                        '<span><strong>Allocated:</strong> ₹' + data.allocated.toLocaleString('en-IN') + '</span>' +
+                        '<span><strong>Remaining:</strong> ₹' + remaining.toLocaleString('en-IN') + '</span>' +
+                        '</div>' +
+                        '<div class="progress-container">' +
+                        '<div class="progress-bar" style="width: ' + Math.min(percent, 100) + '%">' + percent.toFixed(1) + '%</div>' +
+                        '</div>' +
+                        '<div style="margin-top: 8px; opacity: 0.9;"><strong>Total Payments:</strong> ' + data.payments.length + '</div>' +
+                        '</div>';
+                    listDiv.appendChild(card);
+                });
+            }
 
             // All payments table
             const tbody = document.getElementById('paymentsTable');
@@ -1486,14 +1362,13 @@
             }
             appData.expenses.slice().reverse().forEach(e => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(e.date).toLocaleDateString('en-IN')}</td>
-                    <td>${e.contractor}</td>
-                    <td>${e.workType}</td>
-                    <td><strong>₹${parseFloat(e.amount).toLocaleString('en-IN')}</strong></td>
-                    <td>👤 ${e.paidBy}</td>
-                    <td>${e.paymentMode}</td>
-                `;
+                tr.innerHTML = 
+                    '<td>' + new Date(e.date).toLocaleDateString('en-IN') + '</td>' +
+                    '<td>' + e.contractor + '</td>' +
+                    '<td>' + e.workType + '</td>' +
+                    '<td><strong>₹' + parseFloat(e.amount).toLocaleString('en-IN') + '</strong></td>' +
+                    '<td>👤 ' + e.paidBy + '</td>' +
+                    '<td>' + e.paymentMode + '</td>';
                 tbody.appendChild(tr);
             });
         }
@@ -1514,24 +1389,26 @@
 
                 const card = document.createElement('div');
                 card.className = 'glass-card';
-                card.innerHTML = `
-                    <h3>👷 ${c.name}</h3>
-                    <p><strong>📞 Phone:</strong> ${c.phone}</p>
-                    <p><strong>🔧 Specialization:</strong> ${c.specialization}</p>
-                    ${c.email ? `<p><strong>📧 Email:</strong> ${c.email}</p>` : ''}
-                    ${c.workTypes.length ? `<p><strong>🛠️ Work Types:</strong> ${c.workTypes.join(', ')}</p>` : ''}
-                    ${c.teamMembers.length ? `<p><strong>👥 Team:</strong> ${c.teamMembers.join(', ')} (${c.teamMembers.length})</p>` : ''}
-                    <div style="margin: 16px 0;">
-                        <p><strong>💵 Individual Budget:</strong> ₹${c.allocatedBudget.toLocaleString('en-IN')}</p>
-                        <p><strong>💸 Total Paid:</strong> ₹${spent.toLocaleString('en-IN')}</p>
-                        <p><strong>💰 Remaining:</strong> ₹${remaining.toLocaleString('en-IN')}</p>
-                        <div class="progress-container" style="margin-top: 12px;">
-                            <div class="progress-bar" style="width: ${Math.min(percent, 100)}%">${percent.toFixed(1)}%</div>
-                        </div>
-                    </div>
-                    <p><strong>⚠️ Faults:</strong> ${faults}</p>
-                    <button class="btn btn-danger btn-sm" style="margin-top: 10px;" onclick="deleteContractor(${c.id})">🗑️ Delete</button>
-                `;
+                card.innerHTML = 
+                    '<h3>👷 ' + c.name + '</h3>' +
+                    '<p><strong>📞 Phone:</strong> ' + c.phone + '</p>' +
+                    '<p><strong>🔧 Specialization:</strong> ' + c.specialization + '</p>' +
+                    (c.email ? '<p><strong>📧 Email:</strong> ' + c.email + '</p>' : '') +
+                    (c.workTypes.length ? '<p><strong>🛠️ Work Types:</strong> ' + c.workTypes.join(', ') + '</p>' : '') +
+                    (c.teamMembers.length ? '<p><strong>👥 Team:</strong> ' + c.teamMembers.join(', ') + ' (' + c.teamMembers.length + ')</p>' : '') +
+                    '<div style="margin: 16px 0;">' +
+                    '<p><strong>💵 Individual Budget:</strong> ₹' + c.allocatedBudget.toLocaleString('en-IN') + '</p>' +
+                    '<p><strong>💸 Total Paid:</strong> ₹' + spent.toLocaleString('en-IN') + '</p>' +
+                    '<p><strong>💰 Remaining:</strong> ₹' + remaining.toLocaleString('en-IN') + '</p>' +
+                    '<div class="progress-container" style="margin-top: 12px;">' +
+                    '<div class="progress-bar" style="width: ' + Math.min(percent, 100) + '%">' + percent.toFixed(1) + '%</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<p><strong>⚠️ Faults:</strong> ' + faults + '</p>' +
+                    '<div style="display: flex; gap: 10px; margin-top: 10px;">' +
+                    '<button class="btn btn-warning btn-sm" onclick="editContractor(' + c.id + ')">✏️ Edit</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="deleteContractor(' + c.id + ')">🗑️ Delete</button>' +
+                    '</div>';
                 grid.appendChild(card);
             });
         }
@@ -1545,21 +1422,14 @@
             }
             appData.components.slice().reverse().forEach(c => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(c.date).toLocaleDateString('en-IN')}</td>
-                    <td><strong>${c.name}</strong></td>
-                    <td>${c.category}</td>
-                    <td><strong>₹${parseFloat(c.cost).toLocaleString('en-IN')}</strong></td>
-                    <td>
-                        <div class="component-progress">
-                            <div class="component-progress-bar">
-                                <div class="component-progress-fill" style="width: ${c.progress}%">${c.progress}%</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '-')}">${c.status}</span></td>
-                    <td><button class="btn btn-danger btn-sm" onclick="deleteComponent(${c.id})">🗑️</button></td>
-                `;
+                tr.innerHTML = 
+                    '<td>' + new Date(c.date).toLocaleDateString('en-IN') + '</td>' +
+                    '<td><strong>' + c.name + '</strong></td>' +
+                    '<td>' + c.category + '</td>' +
+                    '<td><strong>₹' + parseFloat(c.cost).toLocaleString('en-IN') + '</strong></td>' +
+                    '<td><div class="component-progress"><div class="component-progress-bar"><div class="component-progress-fill" style="width: ' + c.progress + '%">' + c.progress + '%</div></div></div></td>' +
+                    '<td><span class="badge badge-' + c.status.toLowerCase().replace(' ', '-') + '">' + c.status + '</span></td>' +
+                    '<td><button class="btn btn-danger btn-sm" onclick="deleteComponent(' + c.id + ')">🗑️</button></td>';
                 tbody.appendChild(tr);
             });
         }
@@ -1573,130 +1443,14 @@
             }
             appData.faults.slice().reverse().forEach(f => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(f.date).toLocaleDateString('en-IN')}</td>
-                    <td>${f.contractor}</td>
-                    <td>${f.description}</td>
-                    <td><strong>₹${parseFloat(f.damageAmount).toLocaleString('en-IN')}</strong></td>
-                    <td><span class="badge badge-${f.status.toLowerCase().replace(' ', '-')}">${f.status}</span></td>
-                    <td><button class="btn btn-danger btn-sm" onclick="deleteFault(${f.id})">🗑️</button></td>
-                `;
+                tr.innerHTML = 
+                    '<td>' + new Date(f.date).toLocaleDateString('en-IN') + '</td>' +
+                    '<td>' + f.contractor + '</td>' +
+                    '<td>' + f.description + '</td>' +
+                    '<td><strong>₹' + parseFloat(f.damageAmount).toLocaleString('en-IN') + '</strong></td>' +
+                    '<td><span class="badge badge-' + f.status.toLowerCase().replace(' ', '-') + '">' + f.status + '</span></td>' +
+                    '<td><button class="btn btn-danger btn-sm" onclick="deleteFault(' + f.id + ')">🗑️</button></td>';
                 tbody.appendChild(tr);
-            });
-        }
-
-        function renderCalendar() {
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('currentMonth').textContent = `${monthNames[appData.currentMonth]} ${appData.currentYear}`;
-
-            const firstDay = new Date(appData.currentYear, appData.currentMonth, 1).getDay();
-            const daysInMonth = new Date(appData.currentYear, appData.currentMonth + 1, 0).getDate();
-            const today = new Date();
-
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-
-            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
-                const header = document.createElement('div');
-                header.className = 'calendar-header';
-                header.textContent = day;
-                grid.appendChild(header);
-            });
-
-            for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                grid.appendChild(empty);
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${appData.currentYear}-${String(appData.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const hasNote = appData.notes.some(n => n.date === dateStr);
-                const hasPayment = appData.expenses.some(e => e.date === dateStr);
-                const hasActivity = hasNote || hasPayment;
-                const workersToday = appData.notes.filter(n => n.date === dateStr).flatMap(n => n.workers);
-                const paymentsToday = appData.expenses.filter(e => e.date === dateStr);
-                const isToday = today.getDate() === day && today.getMonth() === appData.currentMonth && today.getFullYear() === appData.currentYear;
-
-                const dayEl = document.createElement('div');
-                dayEl.className = `calendar-day ${hasActivity ? 'has-activity' : ''} ${isToday ? 'today' : ''}`;
-                dayEl.onclick = () => viewDayDetails(dateStr);
-                let indicators = '';
-                if (hasNote) indicators += '<div class="calendar-day-indicator">📝</div>';
-                if (hasPayment) indicators += `<div class="calendar-day-indicator">💳 ${paymentsToday.length}</div>`;
-                if (workersToday.length) indicators += `<div class="calendar-day-indicator">👷 ${workersToday.length}</div>`;
-
-                dayEl.innerHTML = `
-                    <div class="calendar-day-number">${day}</div>
-                    ${indicators}
-                `;
-                grid.appendChild(dayEl);
-            }
-        }
-
-        function changeMonth(delta) {
-            appData.currentMonth += delta;
-            if (appData.currentMonth > 11) {
-                appData.currentMonth = 0;
-                appData.currentYear++;
-            } else if (appData.currentMonth < 0) {
-                appData.currentMonth = 11;
-                appData.currentYear--;
-            }
-            saveData();
-            renderCalendar();
-        }
-
-        function viewDayDetails(dateStr) {
-            const notes = appData.notes.filter(n => n.date === dateStr);
-            const payments = appData.expenses.filter(e => e.date === dateStr);
-
-            if (notes.length === 0 && payments.length === 0) {
-                showToast('No activity for this day', 'error');
-                return;
-            }
-
-            let msg = `Activity on ${dateStr}:\n\n`;
-
-            if (payments.length > 0) {
-                msg += `💳 PAYMENTS (${payments.length}):\n`;
-                payments.forEach((p, i) => {
-                    msg += `${i + 1}. ₹${p.amount.toLocaleString('en-IN')} to ${p.contractor}\n`;
-                    msg += `   Work: ${p.workType} | By: ${p.paidBy}\n`;
-                });
-                msg += '\n';
-            }
-
-            if (notes.length > 0) {
-                msg += `📝 NOTES (${notes.length}):\n`;
-                notes.forEach((n, i) => {
-                    msg += `${i + 1}. ${n.title}\n${n.content}\n`;
-                    if (n.workers.length) msg += `Workers: ${n.workers.join(', ')}\n`;
-                    msg += '\n';
-                });
-            }
-
-            alert(msg);
-        }
-
-        function loadNotes() {
-            const container = document.getElementById('notesContainer');
-            container.innerHTML = '';
-            if (appData.notes.length === 0) {
-                container.innerHTML = '<p style="text-align: center; opacity: 0.7;">No notes yet.</p>';
-                return;
-            }
-            appData.notes.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(note => {
-                const div = document.createElement('div');
-                div.className = 'payment-card';
-                div.innerHTML = `
-                    <div class="payment-header">
-                        <div style="font-size: 16px; font-weight: 800;">📅 ${new Date(note.date).toLocaleDateString('en-IN')} - ${note.title}</div>
-                        <button class="btn btn-danger btn-sm" onclick="deleteNote(${note.id})">🗑️</button>
-                    </div>
-                    <div style="margin-top: 12px; opacity: 0.9;">${note.content}</div>
-                    ${note.workers.length ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border); font-size: 13px; opacity: 0.85;">👷 Workers: ${note.workers.join(', ')}</div>` : ''}
-                `;
-                container.appendChild(div);
             });
         }
 
@@ -1709,8 +1463,8 @@
                     date: e.date,
                     type: 'payment',
                     icon: '💳',
-                    title: `Payment to ${e.contractor}`,
-                    details: `₹${parseFloat(e.amount).toLocaleString('en-IN')} for ${e.workType} | Paid by: ${e.paidBy}`,
+                    title: 'Payment to ' + e.contractor,
+                    details: '₹' + parseFloat(e.amount).toLocaleString('en-IN') + ' for ' + e.workType + ' | Paid by: ' + e.paidBy,
                     status: e.status
                 });
             });
@@ -1720,8 +1474,8 @@
                     date: c.date,
                     type: 'component',
                     icon: '🛠️',
-                    title: `Component: ${c.name}`,
-                    details: `${c.category} | ₹${parseFloat(c.cost).toLocaleString('en-IN')} | Progress: ${c.progress}%`,
+                    title: 'Component: ' + c.name,
+                    details: c.category + ' | ₹' + parseFloat(c.cost).toLocaleString('en-IN') + ' | Progress: ' + c.progress + '%',
                     status: c.status
                 });
             });
@@ -1731,20 +1485,9 @@
                     date: f.date,
                     type: 'fault',
                     icon: '⚠️',
-                    title: `Fault: ${f.contractor}`,
-                    details: `${f.description} | Damage: ₹${parseFloat(f.damageAmount).toLocaleString('en-IN')}`,
+                    title: 'Fault: ' + f.contractor,
+                    details: f.description + ' | Damage: ₹' + parseFloat(f.damageAmount).toLocaleString('en-IN'),
                     status: f.status
-                });
-            });
-
-            appData.notes.forEach(n => {
-                allActivity.push({
-                    date: n.date,
-                    type: 'note',
-                    icon: '📝',
-                    title: n.title,
-                    details: n.content,
-                    status: ''
                 });
             });
 
@@ -1753,15 +1496,14 @@
             container.innerHTML = allActivity.length ? '' : '<p style="text-align: center; opacity: 0.7;">No timeline data yet.</p>';
             allActivity.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'log-item';
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <div><strong>${item.icon} ${item.title}</strong></div>
-                        <div>${new Date(item.date).toLocaleDateString('en-IN')}</div>
-                    </div>
-                    <p style="margin-top: 8px; opacity: 0.9;">${item.details}</p>
-                    ${item.status ? `<span class="badge badge-${item.status.toLowerCase().replace(' ', '-')}" style="margin-top: 8px;">${item.status}</span>` : ''}
-                `;
+                div.className = 'payment-card';
+                div.innerHTML = 
+                    '<div style="display: flex; justify-content: space-between; margin-bottom: 8px;">' +
+                    '<div><strong>' + item.icon + ' ' + item.title + '</strong></div>' +
+                    '<div>' + new Date(item.date).toLocaleDateString('en-IN') + '</div>' +
+                    '</div>' +
+                    '<p style="margin-top: 8px; opacity: 0.9;">' + item.details + '</p>' +
+                    (item.status ? '<span class="badge badge-' + item.status.toLowerCase().replace(' ', '-') + '" style="margin-top: 8px;">' + item.status + '</span>' : '');
                 container.appendChild(div);
             });
         }
@@ -1790,36 +1532,22 @@
             const avgProgress = appData.components.length > 0 ? 
                 appData.components.reduce((s, c) => s + c.progress, 0) / appData.components.length : 0;
 
-            summary.innerHTML = `
-                <h3 style="margin-bottom: 16px;">Detailed Summary Report</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div>
-                        <p><strong>💵 Total Budget:</strong></p>
-                        <p style="font-size: 24px; font-weight: 900; color: var(--info);">₹${appData.totalBudget.toLocaleString('en-IN')}</p>
-                    </div>
-                    <div>
-                        <p><strong>💸 Total Paid:</strong></p>
-                        <p style="font-size: 24px; font-weight: 900; color: var(--warning);">₹${totalSpent.toLocaleString('en-IN')}</p>
-                    </div>
-                    <div>
-                        <p><strong>💰 Remaining:</strong></p>
-                        <p style="font-size: 24px; font-weight: 900; color: var(--success);">₹${(appData.totalBudget - totalSpent).toLocaleString('en-IN')}</p>
-                    </div>
-                    <div>
-                        <p><strong>🛠️ Components Cost:</strong></p>
-                        <p style="font-size: 24px; font-weight: 900;">₹${totalComponentCost.toLocaleString('en-IN')}</p>
-                    </div>
-                </div>
-                <div style="margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
-                    <p><strong>👷 Contractors:</strong> ${appData.contractors.length}</p>
-                    <p><strong>💳 Payments:</strong> ${appData.expenses.length}</p>
-                    <p><strong>🛠️ Components:</strong> ${appData.components.length}</p>
-                    <p><strong>⚠️ Faults:</strong> ${appData.faults.length}</p>
-                    <p><strong>💔 Damage Cost:</strong> ₹${totalDamage.toLocaleString('en-IN')}</p>
-                    <p><strong>📝 Notes:</strong> ${appData.notes.length}</p>
-                    <p><strong>📊 Avg Component Progress:</strong> ${avgProgress.toFixed(1)}%</p>
-                </div>
-            `;
+            summary.innerHTML = 
+                '<h3 style="margin-bottom: 16px;">Detailed Summary Report</h3>' +
+                '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">' +
+                '<div><p><strong>💵 Total Budget:</strong></p><p style="font-size: 24px; font-weight: 900; color: var(--info);">₹' + appData.totalBudget.toLocaleString('en-IN') + '</p></div>' +
+                '<div><p><strong>💸 Total Paid:</strong></p><p style="font-size: 24px; font-weight: 900; color: var(--warning);">₹' + totalSpent.toLocaleString('en-IN') + '</p></div>' +
+                '<div><p><strong>💰 Remaining:</strong></p><p style="font-size: 24px; font-weight: 900; color: var(--success);">₹' + (appData.totalBudget - totalSpent).toLocaleString('en-IN') + '</p></div>' +
+                '<div><p><strong>🛠️ Components Cost:</strong></p><p style="font-size: 24px; font-weight: 900;">₹' + totalComponentCost.toLocaleString('en-IN') + '</p></div>' +
+                '</div>' +
+                '<div style="margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">' +
+                '<p><strong>👷 Contractors:</strong> ' + appData.contractors.length + '</p>' +
+                '<p><strong>💳 Payments:</strong> ' + appData.expenses.length + '</p>' +
+                '<p><strong>🛠️ Components:</strong> ' + appData.components.length + '</p>' +
+                '<p><strong>⚠️ Faults:</strong> ' + appData.faults.length + '</p>' +
+                '<p><strong>💔 Damage Cost:</strong> ₹' + totalDamage.toLocaleString('en-IN') + '</p>' +
+                '<p><strong>📊 Avg Component Progress:</strong> ' + avgProgress.toFixed(1) + '%</p>' +
+                '</div>';
         }
 
         function drawChart(canvasId, labels, data, title) {
@@ -1858,10 +1586,10 @@
             if (confirm('Delete this payment record?')) {
                 appData.expenses = appData.expenses.filter(e => e.id !== id);
                 saveData();
-                addLog('Payment Deleted', 'A payment record was removed');
                 loadExpenses();
                 loadDashboard();
                 loadPayments();
+                showToast('Payment deleted', 'success');
             }
         }
 
@@ -1869,9 +1597,9 @@
             if (confirm('Delete this contractor?')) {
                 appData.contractors = appData.contractors.filter(c => c.id !== id);
                 saveData();
-                addLog('Contractor Deleted', 'A contractor was removed');
                 loadContractors();
                 loadContractorSelects();
+                showToast('Contractor deleted', 'success');
             }
         }
 
@@ -1879,9 +1607,9 @@
             if (confirm('Delete this component?')) {
                 appData.components = appData.components.filter(c => c.id !== id);
                 saveData();
-                addLog('Component Deleted', 'A component was removed');
                 loadComponents();
                 loadDashboard();
+                showToast('Component deleted', 'success');
             }
         }
 
@@ -1889,19 +1617,9 @@
             if (confirm('Delete this fault report?')) {
                 appData.faults = appData.faults.filter(f => f.id !== id);
                 saveData();
-                addLog('Fault Deleted', 'A fault report was removed');
                 loadFaults();
                 loadDashboard();
-            }
-        }
-
-        function deleteNote(id) {
-            if (confirm('Delete this note?')) {
-                appData.notes = appData.notes.filter(n => n.id !== id);
-                saveData();
-                addLog('Note Deleted', 'A note was removed');
-                renderCalendar();
-                loadNotes();
+                showToast('Fault deleted', 'success');
             }
         }
 
@@ -1910,9 +1628,8 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${appData.projectName.replace(/\s+/g, '-')}-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = appData.projectName.replace(/\s+/g, '-') + '-backup-' + new Date().toISOString().split('T')[0] + '.json';
             a.click();
-            addLog('Data Exported', 'Full backup created');
             showToast('Data exported successfully!', 'success');
         }
 
@@ -1927,7 +1644,6 @@
                     try {
                         appData = JSON.parse(event.target.result);
                         saveData();
-                        addLog('Data Imported', 'Backup restored successfully');
                         showToast('Data imported successfully!', 'success');
                         location.reload();
                     } catch (err) {
@@ -1945,11 +1661,8 @@
                 appData.contractors = [];
                 appData.components = [];
                 appData.faults = [];
-                appData.notes = [];
-                appData.logs = [];
                 appData.totalBudget = 0;
                 saveData();
-                addLog('App Reset', 'All data cleared');
                 showToast('App reset successfully!', 'success');
                 location.reload();
             }
@@ -1957,7 +1670,7 @@
 
         function clearData() {
             if (confirm('Clear ALL data permanently? This cannot be undone!')) {
-                localStorage.removeItem('interiorBudgetProAdvanced');
+                localStorage.removeItem('interiorBudgetProFixed');
                 location.reload();
             }
         }
@@ -1968,8 +1681,6 @@
                 document.getElementById('expenseDate').valueAsDate = new Date();
             } else if (id === 'faultModal') {
                 document.getElementById('faultDate').valueAsDate = new Date();
-            } else if (id === 'noteModal') {
-                document.getElementById('noteDate').valueAsDate = new Date();
             } else if (id === 'componentModal') {
                 document.getElementById('componentDate').valueAsDate = new Date();
             }
@@ -1981,7 +1692,7 @@
 
         function showToast(message, type) {
             const toast = document.createElement('div');
-            toast.className = `alert alert-${type}`;
+            toast.className = 'alert alert-' + type;
             toast.textContent = message;
             toast.style.position = 'fixed';
             toast.style.top = '20px';
@@ -1989,7 +1700,7 @@
             toast.style.zIndex = '10000';
             toast.style.minWidth = '300px';
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(function() { toast.remove(); }, 3000);
         }
 
         window.addEventListener('load', init);
