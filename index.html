@@ -2056,20 +2056,62 @@
 
         // ========== DATA MANAGEMENT ==========
         function saveData() {
-            localStorage.setItem('ibp_ultimate', JSON.stringify(app));
+    // Save all settings to the app object before storing
+    if (document.getElementById('setProjectName')) {
+        app.projectName = document.getElementById('setProjectName').value.trim() || app.projectName;
+        app.userName = document.getElementById('setUserName').value.trim() || app.userName;
+        app.projectAddress = document.getElementById('setProjectAddress').value.trim() || app.projectAddress;
+        app.projectTimeline = document.getElementById('setProjectTimeline').value.trim() || app.projectTimeline;
+    }
+    
+    if (document.getElementById('setPaymentSources')) {
+        const val = document.getElementById('setPaymentSources').value;
+        if (val.trim()) {
+            app.paymentSources = val.split(',').map(s => s.trim()).filter(s => s);
         }
+    }
+    
+    if (document.getElementById('currencySymbol')) {
+        app.currency = document.getElementById('currencySymbol').value;
+    }
+    
+    if (document.getElementById('dateFormat')) {
+        app.dateFormat = document.getElementById('dateFormat').value;
+    }
+    
+    // Save theme
+    const bodyClass = document.body.className;
+    const themeMatch = bodyClass.match(/theme-(\w+)/);
+    if (themeMatch) {
+        app.theme = themeMatch[1];
+    }
+    
+    localStorage.setItem('ibp_ultimate', JSON.stringify(app));
+}
 
-        function updateDisplays() {
-            document.getElementById('projectNameDisplay').textContent = app.projectName;
-            document.getElementById('userNameDisplay').textContent = app.userName;
-            document.getElementById('setProjectName').value = app.projectName;
-            document.getElementById('setUserName').value = app.userName;
-            document.getElementById('setProjectAddress').value = app.projectAddress || '';
-            document.getElementById('setProjectTimeline').value = app.projectTimeline || '6 months';
-            document.getElementById('setPaymentSources').value = app.paymentSources.join(', ');
-            document.getElementById('currentSources').innerHTML = `<strong>Current Sources:</strong> ${app.paymentSources.join(', ')}`;
-        }
-
+      function updateDisplays() {
+    document.getElementById('projectNameDisplay').textContent = app.projectName;
+    document.getElementById('userNameDisplay').textContent = app.userName;
+    
+    // Settings form fields
+    if (document.getElementById('setProjectName')) {
+        document.getElementById('setProjectName').value = app.projectName;
+        document.getElementById('setUserName').value = app.userName;
+        document.getElementById('setProjectAddress').value = app.projectAddress || '';
+        document.getElementById('setProjectTimeline').value = app.projectTimeline || '6 months';
+        document.getElementById('setPaymentSources').value = app.paymentSources.join(', ');
+        document.getElementById('currentSources').innerHTML = `<strong>Current Sources:</strong> ${app.paymentSources.join(', ')}`;
+    }
+    
+    // Currency and date format selectors
+    if (document.getElementById('currencySymbol')) {
+        document.getElementById('currencySymbol').value = app.currency || '₹';
+    }
+    
+    if (document.getElementById('dateFormat')) {
+        document.getElementById('dateFormat').value = app.dateFormat || 'en-IN';
+    }
+}
         function saveProfile() {
             app.projectName = document.getElementById('setProjectName').value.trim() || 'Interior Budget Pro';
             app.userName = document.getElementById('setUserName').value.trim() || 'Project Manager';
@@ -3508,42 +3550,107 @@ function renderExpenses() {
         }
 
         // ========== DATA EXPORT/IMPORT ==========
-        function exportData() {
-            const dataStr = JSON.stringify(app, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `Interior_Budget_Pro_Backup_${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            showNotification('Backup exported successfully!', 'success');
+    function exportData() {
+    // First save all current settings to app object
+    saveData();
+    
+    // Create comprehensive backup object
+    const backupData = {
+        ...app, // All existing app data
+        backupVersion: '2.0',
+        backupDate: new Date().toISOString(),
+        metadata: {
+            totalExpenses: app.expenses.length,
+            totalContractors: app.contractors.length,
+            totalComponents: app.components.length,
+            totalFaults: app.faults.length,
+            totalNotes: app.notes.length
         }
-
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
+    };
+    
+    const dataStr = JSON.stringify(backupData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `Interior_Budget_Pro_Backup_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    showNotification('Complete backup exported successfully! All settings included.', 'success');
+}
+       function importData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const imported = JSON.parse(event.target.result);
             
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const imported = JSON.parse(event.target.result);
-                    // Validate structure
-                    if (imported.expenses && imported.contractors) {
-                        app = { ...app, ...imported };
-                        saveData();
-                        renderAll();
-                        showNotification('Data imported successfully!', 'success');
-                    } else {
-                        showNotification('Invalid backup file structure', 'error');
-                    }
-                } catch (error) {
-                    console.error('Import error:', error);
-                    showNotification('Invalid backup file', 'error');
-                }
-            };
-            reader.readAsText(file);
+            // Validate it's our backup file
+            if (!imported.expenses || !imported.contractors || !imported.components) {
+                showNotification('Invalid backup file: Missing required data', 'error');
+                return;
+            }
+            
+            // Show confirmation dialog
+            if (confirm(`Import backup from ${imported.backupDate || 'unknown date'}?\n\nThis will replace:\n• ${imported.expenses.length} expenses\n• ${imported.contractors.length} contractors\n• ${imported.components.length} components\n• All settings and preferences\n\nCurrent data will be lost.`)) {
+                
+                // Import all data including settings
+                app = {
+                    budget: imported.budget || 0,
+                    projectName: imported.projectName || 'Interior Budget Pro',
+                    userName: imported.userName || 'Project Manager',
+                    projectAddress: imported.projectAddress || '',
+                    projectTimeline: imported.projectTimeline || '6 months',
+                    paymentSources: imported.paymentSources || ['Self', 'Spouse', 'Parent', 'Bank Loan'],
+                    expenses: imported.expenses || [],
+                    contractors: imported.contractors || [],
+                    components: imported.components || [],
+                    faults: imported.faults || [],
+                    notes: imported.notes || [],
+                    theme: imported.theme || 'purple',
+                    currency: imported.currency || '₹',
+                    dateFormat: imported.dateFormat || 'en-IN'
+                };
+                
+                saveData();
+                renderAll();
+                setTheme(app.theme);
+                updateDisplays();
+                showNotification('Complete backup imported successfully! All settings restored.', 'success');
+                
+                // Reset file input
+                input.value = '';
+            }
+        } catch (error) {
+            console.error('Import error:', error);
+            showNotification('Invalid backup file format. Please select a valid JSON backup.', 'error');
+            input.value = '';
         }
+    };
+    reader.readAsText(file);
+}
+function showBackupSummary() {
+    const summary = `
+Backup includes:
+✓ All expenses (${app.expenses.length})
+✓ All contractors (${app.contractors.length})
+✓ All components (${app.components.length})
+✓ All faults (${app.faults.length})
+✓ All notes (${app.notes.length})
+✓ Profile settings (name, address, timeline)
+✓ Payment sources (${app.paymentSources.length})
+✓ Theme preference (${app.theme})
+✓ Currency (${app.currency})
+✓ Date format (${app.dateFormat})
+✓ Total budget (${app.currency}${app.budget.toLocaleString()})
+    `;
+    
+    if (confirm(`Create backup with current data?\n\n${summary}\n\nClick OK to download backup file.`)) {
+        exportData();
+    }
+}
 
         // ========== EXCEL EXPORT ==========
         function exportExcelEnhanced() {

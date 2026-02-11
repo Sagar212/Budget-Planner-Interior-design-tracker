@@ -1,9 +1,9 @@
 {
   "budget": 900000,
   "projectName": "Casa Eden",
-  "userName": "Sagar",
-  "projectAddress": "",
-  "projectTimeline": "2 months",
+  "userName": "Sagar Jadhav",
+  "projectAddress": "Wing B.Lodha Upper Thane",
+  "projectTimeline": "2 months~3 Months",
   "paymentSources": [
     "Smita Jadhav",
     "Sagar Jadhav"
@@ -251,69 +251,16 @@
       "text": "Had person from HPM tiles visits to provide tiles for the Hall and bedroom Area.No update yet."
     }
   ],
-  "theme": "forest",
+  "theme": "midnight",
   "currency": "₹",
   "dateFormat": "en-IN",
-  "totalBudget": 900000,
-  "logs": [
-    {
-      "id": 1770736474640,
-      "timestamp": "2026-02-10T15:14:34.640Z",
-      "action": "CSV Exported",
-      "description": "Expense data exported"
-    },
-    {
-      "id": 1770736345683,
-      "timestamp": "2026-02-10T15:12:25.683Z",
-      "action": "Fault Reported",
-      "description": "we - ₹434"
-    },
-    {
-      "id": 1770736305140,
-      "timestamp": "2026-02-10T15:11:45.140Z",
-      "action": "Contractor Added",
-      "description": "we (ee)"
-    },
-    {
-      "id": 1770736263332,
-      "timestamp": "2026-02-10T15:11:03.332Z",
-      "action": "Budget Updated",
-      "description": "Budget set to ₹9,99,899"
-    },
-    {
-      "id": 1770736228988,
-      "timestamp": "2026-02-10T15:10:28.988Z",
-      "action": "Expense Added",
-      "description": "Furniture - ₹3,44,344"
-    },
-    {
-      "id": 1770736204295,
-      "timestamp": "2026-02-10T15:10:04.295Z",
-      "action": "Contractor Added",
-      "description": "we (ewe)"
-    },
-    {
-      "id": 1770736189257,
-      "timestamp": "2026-02-10T15:09:49.257Z",
-      "action": "Budget Updated",
-      "description": "Budget set to ₹3,433"
-    },
-    {
-      "id": 1770736181444,
-      "timestamp": "2026-02-10T15:09:41.444Z",
-      "action": "CSV Exported",
-      "description": "Expense data exported"
-    },
-    {
-      "id": 1770736172375,
-      "timestamp": "2026-02-10T15:09:32.375Z",
-      "action": "Theme Changed",
-      "description": "Switched to dark mode"
-    }
-  ],
-  "paymentMakers": [
-    "Smita Jadhav",
-    "Sagar Jadhav"
-  ],
-  "colorTheme": "blue"
+  "backupVersion": "2.0",
+  "backupDate": "2026-02-11T06:36:36.031Z",
+  "metadata": {
+    "totalExpenses": 10,
+    "totalContractors": 4,
+    "totalComponents": 5,
+    "totalFaults": 1,
+    "totalNotes": 2
+  }
 }
