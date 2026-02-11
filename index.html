@@ -1198,7 +1198,56 @@
     </style>
 </head>
 <body class="theme-purple">
+<!-- LOGIN OVERLAY - Add this right after opening body tag -->
+<div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+    <div style="background:rgba(30, 41, 59, 0.95); padding:40px; border-radius:24px; border:1px solid rgba(255,255,255,0.25); max-width:400px; width:90%; text-align:center; animation:modalSlideUp 0.5s ease;">
+        <div style="margin-bottom:30px;">
+            <div style="font-size:48px; color:#667eea; margin-bottom:10px;">
+                <i class="fas fa-home"></i>
+            </div>
+            <h2 style="font-size:32px; font-weight:800; margin-bottom:10px; color:white;">Interior Budget Pro</h2>
+            <p style="opacity:0.8; color:#e2e8f0;">Secure Project Management</p>
+        </div>
+        
+        <div id="loginError" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.3); padding:12px; border-radius:12px; margin-bottom:20px; display:none;">
+            <i class="fas fa-exclamation-circle"></i> 
+            <span style="margin-left:8px;">Invalid credentials</span>
+        </div>
+        
+        <form id="loginForm" onsubmit="return handleLogin(event)">
+            <div style="margin-bottom:20px; text-align:left;">
+                <label style="display:block; font-size:13px; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:8px; font-weight:700; opacity:0.9; color:white;">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter username" required 
+                       style="width:100%; padding:14px; border-radius:12px; border:2px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.15); color:white; font-family:inherit; font-size:15px; transition:all 0.3s ease;">
+            </div>
+            
+            <div style="margin-bottom:30px; text-align:left;">
+                <label style="display:block; font-size:13px; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:8px; font-weight:700; opacity:0.9; color:white;">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password" required 
+                       style="width:100%; padding:14px; border-radius:12px; border:2px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.15); color:white; font-family:inherit; font-size:15px; transition:all 0.3s ease;">
+            </div>
+            
+            <button type="submit" 
+                    style="width:100%; padding:16px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; border-radius:12px; color:white; font-weight:700; font-size:16px; cursor:pointer; transition:all 0.3s ease; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <i class="fas fa-sign-in-alt"></i>
+                Login to Dashboard
+            </button>
+        </form>
+        
+        <!-- <div style="margin-top:25px; padding:15px; background:rgba(255,255,255,0.08); border-radius:12px;">
+            <p style="font-size:13px; opacity:0.7; color:#e2e8f0; margin-bottom:8px;">
+                <i class="fas fa-info-circle"></i> Default credentials
+            </p>
+            <p style="font-size:12px; opacity:0.6; color:#e2e8f0;">
+                Username: <code style="background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">admin</code><br>
+                Password: <code style="background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">adminpwd</code>
+            </p>
+        </div> -->
+    </div>
+</div>
 
+<!-- HIDE THE MAIN APP CONTENT - Add this right after the login overlay -->
+<div id="appContent" style="display:none;">
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="modal" style="display: flex; background: rgba(0,0,0,0.9);">
         <div class="modal-box" style="background: transparent; border: none; box-shadow: none; text-align: center;">
@@ -4078,5 +4127,189 @@ function exportPDF() {
             }
         }, 100);
     </script>
+    </div> <!-- Close the appContent div -->
+
+<script>
+    // ========== LOGIN SYSTEM ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if already logged in
+        if(localStorage.getItem('ibp_logged_in') === 'true') {
+            // User is already logged in
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            initializeApp();
+        } else {
+            // Show login screen
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('appContent').style.display = 'none';
+            
+            // Focus on username field
+            setTimeout(() => {
+                document.getElementById('loginUsername').focus();
+            }, 100);
+        }
+    });
+
+    function handleLogin(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorDiv = document.getElementById('loginError');
+        
+        // Default credentials
+        const validUsername = 'admin';
+        const validPassword = 'adminpwd';
+        
+        // Check credentials
+        if(username === validUsername && password === validPassword) {
+            // Successful login
+            errorDiv.style.display = 'none';
+            
+            // Store login state
+            localStorage.setItem('ibp_logged_in', 'true');
+            
+            // Add login animation
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalHTML = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            submitBtn.disabled = true;
+            
+            // Transition to app
+            setTimeout(() => {
+                // Fade out login
+                document.getElementById('loginOverlay').style.opacity = '0';
+                document.getElementById('loginOverlay').style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('appContent').style.display = 'block';
+                    
+                    // Initialize the main app
+                    initializeApp();
+                    
+                    // Show welcome notification
+                    setTimeout(() => {
+                        showNotification('Welcome back, Administrator!', 'success');
+                    }, 1000);
+                }, 500);
+            }, 1000);
+            
+        } else {
+            // Failed login
+            errorDiv.style.display = 'flex';
+            
+            // Shake animation
+            errorDiv.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                errorDiv.style.animation = '';
+            }, 500);
+            
+            // Clear password field
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginPassword').focus();
+        }
+        
+        return false;
+    }
+
+    function initializeApp() {
+        // Your existing initialization code from DOMContentLoaded
+        setTimeout(() => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }, 800);
+        
+        // Load saved data
+        if(localStorage.getItem('ibp_ultimate')) {
+            try {
+                const saved = JSON.parse(localStorage.getItem('ibp_ultimate'));
+                app = { ...app, ...saved };
+                if(!app.components) app.components = [];
+                if(!app.notes) app.notes = [];
+                if(!app.paymentSources) app.paymentSources = ['Self'];
+                if(!app.projectAddress) app.projectAddress = '';
+                if(!app.projectTimeline) app.projectTimeline = '6 months';
+            } catch(e) {
+                console.error('Error loading saved data:', e);
+            }
+        }
+        
+        // Set theme and initialize
+        setTheme(app.theme || 'purple');
+        updateDisplays();
+        populateSelects();
+        renderAll();
+        
+        // Initialize event listeners
+        initEventListeners();
+        initTableSorting();
+        
+        // Add animation classes
+        setTimeout(() => {
+            document.querySelectorAll('.logo i, .stat-card i').forEach((icon, index) => {
+                icon.style.animationDelay = `${index * 0.1}s`;
+            });
+        }, 100);
+        
+        // Initialize progress slider
+        const compProgress = document.getElementById('compProgress');
+        if (compProgress) {
+            compProgress.addEventListener('input', function() {
+                const display = document.getElementById('compProgDisplay');
+                if (display) {
+                    display.innerText = this.value + '%';
+                    addPremiumClickEffect(display);
+                }
+            });
+        }
+    }
+
+    // Add shake animation to CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Add logout function
+    function logout() {
+        if(confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('ibp_logged_in');
+            // Clear form fields
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            
+            // Show login screen
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('loginOverlay').style.opacity = '1';
+            
+            showNotification('Logged out successfully', 'info');
+        }
+    }
+
+    // Add logout button to header - Add this to your header section
+    function addLogoutButton() {
+        const headerActions = document.querySelector('.header-actions');
+        if(headerActions && !headerActions.querySelector('.btn-logout')) {
+            const logoutBtn = document.createElement('button');
+            logoutBtn.className = 'btn btn-danger';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            logoutBtn.onclick = logout;
+            logoutBtn.style.marginLeft = '10px';
+            headerActions.appendChild(logoutBtn);
+        }
+    }
+
+    // Call addLogoutButton after login
+    setTimeout(addLogoutButton, 1500);
+</script>
 </body>
+
 </html>
