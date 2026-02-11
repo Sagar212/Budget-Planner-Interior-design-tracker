@@ -781,7 +781,20 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             transition: var(--transition);
         }
-        
+        /* Fix for Components table status column */
+#componentsTable th:nth-child(8),
+#componentsTable td:nth-child(8) {
+    min-width: 130px !important;
+    max-width: 150px !important;
+}
+
+#componentsTable .badge {
+    padding: 6px 12px !important;
+    min-width: 100px !important;
+    box-sizing: border-box;
+    display: inline-block;
+    text-align: center;
+}
         .badge:hover {
             transform: scale(1.05);
         }
