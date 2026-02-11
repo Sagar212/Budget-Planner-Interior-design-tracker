@@ -3649,50 +3649,60 @@ function renderExpenses() {
         try {
             const imported = JSON.parse(event.target.result);
             
-            // Validate it's our backup file
+            // Validate
             if (!imported.expenses || !imported.contractors || !imported.components) {
-                showNotification('Invalid backup file: Missing required data', 'error');
+                showNotification("Invalid backup file: Missing required data", "error");
                 return;
             }
             
-            // Show confirmation dialog
-            if (confirm(`Import backup from ${imported.backupDate || 'unknown date'}?\n\nThis will replace:\n• ${imported.expenses.length} expenses\n• ${imported.contractors.length} contractors\n• ${imported.components.length} components\n• All settings and preferences\n\nCurrent data will be lost.`)) {
+            // Show confirmation
+            if (confirm(`Import backup from ${imported.backupDate || 'unknown date'}?\n\nThis will replace:\n• ${imported.expenses.length} expenses\n• ${imported.contractors.length} contractors\n• ${imported.components.length} components\n\nAll settings and preferences data will be lost.`)) {
                 
-                // Import all data including settings
+                // Import all data
                 app = {
                     budget: imported.budget || 0,
-                    projectName: imported.projectName || 'Interior Budget Pro',
-                    userName: imported.userName || 'Project Manager',
-                    projectAddress: imported.projectAddress || '',
-                    projectTimeline: imported.projectTimeline || '6 months',
-                    paymentSources: imported.paymentSources || ['Self', 'Spouse', 'Parent', 'Bank Loan'],
+                    projectName: imported.projectName || "Interior Budget Pro",
+                    userName: imported.userName || "Project Manager",
+                    projectAddress: imported.projectAddress || "",
+                    projectTimeline: imported.projectTimeline || "6 months",
+                    paymentSources: imported.paymentSources || ["Self", "Spouse", "Parent", "Bank Loan"],
                     expenses: imported.expenses || [],
                     contractors: imported.contractors || [],
                     components: imported.components || [],
                     faults: imported.faults || [],
                     notes: imported.notes || [],
-                    theme: imported.theme || 'purple',
-                    currency: imported.currency || '₹',
-                    dateFormat: imported.dateFormat || 'en-IN'
+                    theme: imported.theme || "purple",
+                    currency: imported.currency || "₹",
+                    dateFormat: imported.dateFormat || "en-IN"
                 };
                 
                 saveData();
                 renderAll();
                 setTheme(app.theme);
-                updateDisplays();
-                showNotification('Complete backup imported successfully! All settings restored.', 'success');
                 
-                // Reset file input
-                input.value = '';
+                // ADD THIS: Force update displays AFTER switching to settings tab
+                setTimeout(() => {
+                    switchTab('settings');
+                    setTimeout(() => {
+                        updateDisplays();
+                        showNotification("Complete backup imported successfully! All settings restored.", "success");
+                    }, 100);
+                }, 100);
             }
-        } catch (error) {
-            console.error('Import error:', error);
-            showNotification('Invalid backup file format. Please select a valid JSON backup.', 'error');
+            
+            // Reset file input
+            input.value = '';
+            
+        } catch(error) {
+            console.error("Import error:", error);
+            showNotification("Invalid backup file format. Please select a valid JSON backup.", "error");
             input.value = '';
         }
     };
+    
     reader.readAsText(file);
 }
+
 function showBackupSummary() {
     const summary = `
 Backup includes:
@@ -4140,7 +4150,7 @@ function exportPDF() {
         document.getElementById('loadingOverlay').style.display = 'flex';
         
         // AUTO-LOAD FROM JSON - ADD THIS LINE HERE
-        await loadInitialDataFromJSON();
+        //await loadInitialDataFromJSON();
         
         initializeApp();
     } else {
@@ -4192,7 +4202,7 @@ function exportPDF() {
                 document.getElementById('loadingOverlay').style.display = 'flex';
                 
                 // LOAD FROM JSON FIRST
-                await loadInitialDataFromJSON();
+               // await loadInitialDataFromJSON();
                 
                 // Initialize the main app
                 initializeApp();
