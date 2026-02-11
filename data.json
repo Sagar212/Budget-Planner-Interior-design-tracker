@@ -2,7 +2,7 @@
   "budget": 900000,
   "projectName": "Casa Eden",
   "userName": "Sagar",
-  "projectAddress": "  Pune",
+  "projectAddress": "Pune",
   "projectTimeline": "2 months",
   "paymentSources": [
     "Smita Jadhav",
@@ -168,7 +168,7 @@
       "phone": "+91 90827 79396",
       "email": "",
       "company": "",
-      "budget": 0,
+      "budget": 100000,
       "details": ""
     }
   ],
@@ -196,6 +196,17 @@
       "status": "Completed"
     },
     {
+      "id": 1770746900539,
+      "date": "2026-02-11",
+      "name": "Downlights",
+      "category": "Electrical",
+      "contractor": "Dhruvesh Namade",
+      "workType": "Installaton",
+      "cost": 9000,
+      "progress": 38,
+      "status": "In Progress"
+    },
+    {
       "id": 1770746940230,
       "date": "2026-02-10",
       "name": "Light Sample",
@@ -205,17 +216,6 @@
       "cost": 850,
       "progress": 100,
       "status": "Completed"
-    },
-    {
-      "id": 1770746900539,
-      "date": "2026-01-13",
-      "name": "Downlights",
-      "category": "Electrical",
-      "contractor": "Dhruvesh Namade",
-      "workType": "Installaton",
-      "cost": 9000,
-      "progress": 0,
-      "status": "In Progress"
     },
     {
       "id": 1770746525766,
@@ -251,7 +251,7 @@
       "text": "Had person from HPM tiles visits to provide tiles for the Hall and bedroom Area.No update yet."
     }
   ],
-  "theme": "forest",
+  "theme": "midnight",
   "currency": "₹",
   "dateFormat": "en-IN",
   "totalBudget": 900000,
@@ -317,7 +317,7 @@
   ],
   "colorTheme": "blue",
   "backupVersion": "2.0",
-  "backupDate": "2026-02-11T13:47:54.542Z",
+  "backupDate": "2026-02-11T15:08:20.926Z",
   "metadata": {
     "totalExpenses": 10,
     "totalContractors": 4,
