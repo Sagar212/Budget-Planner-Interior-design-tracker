@@ -4131,109 +4131,165 @@ function exportPDF() {
 
 <script>
     // ========== LOGIN SYSTEM ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check if already logged in
-        if(localStorage.getItem('ibp_logged_in') === 'true') {
-            // User is already logged in
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('appContent').style.display = 'block';
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            initializeApp();
-        } else {
-            // Show login screen
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('appContent').style.display = 'none';
-            
-            // Focus on username field
-            setTimeout(() => {
-                document.getElementById('loginUsername').focus();
-            }, 100);
-        }
-    });
+ document.addEventListener('DOMContentLoaded', async function() {
+    // Check if already logged in
+    if(localStorage.getItem('ibp_logged_in') === 'true') {
+        // User is already logged in
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        // AUTO-LOAD FROM JSON - ADD THIS LINE HERE
+        await loadInitialDataFromJSON();
+        
+        initializeApp();
+    } else {
+        // Show login screen
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('appContent').style.display = 'none';
+        
+        // Focus on username field
+        setTimeout(() => {
+            document.getElementById('loginUsername').focus();
+        }, 100);
+    }
+});
 
     function handleLogin(event) {
-        event.preventDefault();
+    event.preventDefault();
+    
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    
+    // Default credentials
+    const validUsername = 'admin';
+    const validPassword = 'adminpwd';
+    
+    // Check credentials
+    if(username === validUsername && password === validPassword) {
+        // Successful login
+        errorDiv.style.display = 'none';
         
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        const errorDiv = document.getElementById('loginError');
+        // Store login state
+        localStorage.setItem('ibp_logged_in', 'true');
         
-        // Default credentials
-        const validUsername = 'admin';
-        const validPassword = 'adminpwd';
+        // Add login animation
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalHTML = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+        submitBtn.disabled = true;
         
-        // Check credentials
-        if(username === validUsername && password === validPassword) {
-            // Successful login
-            errorDiv.style.display = 'none';
+        // Transition to app
+        setTimeout(async () => {
+            // Fade out login
+            document.getElementById('loginOverlay').style.opacity = '0';
+            document.getElementById('loginOverlay').style.transition = 'opacity 0.5s ease';
             
-            // Store login state
-            localStorage.setItem('ibp_logged_in', 'true');
-            
-            // Add login animation
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const originalHTML = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-            submitBtn.disabled = true;
-            
-            // Transition to app
-            setTimeout(() => {
-                // Fade out login
-                document.getElementById('loginOverlay').style.opacity = '0';
-                document.getElementById('loginOverlay').style.transition = 'opacity 0.5s ease';
+            setTimeout(async () => {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                document.getElementById('loadingOverlay').style.display = 'flex';
                 
+                // LOAD FROM JSON FIRST
+                await loadInitialDataFromJSON();
+                
+                // Initialize the main app
+                initializeApp();
+                
+                // Hide loading overlay
                 setTimeout(() => {
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.getElementById('appContent').style.display = 'block';
-                    
-                    // Initialize the main app
-                    initializeApp();
-                    
-                    // Show welcome notification
-                    setTimeout(() => {
-                        showNotification('Welcome back, Administrator!', 'success');
-                    }, 1000);
-                }, 500);
-            }, 1000);
-            
-        } else {
-            // Failed login
-            errorDiv.style.display = 'flex';
-            
-            // Shake animation
-            errorDiv.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                errorDiv.style.animation = '';
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }, 800);
+                
+                // Show welcome notification
+                setTimeout(() => {
+                    showNotification('Welcome back, Administrator!', 'success');
+                }, 1000);
             }, 500);
-            
-            // Clear password field
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginPassword').focus();
-        }
+        }, 1000);
         
+    } else {
+        // Failed login
+        errorDiv.style.display = 'flex';
+        
+        // Shake animation
+        errorDiv.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+            errorDiv.style.animation = '';
+        }, 500);
+        
+        // Clear password field
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+    }
+    
+    return false;
+}
+// ========== AUTO-LOAD FROM JSON FILE ==========
+// Add this function in the login script section
+async function loadInitialDataFromJSON() {
+    const hasData = localStorage.getItem('ibp_ultimate') !== null;
+
+    // Only attempt to load from data.json if no local data exists yet
+    if (hasData) {
+        console.log('Local data already exists — skipping data.json load');
         return false;
     }
 
-    function initializeApp() {
-        // Your existing initialization code from DOMContentLoaded
-        setTimeout(() => {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }, 800);
+    try {
+        const response = await fetch('data.json');
         
-        // Load saved data
-        if(localStorage.getItem('ibp_ultimate')) {
-            try {
-                const saved = JSON.parse(localStorage.getItem('ibp_ultimate'));
-                app = { ...app, ...saved };
-                if(!app.components) app.components = [];
-                if(!app.notes) app.notes = [];
-                if(!app.paymentSources) app.paymentSources = ['Self'];
-                if(!app.projectAddress) app.projectAddress = '';
-                if(!app.projectTimeline) app.projectTimeline = '6 months';
-            } catch(e) {
-                console.error('Error loading saved data:', e);
+        if (response.ok) {
+            const jsonData = await response.json();
+            
+            // Basic validation
+            if (jsonData && (jsonData.expenses || jsonData.contractors)) {
+                // No existing local data → save the JSON content directly
+                localStorage.setItem('ibp_ultimate', JSON.stringify(jsonData));
+                localStorage.setItem('ibp_json_loaded', 'true');
+                localStorage.setItem('ibp_json_version', jsonData.backupVersion || '1.0');
+                localStorage.setItem('ibp_json_date', jsonData.backupDate || new Date().toISOString());
+                
+                console.log('✅ Initial data successfully loaded from data.json');
+                showNotification('Initial project data loaded from data.json', 'success');
+                return true;
             }
+        } else {
+            console.log('data.json not found (status: ' + response.status + ')');
         }
+    } catch (error) {
+        console.log('Failed to load data.json (common when opening file directly):', error.message);
+        console.log('Tip: Serve the folder with a local server (e.g., python -m http.server) or place data.json in the same directory and reload.');
+    }
+    
+    return false;
+}
+    function initializeApp() {
+    // AUTO-LOAD FROM JSON (also handles updates)
+   // loadInitialDataFromJSON();
+    
+    // Your existing initialization code from DOMContentLoaded
+    setTimeout(() => {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }, 800);
+    
+    // Load saved data
+    if(localStorage.getItem('ibp_ultimate')) {
+        try {
+            const saved = JSON.parse(localStorage.getItem('ibp_ultimate'));
+            app = { ...app, ...saved };
+            if(!app.components) app.components = [];
+            if(!app.notes) app.notes = [];
+            if(!app.paymentSources) app.paymentSources = ['Self'];
+            if(!app.projectAddress) app.projectAddress = '';
+            if(!app.projectTimeline) app.projectTimeline = '6 months';
+        } catch(e) {
+            console.error('Error loading saved data:', e);
+        }
+    }
+    
+    // ... rest of your initializeApp function ...
         
         // Set theme and initialize
         setTheme(app.theme || 'purple');
