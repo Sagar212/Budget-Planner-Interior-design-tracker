@@ -4240,22 +4240,26 @@ function exportPDF() {
 // Add this function in the login script section
 // Replace the entire loadInitialDataFromJSON function with this:
 async function loadInitialDataFromJSON() {
+    // Check if we've already loaded from data.json before
+    const hasLoadedBefore = localStorage.getItem('ibp_dataJsonLoaded');
+    
+    if (hasLoadedBefore === 'true') {
+        console.log('📦 Data.json already loaded previously, using localStorage');
+        return false; // Skip loading, use localStorage instead
+    }
+    
+    // First time - try to load from data.json
+    console.log('🔍 First time setup - attempting to load from data.json...');
+    
     try {
         const response = await fetch('./data.json');
         
         if (response.ok) {
             const jsonData = await response.json();
             
-            // Basic validation
-            if (jsonData && jsonData.budget) {
-                // Check if data.json is newer than localStorage
-                const localVersion = localStorage.getItem('ibpjsondate');
-                const jsonVersion = jsonData.backupDate || new Date().toISOString();
-                
-                console.log('Found data.json with date:', jsonVersion);
-                console.log('Local data date:', localVersion);
-                
-                // Update app with JSON data
+            // Validate data
+            if (jsonData && (jsonData.budget !== undefined || jsonData.projectName)) {
+                // Load data from JSON
                 app = {
                     budget: jsonData.budget || 0,
                     projectName: jsonData.projectName || "Interior Budget Pro",
@@ -4275,26 +4279,30 @@ async function loadInitialDataFromJSON() {
                 
                 // Save to localStorage
                 localStorage.setItem('ibpultimate', JSON.stringify(app));
-                localStorage.setItem('ibpjsonloaded', 'true');
-                localStorage.setItem('ibpjsonversion', jsonData.backupVersion || '1.0');
-                localStorage.setItem('ibpjsondate', jsonVersion);
                 
-                console.log('✅ Data successfully loaded from data.json');
+                // Set flag so we never load from data.json again
+                localStorage.setItem('ibp_dataJsonLoaded', 'true');
+                localStorage.setItem('ibp_initialLoadDate', new Date().toISOString());
+                
+                console.log('✅ Successfully loaded initial data from data.json');
+                console.log('💾 Future changes will be saved to localStorage only');
                 return true;
             } else {
-                console.log('❌ data.json format invalid');
+                console.log('⚠️ data.json has invalid format');
                 return false;
             }
         } else {
-            console.log('⚠️ data.json not found (status: ' + response.status + ')');
+            console.log('⚠️ data.json not found (HTTP ' + response.status + ')');
+            console.log('💡 Starting with empty data');
             return false;
         }
     } catch (error) {
-        console.log('⚠️ Failed to load data.json:', error.message);
-        console.log('💡 Tip: Serve the folder with a local server (e.g., python -m http.server) or place data.json in the same directory');
+        console.log('⚠️ Could not load data.json:', error.message);
+        console.log('💡 Make sure you are running a local server');
         return false;
     }
 }
+
 
 // Add this NEW function before your DOMContentLoaded
 function loadDataFromJSON() {
