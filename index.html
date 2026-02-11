@@ -4150,7 +4150,7 @@ function exportPDF() {
         document.getElementById('loadingOverlay').style.display = 'flex';
         
         // AUTO-LOAD FROM JSON - ADD THIS LINE HERE
-        //await loadInitialDataFromJSON();
+       await loadInitialDataFromJSON();
         
         initializeApp();
     } else {
@@ -4202,7 +4202,7 @@ function exportPDF() {
                 document.getElementById('loadingOverlay').style.display = 'flex';
                 
                 // LOAD FROM JSON FIRST
-               // await loadInitialDataFromJSON();
+                 await loadInitialDataFromJSON();
                 
                 // Initialize the main app
                 initializeApp();
@@ -4238,98 +4238,168 @@ function exportPDF() {
 }
 // ========== AUTO-LOAD FROM JSON FILE ==========
 // Add this function in the login script section
+// Replace the entire loadInitialDataFromJSON function with this:
 async function loadInitialDataFromJSON() {
-    const hasData = localStorage.getItem('ibp_ultimate') !== null;
-
-    // Only attempt to load from data.json if no local data exists yet
-    if (hasData) {
-        console.log('Local data already exists — skipping data.json load');
-        return false;
-    }
-
     try {
-        const response = await fetch('data.json');
+        const response = await fetch('./data.json');
         
         if (response.ok) {
             const jsonData = await response.json();
             
             // Basic validation
-            if (jsonData && (jsonData.expenses || jsonData.contractors)) {
-                // No existing local data → save the JSON content directly
-                localStorage.setItem('ibp_ultimate', JSON.stringify(jsonData));
-                localStorage.setItem('ibp_json_loaded', 'true');
-                localStorage.setItem('ibp_json_version', jsonData.backupVersion || '1.0');
-                localStorage.setItem('ibp_json_date', jsonData.backupDate || new Date().toISOString());
+            if (jsonData && jsonData.budget) {
+                // Check if data.json is newer than localStorage
+                const localVersion = localStorage.getItem('ibpjsondate');
+                const jsonVersion = jsonData.backupDate || new Date().toISOString();
                 
-                console.log('✅ Initial data successfully loaded from data.json');
-                showNotification('Initial project data loaded from data.json', 'success');
+                console.log('Found data.json with date:', jsonVersion);
+                console.log('Local data date:', localVersion);
+                
+                // Update app with JSON data
+                app = {
+                    budget: jsonData.budget || 0,
+                    projectName: jsonData.projectName || "Interior Budget Pro",
+                    userName: jsonData.userName || "Project Manager",
+                    projectAddress: jsonData.projectAddress || "",
+                    projectTimeline: jsonData.projectTimeline || "6 months",
+                    paymentSources: jsonData.paymentSources || ["Self", "Spouse", "Parent", "Bank Loan"],
+                    expenses: jsonData.expenses || [],
+                    contractors: jsonData.contractors || [],
+                    components: jsonData.components || [],
+                    faults: jsonData.faults || [],
+                    notes: jsonData.notes || [],
+                    theme: jsonData.theme || "purple",
+                    currency: jsonData.currency || "₹",
+                    dateFormat: jsonData.dateFormat || "en-IN"
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('ibpultimate', JSON.stringify(app));
+                localStorage.setItem('ibpjsonloaded', 'true');
+                localStorage.setItem('ibpjsonversion', jsonData.backupVersion || '1.0');
+                localStorage.setItem('ibpjsondate', jsonVersion);
+                
+                console.log('✅ Data successfully loaded from data.json');
                 return true;
+            } else {
+                console.log('❌ data.json format invalid');
+                return false;
             }
         } else {
-            console.log('data.json not found (status: ' + response.status + ')');
+            console.log('⚠️ data.json not found (status: ' + response.status + ')');
+            return false;
         }
     } catch (error) {
-        console.log('Failed to load data.json (common when opening file directly):', error.message);
-        console.log('Tip: Serve the folder with a local server (e.g., python -m http.server) or place data.json in the same directory and reload.');
+        console.log('⚠️ Failed to load data.json:', error.message);
+        console.log('💡 Tip: Serve the folder with a local server (e.g., python -m http.server) or place data.json in the same directory');
+        return false;
     }
-    
-    return false;
 }
-    function initializeApp() {
-    // AUTO-LOAD FROM JSON (also handles updates)
-   // loadInitialDataFromJSON();
-    
-    // Your existing initialization code from DOMContentLoaded
+
+// Add this NEW function before your DOMContentLoaded
+function loadDataFromJSON() {
+    // Try to fetch data.json from the same directory
+    fetch('./data.json')  // or just 'data.json'
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Loaded data from data.json:', data);
+            // Merge with app object
+            app = {...app, ...data};
+            saveData(); // Save to localStorage
+            updateDisplays();
+            renderAll();
+            showNotification('Data loaded from data.json successfully!', 'success');
+        })
+        .catch(error => {
+            console.log('Could not load data.json, using localStorage or defaults', error);
+        });
+}
+
+// MODIFY your existing DOMContentLoaded function:
+document.addEventListener('DOMContentLoaded', function() {
+    // Hide loading overlay
     setTimeout(() => {
         document.getElementById('loadingOverlay').style.display = 'none';
     }, 800);
     
-    // Load saved data
-    if(localStorage.getItem('ibp_ultimate')) {
+    // Check if localStorage has data
+    if(localStorage.getItem('ibpultimate')) {
         try {
-            const saved = JSON.parse(localStorage.getItem('ibp_ultimate'));
-            app = { ...app, ...saved };
+            const saved = JSON.parse(localStorage.getItem('ibpultimate'));
+            app = {...app, ...saved};
             if(!app.components) app.components = [];
             if(!app.notes) app.notes = [];
-            if(!app.paymentSources) app.paymentSources = ['Self'];
-            if(!app.projectAddress) app.projectAddress = '';
-            if(!app.projectTimeline) app.projectTimeline = '6 months';
         } catch(e) {
-            console.error('Error loading saved data:', e);
+            console.error('Error loading saved data', e);
         }
-    }
-    
-    // ... rest of your initializeApp function ...
         
-        // Set theme and initialize
+        // Initialize with localStorage data
         setTheme(app.theme || 'purple');
         updateDisplays();
         populateSelects();
         renderAll();
+    } else {
+        // No localStorage - try to load from data.json
+        loadDataFromJSON();
         
-        // Initialize event listeners
+        // Still initialize the UI
+        setTheme(app.theme || 'purple');
+        updateDisplays();
+        populateSelects();
+        renderAll();
+    }
+    
+    // Rest of initialization
+    initEventListeners();
+    initTableSorting();
+});
+
+  function initializeApp() {
+    // AUTO-LOAD FROM JSON (also handles updates)
+    loadInitialDataFromJSON().then(() => {
+        // After JSON loads (or fails), load from localStorage
+        if(localStorage.getItem('ibpultimate')) {
+            try {
+                const saved = JSON.parse(localStorage.getItem('ibpultimate'));
+                app = {...app, ...saved};
+                if(!app.components) app.components = [];
+                if(!app.notes) app.notes = [];
+                if(!app.paymentSources) app.paymentSources = ["Self"];
+                if(!app.projectAddress) app.projectAddress = "";
+                if(!app.projectTimeline) app.projectTimeline = "6 months";
+            } catch(e) {
+                console.error('Error loading saved data', e);
+            }
+        }
+        
+        // Initialize UI
+        setTheme(app.theme || 'purple');
+        updateDisplays();
+        populateSelects();
+        renderAll();
         initEventListeners();
         initTableSorting();
         
-        // Add animation classes
+        // Hide loading overlay
         setTimeout(() => {
-            document.querySelectorAll('.logo i, .stat-card i').forEach((icon, index) => {
-                icon.style.animationDelay = `${index * 0.1}s`;
-            });
-        }, 100);
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }, 800);
         
-        // Initialize progress slider
-        const compProgress = document.getElementById('compProgress');
-        if (compProgress) {
-            compProgress.addEventListener('input', function() {
-                const display = document.getElementById('compProgDisplay');
-                if (display) {
-                    display.innerText = this.value + '%';
-                    addPremiumClickEffect(display);
-                }
-            });
+        // Show notification if data was loaded from JSON
+        if(localStorage.getItem('ibpjsonloaded') === 'true') {
+            setTimeout(() => {
+                showNotification('Project data loaded from data.json!', 'success');
+                localStorage.removeItem('ibpjsonloaded'); // Clear flag
+            }, 1000);
         }
-    }
+    });
+}
+
 
     // Add shake animation to CSS
     const style = document.createElement('style');
