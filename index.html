@@ -2171,9 +2171,10 @@
                 </div>
                 <div class="header-actions">
                     <!-- Real-time Clock -->
-                    <div id="headerClock"
-                        style="background:rgba(0,0,0,0.35); padding:10px 15px; border-radius:12px; font-family:'Courier New', monospace; font-weight:bold; color:var(--accent); min-width:100px; text-align:center;">
-                        00:00:00
+                    <div class="glass"
+                        style="display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.35); padding:10px 15px; border-radius:12px; font-family:'Courier New', monospace; font-weight:bold; color:var(--accent); min-width:160px; justify-content:center;">
+                        <span id="headerClockIcon"></span>
+                        <span id="headerClock">00:00:00 AM</span>
                     </div>
 
                     <!-- Cloud Context -->
@@ -2501,11 +2502,13 @@
                 </h2>
                 <div class="glass-card">
                     <div style="margin-bottom:24px;">
-                        <div style="display:flex; gap:16px; margin-bottom:20px;">
-                            <button class="btn btn-primary" onclick="filterTimeline('all')">All</button>
+                        <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+                            <button class="btn btn-primary active" onclick="filterTimeline('all')">All</button>
                             <button class="btn btn-success" onclick="filterTimeline('payment')">Payments</button>
                             <button class="btn btn-warning" onclick="filterTimeline('fault')">Faults</button>
                             <button class="btn btn-info" onclick="filterTimeline('component')">Components</button>
+                            <button class="btn btn-warning" style="background:#f59e0b"
+                                onclick="filterTimeline('note')">Notes</button>
                         </div>
                     </div>
                     <div id="timelineList"></div>
@@ -2868,8 +2871,24 @@
                         </div>
                         <div><label>Company</label><input type="text" id="contCompany" placeholder="Company Name"></div>
                     </div>
-                    <div class="form-group"><label>Allocated Budget</label><input type="number" id="contBudget"
-                            step="0.01" value="0"></div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Allocated Budget</label>
+                            <input type="number" id="contBudget" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Star Rating (1-5)</label>
+                            <div class="star-rating-input"
+                                style="display:flex; gap:5px; font-size:20px; color:var(--accent); cursor:pointer; margin-top:10px;">
+                                <i class="far fa-star rating-star" data-rating="1" onclick="setContractorRating(1)"></i>
+                                <i class="far fa-star rating-star" data-rating="2" onclick="setContractorRating(2)"></i>
+                                <i class="far fa-star rating-star" data-rating="3" onclick="setContractorRating(3)"></i>
+                                <i class="far fa-star rating-star" data-rating="4" onclick="setContractorRating(4)"></i>
+                                <i class="far fa-star rating-star" data-rating="5" onclick="setContractorRating(5)"></i>
+                                <input type="hidden" id="contRating" value="0">
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label>Contract Details (Optional)</label>
                         <textarea id="contDetails" rows="3" placeholder="Contract terms, scope of work..."></textarea>
@@ -3858,6 +3877,7 @@
                     email: document.getElementById('contEmail').value.trim() || '',
                     company: document.getElementById('contCompany').value.trim() || '',
                     budget: parseFloat(document.getElementById('contBudget').value || 0),
+                    rating: parseInt(document.getElementById('contRating').value || 0),
                     details: document.getElementById('contDetails').value.trim() || ''
                 };
                 const idx = app.contractors.findIndex(x => x.id === data.id);
@@ -3879,6 +3899,8 @@
                 document.getElementById('contEmail').value = c.email || '';
                 document.getElementById('contCompany').value = c.company || '';
                 document.getElementById('contBudget').value = c.budget;
+                document.getElementById('contRating').value = c.rating || 0;
+                setContractorRating(c.rating || 0);
                 document.getElementById('contDetails').value = c.details || '';
                 openModal('contractorModal');
             }
@@ -3899,55 +3921,79 @@
                     const percent = c.budget > 0 ? ((paid / c.budget) * 100).toFixed(1) : 0;
                     const projects = app.expenses.filter(e => e.contractor === c.name).length;
 
+                    let stars = '';
+                    const rating = c.rating || 0;
+                    for (let i = 1; i <= 5; i++) {
+                        stars += `<i class="${i <= rating ? 'fas' : 'far'} fa-star" style="color:var(--accent); font-size:12px;"></i>`;
+                    }
+
                     return `
-<div class="glass-card" style="text-align:left; padding:18px;">
-    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
+<div class="glass-card contractor-card" style="text-align:left; padding:20px; border-radius:18px; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.15); box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+    <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:var(--primary);"></div>
+    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:14px;">
         <div style="flex:1;">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                <i class="fas fa-hard-hat" style="color:var(--warning)"></i>
-                <h3 style="margin:0; font-size:16px; font-weight:700;">${c.name}</h3>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+                <h3 style="margin:0; font-size:18px; font-weight:800; letter-spacing:-0.5px;">${c.name}</h3>
+                <div style="display:flex; gap:2px;">${stars}</div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:4px; font-size:13px;">
-                <div style="display:flex; align-items:center; gap:6px; opacity:0.9;">
-                    <i class="fas fa-briefcase" style="width:16px; text-align:center;"></i>
-                    <span>${c.role || 'Contractor'}</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:6px; opacity:0.8;">
-                    <i class="fas fa-phone" style="width:16px; text-align:center;"></i>
-                    <span>${c.phone || '-'}</span>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; opacity:0.9;">
+                    ${c.role || 'Contractor'}
+                </span>
+                ${projects > 0 ? `<span style="font-size:11px; font-weight:700; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:10px;">${projects} Jobs</span>` : ''}
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; opacity:0.85;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-phone-alt" style="width:14px; color:var(--info);"></i>
+                    <a href="tel:${c.phone}" style="color:inherit; text-decoration:none;">${c.phone || '-'}</a>
                 </div>
                 ${c.email ? `
-                <div style="display:flex; align-items:center; gap:6px; opacity:0.8;">
-                    <i class="fas fa-envelope" style="width:16px; text-align:center;"></i>
-                    <span>${c.email}</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-envelope" style="width:14px; color:var(--info);"></i>
+                    <a href="mailto:${c.email}" style="color:inherit; text-decoration:none; font-size:12px;">${c.email}</a>
                 </div>
                 ` : ''}
             </div>
         </div>
-        <div style="display:flex; gap:4px; align-items:center;">
-            <button class="btn-icon btn-edit" onclick="editContractor(${c.id})" title="Edit">
-                <i class="fas fa-edit"></i>
+        <div style="display:flex; gap:6px;">
+            <button class="btn-icon btn-edit" onclick="editContractor(${c.id})" title="Edit" style="background:rgba(255,255,255,0.1);">
+                <i class="fas fa-pen" style="font-size:12px;"></i>
             </button>
-            <button class="btn-icon btn-delete" onclick="deleteContractor(${c.id})" title="Delete">
-                <i class="fas fa-trash"></i>
+            <button class="btn-icon btn-delete" onclick="deleteContractor(${c.id})" title="Delete" style="background:rgba(239,68,68,0.1); color:var(--danger);">
+                <i class="fas fa-trash-alt" style="font-size:12px;"></i>
             </button>
         </div>
     </div>
-    <div class="prog-track" style="font-size:12px; margin-bottom:6px;">
-        <span><i class="fas fa-money-bill-wave"></i> Paid: ${app.currency}${paid.toLocaleString(app.dateFormat)}</span>
-        <span><i class="fas fa-clipboard-list"></i> ${projects} projects</span>
-    </div>
-    <div class="budget-bar-container" style="height:10px; margin:10px 0;">
-        <div class="budget-bar-fill" style="width:${Math.min(percent, 100)}%"></div>
-    </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
-        <div style="opacity:0.8;">Budget: ${app.currency}${parseFloat(c.budget).toLocaleString(app.dateFormat)}</div>
-        <div style="font-weight:700; color:${percent > 90 ? 'var(--danger)' : percent > 70 ? 'var(--warning)' : 'var(--success)'}">
-            ${percent}% used
+    
+    <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:12px; margin-top:10px;">
+        <div class="prog-track" style="font-size:12px; margin-bottom:8px;">
+            <span style="opacity:0.8;">Total Payments</span>
+            <span style="font-weight:700;">${app.currency}${paid.toLocaleString(app.dateFormat)}</span>
+        </div>
+        <div class="budget-bar-container" style="height:8px; margin-bottom:8px; background:rgba(255,255,255,0.1);">
+            <div class="budget-bar-fill" style="width:${Math.min(percent, 100)}%; background:linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
+            <span style="opacity:0.6;">Budget: ${app.currency}${parseFloat(c.budget).toLocaleString(app.dateFormat)}</span>
+            <span style="font-weight:800; color:${percent > 90 ? 'var(--danger)' : percent > 70 ? 'var(--warning)' : 'var(--success)'}">
+                ${percent}%
+            </span>
         </div>
     </div>
 </div>`;
                 }).join('');
+            }
+
+            function setContractorRating(rating) {
+                document.getElementById('contRating').value = rating;
+                const stars = document.querySelectorAll('#contractorModal .rating-star');
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.replace('far', 'fas');
+                    } else {
+                        star.classList.replace('fas', 'far');
+                    }
+                });
             }
 
             // ========== CRUD OPERATIONS FOR COMPONENTS ==========
@@ -4006,7 +4052,7 @@
                         c.status === 'In Progress' ? 'badge-inprogress' : 'badge-pending';
                     return `
                 <tr>
-                    <td>${formatDate(c.date)}</td>
+                    <td data-sort="${c.date}">${formatDate(c.date)}</td>
                     <td><b>${c.name}</b></td>
                     <td>${c.category || 'Other'}</td>
                     <td>${c.contractor || '-'}</td>
@@ -4080,7 +4126,7 @@
                         (f.status === 'In Review' || f.status === 'In Progress' ? 'badge-inprogress' : 'badge-faulty');
                     return `
                 <tr>
-                    <td>${formatDate(f.date)}</td>
+                    <td data-sort="${f.date}">${formatDate(f.date)}</td>
                     <td>${f.contractor}</td>
                     <td>${f.desc}</td>
                     <td>${app.currency}${parseFloat(f.cost || 0).toLocaleString(app.dateFormat)}</td>
@@ -4103,6 +4149,11 @@
                 const container = document.getElementById('paymentBarsContainer');
                 const relevant = filterName === 'all' ? app.contractors : app.contractors.filter(c => c.name === filterName);
 
+                const exportBtn = document.getElementById('btnExportContractorPDF');
+                if (exportBtn) {
+                    exportBtn.style.display = filterName === 'all' ? 'none' : 'inline-flex';
+                }
+
                 container.innerHTML = relevant.map(c => {
                     const paid = app.expenses.filter(e => e.contractor === c.name).reduce((a, b) => a + parseFloat(b.amount || 0), 0);
                     const percent = c.budget > 0 ? ((paid / c.budget) * 100).toFixed(1) : 0;
@@ -4121,7 +4172,7 @@
                 if (filterName !== 'all') txs = txs.filter(e => e.contractor === filterName);
                 tbody.innerHTML = txs.sort((a, b) => new Date(b.date) - new Date(a.date)).map(e => `
                 <tr>
-                    <td>${formatDate(e.date)}</td>
+                    <td data-sort="${e.date}">${formatDate(e.date)}</td>
                     <td>${e.contractor || '-'}</td>
                     <td>${e.workType}</td>
                     <td><b>${app.currency}${parseFloat(e.amount).toLocaleString(app.dateFormat)}</b></td>
@@ -4303,16 +4354,18 @@
 
                 // Add notes
                 app.notes.forEach(n => {
-                    events.push({
-                        date: n.date,
-                        type: 'Note',
-                        icon: '📝',
-                        color: 'var(--warning)',
-                        timelineColor: 'var(--warning)',
-                        desc: n.text,
-                        details: 'Personal note',
-                        category: 'note'
-                    });
+                    if (timelineFilter === 'all' || timelineFilter === 'note') {
+                        events.push({
+                            date: n.date,
+                            type: 'Note',
+                            icon: '📝',
+                            color: 'var(--warning)',
+                            timelineColor: 'var(--warning)',
+                            desc: n.text,
+                            details: 'Personal note',
+                            category: 'note'
+                        });
+                    }
                 });
 
                 // Sort by date (newest first)
@@ -4804,6 +4857,8 @@
                 }
                 if (id === 'contractorModal') {
                     document.getElementById('contBudget').value = 0;
+                    document.getElementById('contRating').value = 0;
+                    setContractorRating(0);
                 }
             }
 
@@ -4828,7 +4883,7 @@
                                 'badge-pending';
                     return `
         <tr>
-            <td>${formatDate(e.date)}</td>
+            <td data-sort="${e.date}">${formatDate(e.date)}</td>
             <td>${e.category}</td>
             <td>${e.contractor || '-'}</td>
             <td>${e.workType}</td>
@@ -4869,8 +4924,11 @@
 
                         // Sort rows
                         rows.sort((a, b) => {
-                            let aVal = a.children[colIndex].textContent.trim();
-                            let bVal = b.children[colIndex].textContent.trim();
+                            let aCell = a.children[colIndex];
+                            let bCell = b.children[colIndex];
+
+                            let aVal = aCell.getAttribute('data-sort') || aCell.textContent.trim();
+                            let bVal = bCell.getAttribute('data-sort') || bCell.textContent.trim();
 
                             // Try to convert to numbers for currency and numeric values
                             const aNum = parseFloat(aVal.replace(/[^\d.-]/g, ''));
@@ -5152,6 +5210,127 @@ Backup includes:
 
             // ========== PDF EXPORT ==========
             // ========== PDF EXPORT ==========
+            function exportContractorPaymentsPDF() {
+                const contractorName = document.getElementById('paymentFilter').value;
+                if (!contractorName || contractorName === 'all') return;
+
+                const contractor = app.contractors.find(c => c.name === contractorName);
+                const payments = app.expenses.filter(e => e.contractor === contractorName)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (payments.length === 0) {
+                    showNotification('No payments found for this contractor', 'info');
+                    return;
+                }
+
+                const loadingBtn = document.getElementById('btnExportContractorPDF');
+                const originalHTML = loadingBtn.innerHTML;
+                loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                loadingBtn.disabled = true;
+
+                setTimeout(() => {
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF('p', 'mm', 'a4');
+
+                        const formatForPDF = (text) => {
+                            if (!text) return '';
+                            return text.toString().replace(/₹/g, 'Rs.').replace(/[^\x00-\x7F]/g, '');
+                        };
+
+                        const primaryColor = [102, 126, 234]; // #667eea
+                        const accentColor = [242, 211, 72]; // #f2d348
+
+                        // Header Background
+                        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                        doc.rect(0, 0, 210, 40, 'F');
+
+                        // Title
+                        doc.setFontSize(22);
+                        doc.setTextColor(255, 255, 255);
+                        doc.text('Payment Statement', 20, 20);
+                        doc.setFontSize(14);
+                        doc.text(formatForPDF(contractorName), 20, 30);
+
+                        // Contractor Info Box
+                        doc.setFillColor(245, 247, 251);
+                        doc.rect(20, 50, 170, 35, 'F');
+                        doc.setTextColor(40, 40, 40);
+                        doc.setFontSize(12);
+                        doc.text('Contractor Details', 25, 60);
+                        doc.setFontSize(10);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Role: ${formatForPDF(contractor?.role || 'N/A')}`, 25, 68);
+                        doc.text(`Phone: ${formatForPDF(contractor?.phone || 'N/A')}`, 25, 75);
+                        doc.text(`Email: ${formatForPDF(contractor?.email || 'N/A')}`, 25, 82);
+
+                        // Summary Box (Right Side)
+                        const totalPaid = payments.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+                        const budget = contractor?.budget || 0;
+                        const balance = budget - totalPaid;
+
+                        doc.setFillColor(245, 247, 251);
+                        doc.rect(130, 50, 60, 35, 'F');
+                        doc.setTextColor(40, 40, 40);
+                        doc.text('Finances', 135, 60);
+                        doc.setFontSize(9);
+                        doc.text(`Total Paid: Rs.${totalPaid.toLocaleString()}`, 135, 68);
+                        doc.text(`Budget: Rs.${budget.toLocaleString()}`, 135, 75);
+                        doc.setTextColor(balance < 0 ? 220 : 40, balance < 0 ? 53 : 40, balance < 0 ? 69 : 40);
+                        doc.text(`Balance: Rs.${balance.toLocaleString()}`, 135, 82);
+
+                        // Table
+                        doc.setTextColor(40, 40, 40);
+                        doc.setFontSize(14);
+                        doc.text('Payment History', 20, 100);
+
+                        let yPos = 110;
+                        // Table Header
+                        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                        doc.rect(20, yPos, 170, 10, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                        doc.text('Date', 25, yPos + 7);
+                        doc.text('Work Type', 55, yPos + 7);
+                        doc.text('Mode', 110, yPos + 7);
+                        doc.text('Amount', 150, yPos + 7);
+
+                        yPos += 15;
+                        doc.setTextColor(60, 60, 60);
+
+                        payments.forEach((p, i) => {
+                            if (yPos > 270) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            if (i % 2 === 0) {
+                                doc.setFillColor(248, 249, 252);
+                                doc.rect(20, yPos - 5, 170, 10, 'F');
+                            }
+                            doc.text(formatForPDF(new Date(p.date).toLocaleDateString()), 25, yPos);
+                            doc.text(formatForPDF(p.workType || 'General'), 55, yPos);
+                            doc.text(formatForPDF(p.mode || 'N/A'), 110, yPos);
+                            doc.text(`Rs.${parseFloat(p.amount).toLocaleString()}`, 150, yPos);
+                            yPos += 10;
+                        });
+
+                        // Footer
+                        doc.setFontSize(8);
+                        doc.setTextColor(150, 150, 150);
+                        doc.text(`Generated by Interior Budget Pro for "${app.projectName}" on ${new Date().toLocaleDateString()}`, 105, 285, { align: 'center' });
+
+                        doc.save(`Payment_Statement_${contractorName}_${new Date().toISOString().split('T')[0]}.pdf`);
+                        showNotification('Contractor payment statement exported!', 'success');
+                    } catch (err) {
+                        console.error('PDF Export Error:', err);
+                        showNotification('Failed to export PDF', 'error');
+                    } finally {
+                        loadingBtn.innerHTML = originalHTML;
+                        loadingBtn.disabled = false;
+                    }
+                }, 500);
+            }
+
             function exportPDF() {
                 const loadingBtn = event?.target || document.querySelector('.btn-pdf');
                 const originalHTML = loadingBtn.innerHTML;
@@ -5802,12 +5981,26 @@ Backup includes:
 
         function updateHeaderClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
+            let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            // Icon logic: Sun icon (6 AM - 6 PM), Moon icon (6 PM - 6 AM)
+            const isDay = hours >= 6 && hours < 18;
+            const iconEl = document.getElementById('headerClockIcon');
+            if (iconEl) {
+                iconEl.innerHTML = isDay ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                iconEl.style.color = isDay ? '#f2d348' : '#cbd5e1';
+            }
+
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const hoursStr = String(hours).padStart(2, '0');
+
             const clockEl = document.getElementById('headerClock');
             if (clockEl) {
-                clockEl.textContent = `${hours}:${minutes}:${seconds}`;
+                clockEl.textContent = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
             }
         }
     </script>
