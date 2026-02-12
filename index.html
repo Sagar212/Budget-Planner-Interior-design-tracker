@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -2789,6 +2789,31 @@
                     Settings
                 </h2>
 
+                <!-- User Management Section (Admin Only) -->
+                <div class="glass-card" id="userManagementSection"
+                    style="display:none; border-left: 5px solid var(--primary);">
+                    <h3 style="margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+                        <span><i class="fas fa-users-cog"></i> User Management</span>
+                        <button class="btn btn-success" onclick="UserManager.openUserModal()">
+                            <i class="fas fa-user-plus"></i> Add User
+                        </button>
+                    </h3>
+                    <div class="table-wrap">
+                        <table id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Project</th>
+                                    <th>Shared Key</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="glass-card">
                     <h3 style="margin-bottom:24px;">
                         <i class="fas fa-user-circle"></i> Profile Settings
@@ -3220,6 +3245,44 @@
                 </div>
             </div>
         </div>
+        <!-- User Management Modal -->
+        <div id="userModal" class="modal">
+            <div class="modal-box">
+                <h3 style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-user-shield" style="color:var(--primary);"></i>
+                    User Details
+                </h3>
+                <form onsubmit="UserManager.saveUser(event)">
+                    <input type="hidden" id="userId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Username</label><input type="text" id="userUsername" required>
+                        </div>
+                        <div class="form-group"><label>Email</label><input type="email" id="userEmail" required></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Password</label><input type="password" id="userPassword"
+                                placeholder="Leave blank to keep current"></div>
+                        <div class="form-group"><label>Role</label>
+                            <select id="userRole">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Project Name</label><input type="text" id="userProject"
+                                placeholder="Assigned Project"></div>
+                        <div class="form-group"><label>Shared Key (Optional)</label><input type="text"
+                                id="userSharedKey" placeholder="For sharing projects"></div>
+                    </div>
+                    <div style="display:flex; gap:12px; margin-top:28px;">
+                        <button type="button" class="btn btn-danger" onclick="closeModal('userModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success" style="flex:1">Save User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Data Lists -->
         <datalist id="commonWorkTypes">
             <option>Material Purchase</option>
@@ -3260,13 +3323,234 @@
             let currentCharts = {};
             let timelineFilter = 'all';
 
+            // ========== USER & PROJECT MANAGEMENT ==========
+            const UserManager = {
+                currentUser: null,
+
+                // SHA-256 Hashing
+                async hashPassword(password) {
+                    const msgBuffer = new TextEncoder().encode(password);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                },
+
+                // Login Logic
+                async login(username, password) {
+                    try {
+                        const hash = await this.hashPassword(password);
+
+                        // Check Supabase 'users' table
+                        const { data: user, error } = await SupabaseBackup.client
+                            .from('users')
+                            .select('*')
+                            .eq('username', username)
+                            .eq('password_hash', hash)
+                            .single();
+
+                        if (error || !user) throw new Error('Invalid credentials');
+
+                        // Fetch Project Details
+                        const { data: project } = await SupabaseBackup.client
+                            .from('projects')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .single();
+
+                        this.currentUser = { ...user, project: project || {} };
+
+                        // Update UI & State
+                        this.initSession();
+                        return true;
+
+                    } catch (err) {
+                        console.error('Login failed:', err);
+                        return false;
+                    }
+                },
+
+                // Initialize Session after Login
+                initSession() {
+                    const user = this.currentUser;
+                    if (!user) return;
+
+                    // Update Global State
+                    app.userName = user.username;
+                    // Use shared key if available for project ID, otherwise use username-project combo
+                    SupabaseBackup.PROJECT_ID = user.project?.shared_unique_key || user.project?.project_name || 'MyProject';
+                    app.projectName = user.project?.project_name || 'My Interior Project';
+
+                    // UI Updates
+                    document.getElementById('userNameDisplay').innerText = user.username;
+                    document.getElementById('projectNameDisplay').innerText = app.projectName;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('appContent').style.display = 'block';
+
+                    // Admin Privileges
+                    if (user.role === 'admin') {
+                        document.getElementById('userManagementSection').style.display = 'block';
+                        this.loadUsers();
+                    } else {
+                        document.getElementById('userManagementSection').style.display = 'none';
+                    }
+
+                    // Load Data
+                    SupabaseBackup.autoLoadFromCloud();
+                },
+
+                async loadUsers() {
+                    if (this.currentUser?.role !== 'admin') return;
+
+                    const { data: users, error } = await SupabaseBackup.client
+                        .from('users')
+                        .select(`
+                            *,
+                            projects (project_name, shared_unique_key)
+                        `)
+                        .order('created_at');
+
+                    if (error) {
+                        showNotification('Failed to load users: ' + error.message, 'error');
+                        return;
+                    }
+
+                    this.renderUsersTable(users);
+                },
+
+                renderUsersTable(users) {
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = users.map(u => `
+                        <tr>
+                            <td>${u.username}</td>
+                            <td><span class="badge ${u.role === 'admin' ? 'badge-completed' : 'badge-inprogress'}">${u.role}</span></td>
+                            <td>${u.projects?.[0]?.project_name || '-'}</td>
+                            <td><code style="font-size:10px;">${u.projects?.[0]?.shared_unique_key || '-'}</code></td>
+                            <td>
+                                <button class="btn-icon btn-edit" onclick="UserManager.editUser('${u.id}')"><i class="fas fa-edit"></i></button>
+                                ${u.username !== 'admin' ? `<button class="btn-icon btn-delete" onclick="UserManager.deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                            </td>
+                        </tr>
+                    `).join('');
+                },
+
+                openUserModal() {
+                    document.getElementById('userId').value = '';
+                    document.getElementById('userUsername').value = '';
+                    document.getElementById('userEmail').value = '';
+                    document.getElementById('userPassword').value = '';
+                    document.getElementById('userProject').value = '';
+                    document.getElementById('userSharedKey').value = '';
+                    openModal('userModal');
+                },
+
+                async editUser(id) {
+                    const { data: user, error } = await SupabaseBackup.client
+                        .from('users')
+                        .select('*, projects(*)')
+                        .eq('id', id)
+                        .single();
+
+                    if (user) {
+                        document.getElementById('userId').value = user.id;
+                        document.getElementById('userUsername').value = user.username;
+                        document.getElementById('userEmail').value = user.email;
+                        document.getElementById('userRole').value = user.role;
+                        document.getElementById('userProject').value = user.projects?.[0]?.project_name || '';
+                        document.getElementById('userSharedKey').value = user.projects?.[0]?.shared_unique_key || '';
+                        openModal('userModal');
+                    }
+                },
+
+                async saveUser(e) {
+                    e.preventDefault();
+                    const id = document.getElementById('userId').value;
+                    const username = document.getElementById('userUsername').value;
+                    const email = document.getElementById('userEmail').value;
+                    const password = document.getElementById('userPassword').value;
+                    const role = document.getElementById('userRole').value;
+                    const projectName = document.getElementById('userProject').value;
+                    const sharedKey = document.getElementById('userSharedKey').value;
+
+                    try {
+                        let userId = id;
+
+                        // 1. Create/Update User
+                        const userPayload = { username, email, role };
+                        if (password) {
+                            userPayload.password_hash = await this.hashPassword(password);
+                        }
+
+                        if (id) {
+                            await SupabaseBackup.client.from('users').update(userPayload).eq('id', id);
+                        } else {
+                            if (!password) throw new Error('Password required for new users');
+                            const { data, error } = await SupabaseBackup.client.from('users').insert([userPayload]).select().single();
+                            if (error) throw error;
+                            userId = data.id;
+                        }
+
+                        // 2. Update Project
+                        if (projectName) {
+                            const projectPayload = {
+                                user_id: userId,
+                                project_name: projectName,
+                                shared_unique_key: sharedKey || null
+                            };
+
+                            // Upsert project (assuming 1 project per user for now)
+                            // First check if project exists for user
+                            const { data: existing } = await SupabaseBackup.client.from('projects').select('project_id').eq('user_id', userId).single();
+
+                            if (existing) {
+                                await SupabaseBackup.client.from('projects').update(projectPayload).eq('project_id', existing.project_id);
+                            } else {
+                                await SupabaseBackup.client.from('projects').insert([projectPayload]);
+                            }
+                        }
+
+                        closeModal('userModal');
+                        showNotification('User saved successfully', 'success');
+                        this.loadUsers();
+
+                    } catch (err) {
+                        console.error('Save error:', err);
+                        showNotification('Error: ' + err.message, 'error');
+                    }
+                },
+
+                async deleteUser(id) {
+                    if (!confirm('Delete this user and their project link?')) return;
+                    await SupabaseBackup.client.from('users').delete().eq('id', id);
+                    this.loadUsers();
+                }
+            };
+
+            // Global Login Handler
+            async function handleLogin(e) {
+                e.preventDefault();
+                const btn = e.target.querySelector('button');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+                const u = document.getElementById('loginUsername').value;
+                const p = document.getElementById('loginPassword').value;
+
+                if (await UserManager.login(u, p)) {
+                    // Success handled in initSession
+                } else {
+                    document.getElementById('loginError').style.display = 'block';
+                    btn.innerHTML = originalHtml;
+                }
+            }
+
+
             // ========== SUPABASE CLOUD BACKUP SYSTEM ==========
             const SupabaseBackup = {
                 // ⚠️ REPLACE THESE WITH YOUR SUPABASE CREDENTIALS
                 SUPABASE_URL: 'https://dujxruuoebpmextqtnpw.supabase.co',
                 SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1anhydXVvZWJwbWV4dHF0bnB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NzgyMjksImV4cCI6MjA4NjQ1NDIyOX0.bt6fbwZtutTvrnOQH9RgpVHqvT4ddpn4eL-EvfbL7zI',
                 TABLE_NAME: 'backups',
-                PROJECT_ID: 'Casa Eden',
+                PROJECT_ID: null, // This will be dynamically set
                 client: null,
                 isConnected: false,
 
@@ -3281,7 +3565,8 @@
                         if (typeof supabase !== 'undefined' && supabase.createClient) {
                             this.client = supabase.createClient(this.SUPABASE_URL, this.SUPABASE_KEY);
                             console.log('☁️ Supabase client initialized');
-                            this.testConnection(true);
+                            // Loaded manually viaUserManager
+                            this.updateStatus(true, 'Ready');
                         } else {
                             console.warn('☁️ Supabase library not loaded');
                             this.updateStatus(false, 'Library Error');
@@ -3548,47 +3833,73 @@
                     if (modal) modal.classList.remove('active');
                 },
 
-                // Auto-load from cloud on startup (compares timestamps efficiently)
+                // Auto-load from cloud or local (sync logic)
                 async autoLoadFromCloud() {
-                    if (!this.client || !this.isConnected) return;
-                    try {
-                        // 1. Fetch only the timestamp and ID of the latest backup first (Optimized)
-                        const { data: meta, error: metaError } = await this.client
-                            .from(this.TABLE_NAME)
-                            .select('id, created_at')
-                            .eq('project_name', this.PROJECT_ID)
-                            .order('created_at', { ascending: false })
-                            .limit(1)
-                            .single();
+                    if (!this.PROJECT_ID) return;
 
-                        if (metaError || !meta) {
-                            console.log('☁️ No cloud backups to auto-load');
-                            return;
+                    const key = `ibp_${this.PROJECT_ID}`;
+                    const localDataStr = localStorage.getItem(key);
+                    const localDateStr = localStorage.getItem(key + '_lastSaved');
+                    const localDate = localDateStr ? new Date(localDateStr).getTime() : 0;
+
+                    let cloudDate = 0;
+                    let cloudMeta = null;
+
+                    showNotification('⏳ Syncing data...', 'info');
+
+                    try {
+                        if (this.client && this.isConnected) {
+                            // 1. Check cloud timestamp
+                            const { data: meta, error: metaError } = await this.client
+                                .from(this.TABLE_NAME)
+                                .select('id, created_at')
+                                .eq('project_name', this.PROJECT_ID)
+                                .order('created_at', { ascending: false })
+                                .limit(1)
+                                .single();
+
+                            if (!metaError && meta) {
+                                cloudMeta = meta;
+                                cloudDate = new Date(meta.created_at).getTime();
+                            }
                         }
 
-                        const cloudDate = new Date(meta.created_at).getTime();
-                        const localDateStr = localStorage.getItem('ibp_lastSaved');
-                        const localDate = localDateStr ? new Date(localDateStr).getTime() : 0;
-
-                        // 2. Only fetch the heavy backup_data if cloud is truly newer
+                        // 2. Compare and Load
                         if (cloudDate > localDate) {
                             console.log('☁️ Cloud backup is newer — fetching full data...');
-
                             const { data, error } = await this.client
                                 .from(this.TABLE_NAME)
                                 .select('backup_data')
-                                .eq('id', meta.id)
+                                .eq('id', cloudMeta.id)
                                 .single();
 
                             if (error || !data || !data.backup_data) throw new Error('Failed to fetch full backup content');
 
                             this._applyBackup(data.backup_data);
-                            showNotification('☁️ Loaded latest data from cloud', 'info');
+                            showNotification('☁️ Loaded latest data from cloud', 'success');
+
+                        } else if (localDataStr) {
+                            console.log('📂 Local data is newer or current — loading local');
+                            const localData = JSON.parse(localDataStr);
+                            this._applyBackup(localData);
+                            // showNotification('📂 Loaded local data', 'success'); // Optional, maybe too noisy
                         } else {
-                            console.log('☁️ Local data is current — skipping cloud load');
+                            console.log('⚠️ No data found. Starting fresh.');
+                            showNotification('✨ New Project Started', 'info');
+                            renderAll(); // Ensure empty state is rendered
                         }
+
                     } catch (err) {
-                        console.log('☁️ Auto-load skipped:', err.message);
+                        console.error('☁️ Auto-load error:', err);
+                        // Fallback to local
+                        if (localDataStr) {
+                            console.log('📂 Fallback to local data');
+                            const localData = JSON.parse(localDataStr);
+                            this._applyBackup(localData);
+                            showNotification('📂 Loaded local data (Offline)', 'warning');
+                        } else {
+                            renderAll();
+                        }
                     }
                 }
             };
@@ -3694,8 +4005,10 @@
                     app.theme = themeMatch[1];
                 }
 
-                localStorage.setItem('ibpultimate', JSON.stringify(app));
-                localStorage.setItem('ibp_lastSaved', new Date().toISOString());
+                // use dynamic key
+                const key = SupabaseBackup.PROJECT_ID ? `ibp_${SupabaseBackup.PROJECT_ID}` : 'ibpultimate';
+                localStorage.setItem(key, JSON.stringify(app));
+                localStorage.setItem(key + '_lastSaved', new Date().toISOString());
             }
 
             function updateDisplays() {
@@ -6148,350 +6461,153 @@ Backup includes:
         </script>
     </div> <!-- Close the appContent div -->
 
+
+
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-box" style="max-width: 500px;">
+            <h3 style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+                <i class="fas fa-user-edit" style="color:var(--primary);"></i>
+                User Details
+            </h3>
+            <form onsubmit="UserManager.saveUser(event)">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="userUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email (Optional)</label>
+                    <input type="email" id="userEmail">
+                </div>
+                <div class="form-group">
+                    <label>Password (Leave blank to keep current)</label>
+                    <input type="password" id="userPassword" placeholder="New Password">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="userRole" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <hr style="border-color:rgba(255,255,255,0.1); margin:20px 0;">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" id="userProject" placeholder="User's Project Name">
+                </div>
+                <div class="form-group">
+                    <label>Shared Unique Key (Optional)</label>
+                    <input type="text" id="userSharedKey" placeholder="Link to existing project key">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                    <button type="button" class="btn"
+                        style="background:transparent; border:1px solid rgba(255,255,255,0.2);"
+                        onclick="closeModal('userModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // ========== LOGIN SYSTEM ==========
-        document.addEventListener('DOMContentLoaded', async function () {
-            // Check if already logged in
-            if (localStorage.getItem('ibp_logged_in') === 'true') {
-                // User is already logged in
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appContent').style.display = 'block';
-                document.getElementById('loadingOverlay').style.display = 'flex';
-
-                // AUTO-LOAD FROM JSON - ADD THIS LINE HERE
-                await loadInitialDataFromJSON();
-
-                initializeApp();
-            } else {
-                // Show login screen
-                document.getElementById('loginOverlay').style.display = 'flex';
-                document.getElementById('appContent').style.display = 'none';
-
-                // Focus on username field
-                setTimeout(() => {
-                    document.getElementById('loginUsername').focus();
-                }, 100);
-            }
-        });
-
-        function handleLogin(event) {
-            event.preventDefault();
-
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const errorDiv = document.getElementById('loginError');
-
-            // Default credentials
-            const validUsername = 'admin';
-            const validPassword = 'adminpwd';
-
-            // Check credentials
-            if (username === validUsername && password === validPassword) {
-                // Successful login
-                errorDiv.style.display = 'none';
-
-                // Store login state
-                localStorage.setItem('ibp_logged_in', 'true');
-
-                // Add login animation
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                const originalHTML = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-                submitBtn.disabled = true;
-
-                // Transition to app
-                setTimeout(async () => {
-                    // Fade out login
-                    document.getElementById('loginOverlay').style.opacity = '0';
-                    document.getElementById('loginOverlay').style.transition = 'opacity 0.5s ease';
-
-                    setTimeout(async () => {
-                        document.getElementById('loginOverlay').style.display = 'none';
-                        document.getElementById('appContent').style.display = 'block';
-                        document.getElementById('loadingOverlay').style.display = 'flex';
-
-                        // LOAD FROM JSON FIRST
-                        await loadInitialDataFromJSON();
-
-                        // Initialize the main app
-                        initializeApp();
-
-                        // Hide loading overlay
-                        setTimeout(() => {
-                            document.getElementById('loadingOverlay').style.display = 'none';
-                        }, 800);
-
-                        // Show welcome notification
-                        setTimeout(() => {
-                            showNotification('Welcome back, Administrator!', 'success');
-                        }, 1000);
-                    }, 500);
-                }, 1000);
-
-            } else {
-                // Failed login
-                errorDiv.style.display = 'flex';
-
-                // Shake animation
-                errorDiv.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    errorDiv.style.animation = '';
-                }, 500);
-
-                // Clear password field
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('loginPassword').focus();
-            }
-
-            return false;
-        }
-        // ========== AUTO-LOAD FROM JSON FILE ==========
-        // Add this function in the login script section
-        // Replace the entire loadInitialDataFromJSON function with this:
-        async function loadInitialDataFromJSON() {
-            // Check if we've already loaded from data.json before
-            const hasLoadedBefore = localStorage.getItem('ibp_dataJsonLoaded');
-
-            if (hasLoadedBefore === 'true') {
-                console.log('📦 Data.json already loaded previously, using localStorage');
-                return false; // Skip loading, use localStorage instead
-            }
-
-            // First time - try to load from data.json
-            console.log('🔍 First time setup - attempting to load from data.json...');
-
-            try {
-                const response = await fetch('./data.json');
-
-                if (response.ok) {
-                    const jsonData = await response.json();
-
-                    // Validate data
-                    if (jsonData && (jsonData.budget !== undefined || jsonData.projectName)) {
-                        // Load data from JSON
-                        app = {
-                            budget: jsonData.budget || 0,
-                            projectName: jsonData.projectName || "Interior Budget Pro",
-                            userName: jsonData.userName || "Project Manager",
-                            projectAddress: jsonData.projectAddress || "",
-                            projectTimeline: jsonData.projectTimeline || "6 months",
-                            paymentSources: jsonData.paymentSources || ["Self", "Spouse", "Parent", "Bank Loan"],
-                            expenses: jsonData.expenses || [],
-                            contractors: jsonData.contractors || [],
-                            components: jsonData.components || [],
-                            planning: jsonData.planning || {
-                                electricity: [],
-                                furniture: [],
-                                pop: [],
-                                painter: [],
-                                custom: []
-                            },
-                            faults: jsonData.faults || [],
-                            notes: jsonData.notes || [],
-                            theme: jsonData.theme || "purple",
-                            currency: jsonData.currency || "₹",
-                            dateFormat: jsonData.dateFormat || "en-IN"
-                        };
-
-                        // Save to localStorage
-                        localStorage.setItem('ibpultimate', JSON.stringify(app));
-
-                        // Set flag so we never load from data.json again
-                        localStorage.setItem('ibp_dataJsonLoaded', 'true');
-                        localStorage.setItem('ibp_initialLoadDate', new Date().toISOString());
-
-                        console.log('✅ Successfully loaded initial data from data.json');
-                        console.log('💾 Future changes will be saved to localStorage only');
-                        return true;
-                    } else {
-                        console.log('⚠️ data.json has invalid format');
-                        return false;
-                    }
-                } else {
-                    console.log('⚠️ data.json not found (HTTP ' + response.status + ')');
-                    console.log('💡 Starting with empty data');
-                    return false;
-                }
-            } catch (error) {
-                console.log('⚠️ Could not load data.json:', error.message);
-                console.log('💡 Make sure you are running a local server');
-                return false;
-            }
-        }
-
-
-        // Add this NEW function before your DOMContentLoaded
-        function loadDataFromJSON() {
-            // Try to fetch data.json from the same directory
-            fetch('./data.json')  // or just 'data.json'
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Loaded data from data.json:', data);
-                    // Merge with app object
-                    app = { ...app, ...data };
-                    saveData(); // Save to localStorage
-                    updateDisplays();
-                    renderAll();
-                    showNotification('Data loaded from data.json successfully!', 'success');
-                })
-                .catch(error => {
-                    console.log('Could not load data.json, using localStorage or defaults', error);
-                });
-        }
-
-        // MODIFY your existing DOMContentLoaded function:
+        // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', function () {
             // Hide loading overlay
             setTimeout(() => {
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }, 800);
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.style.display = 'none';
+            }, 500);
 
-            // Check if localStorage has data
-            if (localStorage.getItem('ibpultimate')) {
-                try {
-                    const saved = JSON.parse(localStorage.getItem('ibpultimate'));
-                    app = { ...app, ...saved };
-                    if (!app.components) app.components = [];
-                    if (!app.notes) app.notes = [];
-                } catch (e) {
-                    console.error('Error loading saved data', e);
-                }
+            // Initialize minimal UI
+            if (typeof setTheme === 'function') setTheme('purple');
+            if (typeof initTableSorting === 'function') initTableSorting();
 
-                // Initialize with localStorage data
-                setTheme(app.theme || 'purple');
-                updateDisplays();
-                populateSelects();
-                renderAll();
-            } else {
-                // No localStorage - try to load from data.json
-                loadDataFromJSON();
+            // Initialize Supabase
+            if (typeof SupabaseBackup !== 'undefined' && SupabaseBackup.init) SupabaseBackup.init();
 
-                // Still initialize the UI
-                setTheme(app.theme || 'purple');
-                updateDisplays();
-                populateSelects();
-                renderAll();
+            // Show Login Overlay logic
+            const appContent = document.getElementById('appContent');
+            const loginOverlay = document.getElementById('loginOverlay');
+
+            if (appContent) appContent.style.display = 'none';
+            if (loginOverlay) {
+                loginOverlay.style.display = 'flex';
             }
 
-            // Rest of initialization
-            initEventListeners();
-            initTableSorting();
+            // Add shake animation style
+            if (!document.getElementById('shakeStyle')) {
+                const style = document.createElement('style');
+                style.id = 'shakeStyle';
+                style.innerHTML = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+                document.head.appendChild(style);
+            }
+
+            // Initialize Clock
+            // Check if interval already exists to avoid duplicates if re-run
+            if (!window.clockInterval) {
+                window.clockInterval = setInterval(updateHeaderClock, 1000);
+            }
+            updateHeaderClock();
         });
 
-        function initializeApp() {
-            // AUTO-LOAD FROM JSON (also handles updates)
-            loadInitialDataFromJSON().then(() => {
-                // After JSON loads (or fails), load from localStorage
-                if (localStorage.getItem('ibpultimate')) {
-                    try {
-                        const saved = JSON.parse(localStorage.getItem('ibpultimate'));
-                        app = { ...app, ...saved };
-                        if (!app.components) app.components = [];
-                        if (!app.planning) app.planning = {
-                            electricity: [],
-                            furniture: [],
-                            pop: [],
-                            painter: [],
-                            custom: []
-                        };
-                        if (!app.notes) app.notes = [];
-                        if (!app.paymentSources) app.paymentSources = ["Self"];
-                        if (!app.projectAddress) app.projectAddress = "";
-                        if (!app.projectTimeline) app.projectTimeline = "6 months";
-                    } catch (e) {
-                        console.error('Error loading saved data', e);
-                    }
-                }
-
-                // Initialize UI
-                setTheme(app.theme || 'purple');
-                updateDisplays();
-                populateSelects();
-                renderAll();
-                initInteractiveElements();
-                initEventListeners();
-                initTableSorting();
-
-                // Hide loading overlay
-                setTimeout(() => {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                }, 800);
-
-                // Show notification if data was loaded from JSON
-                if (localStorage.getItem('ibpjsonloaded') === 'true') {
-                    setTimeout(() => {
-                        showNotification('Project data loaded from data.json!', 'success');
-                        localStorage.removeItem('ibpjsonloaded'); // Clear flag
-                    }, 1000);
-                }
-
-                // Initialize Supabase Cloud Backup
-                SupabaseBackup.init();
-                setTimeout(() => SupabaseBackup.autoLoadFromCloud(), 500);
-            });
-        }
-
-
-        // Add shake animation to CSS
-        const style = document.createElement('style');
-        style.innerHTML = `
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-    `;
-        document.head.appendChild(style);
-
-        // Add logout function
+        // Logout Function (Global)
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('ibp_logged_in');
-                // Clear form fields
-                document.getElementById('loginUsername').value = '';
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('loginError').style.display = 'none';
 
-                // Show login screen
-                document.getElementById('appContent').style.display = 'none';
-                document.getElementById('loginOverlay').style.display = 'flex';
-                document.getElementById('loginOverlay').style.opacity = '1';
+                // Reset App State (simplified for safety)
+                if (typeof SupabaseBackup !== 'undefined') SupabaseBackup.PROJECT_ID = null;
 
-                showNotification('Logged out successfully', 'info');
+                // Clear inputs
+                const inputs = ['loginUsername', 'loginPassword'];
+                inputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+
+                // UI Switch
+                if (document.getElementById('appContent')) document.getElementById('appContent').style.display = 'none';
+                if (document.getElementById('loginOverlay')) {
+                    const ol = document.getElementById('loginOverlay');
+                    ol.style.display = 'flex';
+                    ol.style.opacity = '1';
+                }
+
+                if (typeof showNotification === 'function') showNotification('Logged out successfully', 'info');
             }
         }
 
+        // Header Clock
         function updateHeaderClock() {
             const now = new Date();
-            let hours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-
-            // Icon logic: Sun icon (6 AM - 6 PM), Moon icon (6 PM - 6 AM)
-            const isDay = hours >= 6 && hours < 18;
             const iconEl = document.getElementById('headerClockIcon');
-            if (iconEl) {
+            const clockEl = document.getElementById('headerClock');
+
+            if (iconEl && clockEl) {
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const isDay = hours >= 6 && hours < 18;
+
                 iconEl.innerHTML = isDay ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
                 iconEl.style.color = isDay ? '#f2d348' : '#cbd5e1';
-            }
 
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            const hoursStr = String(hours).padStart(2, '0');
-
-            const clockEl = document.getElementById('headerClock');
-            if (clockEl) {
-                clockEl.textContent = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                clockEl.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
             }
         }
 
-        // Initialize table sorting
+        // Table Sorting
         function initTableSorting() {
             document.querySelectorAll('th[data-sortable="true"]').forEach(th => {
                 th.addEventListener('click', () => {
@@ -6501,38 +6617,25 @@ Backup includes:
                     const thIndex = Array.from(th.parentNode.children).indexOf(th);
                     const isAsc = th.classList.contains('asc');
 
-                    // Reset all headers
                     table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc'));
-
-                    // Toggle current header
                     th.classList.toggle('asc', !isAsc);
                     th.classList.toggle('desc', isAsc);
 
                     const multiplier = !isAsc ? 1 : -1;
-
                     rows.sort((a, b) => {
                         const aCell = a.children[thIndex];
                         const bCell = b.children[thIndex];
                         const aVal = aCell.getAttribute('data-sort') || aCell.innerText.trim();
                         const bVal = bCell.getAttribute('data-sort') || bCell.innerText.trim();
 
-                        // Date sorting
                         if (!isNaN(Date.parse(aVal)) && !isNaN(Date.parse(bVal)) && isNaN(aVal)) {
                             return (new Date(aVal) - new Date(bVal)) * multiplier;
                         }
-
-                        // Numeric sorting (remove currency symbols)
                         const aNum = parseFloat(aVal.replace(/[^0-9.-]+/g, ''));
                         const bNum = parseFloat(bVal.replace(/[^0-9.-]+/g, ''));
-
-                        if (!isNaN(aNum) && !isNaN(bNum)) {
-                            return (aNum - bNum) * multiplier;
-                        }
-
-                        // String sorting
+                        if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * multiplier;
                         return aVal.localeCompare(bVal) * multiplier;
                     });
-
                     tbody.append(...rows);
                 });
             });
