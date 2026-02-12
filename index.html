@@ -132,6 +132,7 @@
             background: var(--bg-grad);
             background-attachment: fixed;
             min-height: 100vh;
+            min-height: 100dvh;
             color: var(--text-light);
             padding: 20px;
             transition: var(--transition);
@@ -752,6 +753,7 @@
             box-shadow:
                 inset 0 2px 4px rgba(0, 0, 0, 0.1),
                 0 4px 20px rgba(0, 0, 0, 0.15);
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
@@ -2221,6 +2223,9 @@
                 <div class="nav-tab" onclick="switchTab('faults', this)">
                     <i class="fas fa-exclamation-triangle"></i> Faults
                 </div>
+                <div class="nav-tab" onclick="switchTab('planning', this)">
+                    <i class="fas fa-clipboard-list"></i> Initial Planning
+                </div>
                 <div class="nav-tab" onclick="switchTab('calendar', this)">
                     <i class="fas fa-calendar-alt"></i> Calendar
                 </div>
@@ -2325,7 +2330,7 @@
                         <i class="fas fa-wallet" style="color:var(--success);"></i>
                         Expense Tracker
                     </h2>
-                    <button class="btn btn-success" onclick="openModal('expenseModal')">
+                    <button class="btn btn-success" onclick="addExpense()">
                         <i class="fas fa-plus"></i> Add Expense
                     </button>
                 </div>
@@ -2355,7 +2360,7 @@
                         <i class="fas fa-hard-hat" style="color:var(--warning);"></i>
                         Contractors Management
                     </h2>
-                    <button class="btn btn-success" onclick="openModal('contractorModal')">
+                    <button class="btn btn-success" onclick="addContractor()">
                         <i class="fas fa-plus"></i> Add Contractor
                     </button>
                 </div>
@@ -2373,10 +2378,22 @@
                 <div class="glass-card" style="margin-top:20px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
                         <h3>Contractor Payment Status</h3>
-                        <select id="paymentFilter" onchange="renderPayments()"
-                            style="width:280px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.15); color:var(--text-light); border:2px solid rgba(255,255,255,0.2);">
-                            <option value="all">Show All Transactions</option>
-                        </select>
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <select id="paymentFilter" onchange="renderPayments()"
+                                style="width:280px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.15); color:var(--text-light); border:2px solid rgba(255,255,255,0.2);">
+                                <option value="all">Show All Transactions</option>
+                            </select>
+                            <button id="btnExportContractorPDF" class="btn btn-pdf"
+                                style="display:none; padding:12px; border-radius:12px;"
+                                onclick="exportContractorPaymentsPDF()">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button id="btnShareWhatsApp" class="btn btn-success"
+                                style="display:none; padding:12px; border-radius:12px; background:#25D366; border-color:#25D366;"
+                                onclick="shareOnWhatsApp()">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                        </div>
                     </div>
                     <div id="paymentBarsContainer"></div>
                 </div>
@@ -2406,7 +2423,7 @@
                         <i class="fas fa-couch" style="color:var(--accent);"></i>
                         Components & Materials
                     </h2>
-                    <button class="btn btn-success" onclick="openModal('componentModal')">
+                    <button class="btn btn-success" onclick="addComponent()">
                         <i class="fas fa-plus"></i> Add Component
                     </button>
                 </div>
@@ -2415,11 +2432,10 @@
                         <thead>
                             <tr>
                                 <th data-sortable="true">Date</th>
-                                <th data-sortable="true">Name</th>
-                                <th data-sortable="true">Category</th>
+                                <th data-sortable="true">Component Details</th>
                                 <th data-sortable="true">Contractor</th>
-                                <th data-sortable="true">Work Type</th>
-                                <th data-sortable="true">Cost</th>
+                                <th data-sortable="true">Proposed Cost</th>
+                                <th data-sortable="true">Actual Cost</th>
                                 <th data-sortable="true">Progress</th>
                                 <th data-sortable="true">Status</th>
                                 <th data-sortable="false">Actions</th>
@@ -2437,7 +2453,7 @@
                         <i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i>
                         Faults & Issues
                     </h2>
-                    <button class="btn btn-danger" onclick="openModal('faultModal')">
+                    <button class="btn btn-danger" onclick="addFault()">
                         <i class="fas fa-exclamation"></i> Report Fault
                     </button>
                 </div>
@@ -2455,6 +2471,164 @@
                         </thead>
                         <tbody id="faultTableBody"></tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Initial Planning View -->
+            <div id="planning" class="view-section" style="display:none;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:28px; align-items:center;">
+                    <h2 style="font-size:28px; font-weight:800; display:flex; align-items:center; gap:12px;">
+                        <i class="fas fa-clipboard-list" style="color:var(--info);"></i>
+                        Initial Project Planning
+                    </h2>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn btn-primary" onclick="exportPlanningToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export Planning
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Planning Sections Layout -->
+                <div id="planningSectionsContainer">
+                    <!-- Electricity Section -->
+                    <div class="glass-card" style="margin-bottom:32px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="color:#38bdf8;"><i class="fas fa-bolt"></i> Electricity Planning</h3>
+                            <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('electricity')"
+                                title="Add Row">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="planning-table" id="table-electricity">
+                                <thead>
+                                    <tr>
+                                        <th>Material/Item Name</th>
+                                        <th>Part Name (Contractor)</th>
+                                        <th>Units</th>
+                                        <th>Material Type</th>
+                                        <th>Proposed Cost</th>
+                                        <th>Actual Cost</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="body-electricity"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Furniture Section -->
+                    <div class="glass-card" style="margin-bottom:32px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="color:#a78bfa;"><i class="fas fa-couch"></i> Furniture Planning</h3>
+                            <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('furniture')"
+                                title="Add Row">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="planning-table" id="table-furniture">
+                                <thead>
+                                    <tr>
+                                        <th>Material/Item Name</th>
+                                        <th>Part Name (Contractor)</th>
+                                        <th>Units</th>
+                                        <th>Material Type</th>
+                                        <th>Proposed Cost</th>
+                                        <th>Actual Cost</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="body-furniture"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- POP Section -->
+                    <div class="glass-card" style="margin-bottom:32px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="color:#2dd4bf;"><i class="fas fa-layer-group"></i> POP Planning</h3>
+                            <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('pop')"
+                                title="Add Row">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="planning-table" id="table-pop">
+                                <thead>
+                                    <tr>
+                                        <th>Material/Item Name</th>
+                                        <th>Part Name (Contractor)</th>
+                                        <th>Units</th>
+                                        <th>Material Type</th>
+                                        <th>Proposed Cost</th>
+                                        <th>Actual Cost</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="body-pop"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Painter Section -->
+                    <div class="glass-card" style="margin-bottom:32px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="color:#f0abfc;"><i class="fas fa-paint-roller"></i> Painter Planning</h3>
+                            <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('painter')"
+                                title="Add Row">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="planning-table" id="table-painter">
+                                <thead>
+                                    <tr>
+                                        <th>Material/Item Name</th>
+                                        <th>Part Name (Contractor)</th>
+                                        <th>Units</th>
+                                        <th>Material Type</th>
+                                        <th>Proposed Cost</th>
+                                        <th>Actual Cost</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="body-painter"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Custom Fitting Section -->
+                    <div class="glass-card" style="margin-bottom:32px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="color:var(--accent);"><i class="fas fa-tools"></i> Custom Fitting / Others</h3>
+                            <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('custom')"
+                                title="Add Row">
+                                <i class="fas fa-plus"></i> Add Row
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="planning-table" id="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Material/Item Name</th>
+                                        <th>Part Name (Contractor)</th>
+                                        <th>Units</th>
+                                        <th>Material Type</th>
+                                        <th>Proposed Cost</th>
+                                        <th>Actual Cost</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="body-custom"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2916,7 +3090,7 @@
                     </div>
                     <div class="form-grid">
                         <div><label>Category</label>
-                            <select id="compCategory">
+                            <select id="compCategory" onchange="toggleComponentTemplate()">
                                 <option>Electrical</option>
                                 <option>Plumbing</option>
                                 <option>Furniture</option>
@@ -2926,21 +3100,46 @@
                                 <option>Other</option>
                             </select>
                         </div>
-                        <div><label>Cost</label><input type="number" id="compCost" step="0.01" required></div>
+                        <div><label>Proposed Cost</label><input type="number" id="compProposedCost" step="0.01"
+                                value="0"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div><label>Actual Cost</label><input type="number" id="compActualCost" step="0.01" value="0">
+                        </div>
+                        <div><label>Work Type</label>
+                            <select id="compWorkType">
+                                <option>Installation</option>
+                                <option>Repair</option>
+                                <option>Maintenance</option>
+                                <option>Fitting</option>
+                                <option>Material Supply</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Contractor</label>
-                        <select id="compContractor">
-                            <option value="">None</option>
+                        <select id="compContractor" onchange="toggleNewContractorFields()">
+                            <option value="">None / New</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Work Type</label><input type="text" id="compWorkType"
-                            placeholder="e.g. Kitchen Installation"></div>
-                    <div class="form-group">
+                    <!-- New Contractor Details if "None" selected -->
+                    <div id="newContractorDetails"
+                        style="display:none; background:rgba(255,165,0,0.05); padding:15px; border-radius:12px; border:1px solid rgba(255,165,0,0.2); margin-bottom:15px;">
+                        <div class="form-grid">
+                            <div><label>New Contractor Name</label><input type="text" id="compNewContName"
+                                    placeholder="Name"></div>
+                            <div><label>New Contractor Phone</label><input type="tel" id="compNewContPhone"
+                                    placeholder="Phone"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top:20px;">
                         <label>Progress (%)</label>
-                        <input type="range" id="compProgress" min="0" max="100" value="0" style="width:100%">
+                        <input type="range" id="compProgress" min="0" max="100" value="0" style="width:100%"
+                            oninput="document.getElementById('compProgDisplay').innerText = this.value + '%'">
                         <div style="text-align:center; font-size:18px; margin-top:8px;" id="compProgDisplay">0%</div>
                     </div>
+
                     <div class="form-group"><label>Status</label>
                         <select id="compStatus">
                             <option>Not Started</option>
@@ -3282,6 +3481,13 @@
                         expenses: backupData.expenses || [],
                         contractors: backupData.contractors || [],
                         components: backupData.components || [],
+                        planning: backupData.planning || {
+                            electricity: [],
+                            furniture: [],
+                            pop: [],
+                            painter: [],
+                            custom: []
+                        },
                         faults: backupData.faults || [],
                         notes: backupData.notes || [],
                         theme: backupData.theme || 'purple',
@@ -3387,51 +3593,12 @@
                 }
             };
 
-            // ========== INITIALIZATION ==========
-            document.addEventListener('DOMContentLoaded', function () {
-                // Hide loading overlay
-                setTimeout(() => {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                }, 800);
 
-                // Load saved data
-                if (localStorage.getItem('ibp_ultimate')) {
-                    try {
-                        const saved = JSON.parse(localStorage.getItem('ibp_ultimate'));
-                        app = { ...app, ...saved };
-                        if (!app.components) app.components = [];
-                        if (!app.notes) app.notes = [];
-                        if (!app.paymentSources) app.paymentSources = ['Self'];
-                        if (!app.projectAddress) app.projectAddress = '';
-                        if (!app.projectTimeline) app.projectTimeline = '6 months';
-                    } catch (e) {
-                        console.error('Error loading saved data:', e);
-                    }
-                }
-
-                // Set theme and initialize
-                setTheme(app.theme || 'purple');
-                updateDisplays();
-                populateSelects();
-                renderAll();
-
-                // Initialize event listeners
-                initEventListeners();
-                initTableSorting();
-
-                // Initialize Supabase Cloud Backup
-                SupabaseBackup.init();
-
+            // ========== INITIALIZATION UTILITIES ==========
+            function initInteractiveElements() {
                 // Initialize Header Clock
                 updateHeaderClock();
                 setInterval(updateHeaderClock, 1000);
-
-                // Add animation classes
-                setTimeout(() => {
-                    document.querySelectorAll('.logo i, .stat-card i').forEach((icon, index) => {
-                        icon.style.animationDelay = `${index * 0.1}s`;
-                    });
-                }, 100);
 
                 // Initialize progress slider
                 const compProgress = document.getElementById('compProgress');
@@ -3444,7 +3611,10 @@
                         }
                     });
                 }
-            });
+
+                // Progress slider listener is already handled by oninput in HTML
+                // (Optional: remove this if you want to rely purely on HTML oninput)
+            }
 
             function initEventListeners() {
                 // Button click animations
@@ -3524,7 +3694,7 @@
                     app.theme = themeMatch[1];
                 }
 
-                localStorage.setItem('ibp_ultimate', JSON.stringify(app));
+                localStorage.setItem('ibpultimate', JSON.stringify(app));
                 localStorage.setItem('ibp_lastSaved', new Date().toISOString());
             }
 
@@ -3612,10 +3782,9 @@
                     renderDashboard();
                     renderRecentActivity();
                 }
-                if (id === 'calendar') renderCalendar();
-                if (id === 'timeline') renderTimeline();
                 if (id === 'reports') renderReports();
                 if (id === 'payments') renderPayments();
+                if (id === 'planning') renderPlanning();
             }
 
             // ========== RENDERING FUNCTIONS ==========
@@ -3627,6 +3796,7 @@
                 renderPayments();
                 renderComponents();
                 renderFaults();
+                renderPlanning();
                 renderCalendar();
                 renderTimeline();
                 populateSelects();
@@ -3833,6 +4003,14 @@
                 closeModal('expenseModal');
             }
 
+            function addExpense() {
+                document.getElementById('expenseForm').reset();
+                document.getElementById('expId').value = '';
+                document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('duplicateFromModal').style.display = 'none';
+                openModal('expenseModal');
+            }
+
             // Update editExpense function to show duplicate button
             function editExpense(id) {
                 const e = app.expenses.find(x => x.id === id);
@@ -3855,23 +4033,46 @@
             }
 
             // Update the modal opening for new expenses to hide duplicate button
-            function openModal(id) {
+            // ========== MODAL FUNCTIONS ==========
+            function openModal(id, isEdit = false) {
                 document.getElementById(id).classList.add('active');
-                if (id === 'expenseModal') {
-                    document.getElementById('expDate').valueAsDate = new Date();
-                    document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-                    document.getElementById('expId').value = '';
-                    document.getElementById('duplicateFromModal').style.display = 'none'; // Hide for new expense
+                if (!isEdit) {
+                    if (id === 'expenseModal') {
+                        document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+                        document.getElementById('expId').value = '';
+                        document.getElementById('duplicateFromModal').style.display = 'none';
+                    }
+                    if (id === 'contractorModal') {
+                        document.getElementById('contractorForm').reset();
+                        document.getElementById('contId').value = '';
+                        document.getElementById('contBudget').value = 0;
+                        document.getElementById('contRating').value = 0;
+                        setContractorRating(0);
+                    }
+                    if (id === 'componentModal') {
+                        document.getElementById('componentForm').reset();
+                        document.getElementById('compDate').value = new Date().toISOString().split('T')[0];
+                        document.getElementById('compProgress').value = 0;
+                        document.getElementById('compProgDisplay').innerText = '0%';
+                        document.getElementById('newContractorDetails').style.display = 'block';
+                    }
+                    if (id === 'faultModal') {
+                        document.getElementById('faultDate').value = new Date().toISOString().split('T')[0];
+                    }
                 }
-                // ... rest of the existing code ...
+            }
+
+            function closeModal(id) {
+                document.getElementById(id).classList.remove('active');
             }
             // ========== CRUD OPERATIONS FOR CONTRACTORS ==========
             function saveContractor(e) {
                 e.preventDefault();
                 const id = document.getElementById('contId').value || Date.now();
+                const newName = document.getElementById('contName').value.trim();
                 const data = {
                     id: parseInt(id),
-                    name: document.getElementById('contName').value.trim(),
+                    name: newName,
                     role: document.getElementById('contRole').value.trim(),
                     phone: document.getElementById('contPhone').value.trim(),
                     email: document.getElementById('contEmail').value.trim() || '',
@@ -3880,13 +4081,29 @@
                     rating: parseInt(document.getElementById('contRating').value || 0),
                     details: document.getElementById('contDetails').value.trim() || ''
                 };
+
                 const idx = app.contractors.findIndex(x => x.id === data.id);
-                if (idx > -1) app.contractors[idx] = data;
-                else app.contractors.push(data);
+                if (idx > -1) {
+                    const oldName = app.contractors[idx].name;
+                    // Propagate name change if name has changed
+                    if (oldName !== newName) {
+                        app.expenses.forEach(exp => { if (exp.contractor === oldName) exp.contractor = newName; });
+                        app.components.forEach(comp => { if (comp.contractor === oldName) comp.contractor = newName; });
+                        app.faults.forEach(fault => { if (fault.contractor === oldName) fault.contractor = newName; });
+                    }
+                    app.contractors[idx] = data;
+                } else {
+                    app.contractors.push(data);
+                }
+
                 saveData();
                 renderAll();
                 closeModal('contractorModal');
                 showNotification('Contractor saved successfully!', 'success');
+            }
+
+            function addContractor() {
+                openModal('contractorModal', false);
             }
 
             function editContractor(id) {
@@ -3898,11 +4115,11 @@
                 document.getElementById('contPhone').value = c.phone || '';
                 document.getElementById('contEmail').value = c.email || '';
                 document.getElementById('contCompany').value = c.company || '';
-                document.getElementById('contBudget').value = c.budget;
+                document.getElementById('contBudget').value = c.budget || 0;
                 document.getElementById('contRating').value = c.rating || 0;
                 setContractorRating(c.rating || 0);
                 document.getElementById('contDetails').value = c.details || '';
-                openModal('contractorModal');
+                openModal('contractorModal', true);
             }
 
             function deleteContractor(id) {
@@ -3919,64 +4136,94 @@
                 grid.innerHTML = app.contractors.map(c => {
                     const paid = app.expenses.filter(e => e.contractor === c.name).reduce((a, b) => a + parseFloat(b.amount || 0), 0);
                     const percent = c.budget > 0 ? ((paid / c.budget) * 100).toFixed(1) : 0;
-                    const projects = app.expenses.filter(e => e.contractor === c.name).length;
 
                     let stars = '';
                     const rating = c.rating || 0;
                     for (let i = 1; i <= 5; i++) {
-                        stars += `<i class="${i <= rating ? 'fas' : 'far'} fa-star" style="color:var(--accent); font-size:12px;"></i>`;
+                        stars += `<i class="${i <= rating ? 'fas' : 'far'} fa-star" style="color:#f2d348; font-size:10px; text-shadow:0 0 5px rgba(242,211,72,0.3);"></i>`;
                     }
 
                     return `
-<div class="glass-card contractor-card" style="text-align:left; padding:20px; border-radius:18px; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.15); box-shadow:0 10px 30px rgba(0,0,0,0.2);">
-    <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:var(--primary);"></div>
-    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:14px;">
-        <div style="flex:1;">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
-                <h3 style="margin:0; font-size:18px; font-weight:800; letter-spacing:-0.5px;">${c.name}</h3>
-                <div style="display:flex; gap:2px;">${stars}</div>
+<div class="glass-card contractor-card" 
+     style="text-align:left; padding:24px; border-radius:22px; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.15); box-shadow:0 15px 35px rgba(0,0,0,0.3); transition:all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); cursor:default;"
+     onmouseover="this.style.transform='translateY(-8px)'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.boxShadow='0 20px 45px rgba(0,0,0,0.4)';"
+     onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,255,255,0.15)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.3)';"
+>
+    <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:linear-gradient(to bottom, var(--primary), var(--secondary));"></div>
+    
+    <!-- Header Section: Responsive Name and Actions -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:18px;">
+        <div style="flex:1; min-width:0;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <h3 style="margin:0; font-size:20px; font-weight:900; letter-spacing:-0.5px; line-height:1.2; word-break:break-word; color:white;">${c.name}</h3>
+                <div style="display:flex; gap:3px; margin-top:2px;">${stars}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; opacity:0.9;">
+            
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; background:rgba(255,255,255,0.15); color:white; padding:3px 10px; border-radius:12px; backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.1);">
                     ${c.role || 'Contractor'}
                 </span>
-                ${projects > 0 ? `<span style="font-size:11px; font-weight:700; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:10px;">${projects} Jobs</span>` : ''}
-            </div>
-            <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; opacity:0.85;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-phone-alt" style="width:14px; color:var(--info);"></i>
-                    <a href="tel:${c.phone}" style="color:inherit; text-decoration:none;">${c.phone || '-'}</a>
-                </div>
-                ${c.email ? `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-envelope" style="width:14px; color:var(--info);"></i>
-                    <a href="mailto:${c.email}" style="color:inherit; text-decoration:none; font-size:12px;">${c.email}</a>
-                </div>
-                ` : ''}
+                <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; background:rgba(34,197,94,0.15); color:#4ade80; padding:3px 10px; border-radius:12px; border:1px solid rgba(34,197,94,0.2);">
+                    ${app.currency}${paid.toLocaleString()} Paid
+                </span>
             </div>
         </div>
-        <div style="display:flex; gap:6px;">
-            <button class="btn-icon btn-edit" onclick="editContractor(${c.id})" title="Edit" style="background:rgba(255,255,255,0.1);">
-                <i class="fas fa-pen" style="font-size:12px;"></i>
+        
+        <div style="display:flex; gap:8px;">
+            <button class="btn-icon btn-edit" onclick="editContractor(${c.id})" title="Edit" style="background:rgba(255,255,255,0.08); width:36px; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
+                <i class="fas fa-pen" style="font-size:13px;"></i>
             </button>
-            <button class="btn-icon btn-delete" onclick="deleteContractor(${c.id})" title="Delete" style="background:rgba(239,68,68,0.1); color:var(--danger);">
-                <i class="fas fa-trash-alt" style="font-size:12px;"></i>
+            <button class="btn-icon btn-delete" onclick="deleteContractor(${c.id})" title="Delete" style="background:rgba(239,68,68,0.08); color:#f87171; width:36px; height:36px; border-radius:10px; border:1px solid rgba(239,68,68,0.15);">
+                <i class="fas fa-trash-alt" style="font-size:13px;"></i>
             </button>
         </div>
     </div>
+
+    <!-- Contact Info Section -->
+    <div style="display:grid; grid-template-columns:1fr; gap:8px; font-size:13px; opacity:0.8; margin-bottom:20px; background:rgba(0,0,0,0.1); padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-phone-alt" style="width:16px; color:var(--info); font-size:12px;"></i>
+            <a href="tel:${c.phone}" style="color:inherit; text-decoration:none; font-weight:600;">${c.phone || '-'}</a>
+        </div>
+        ${c.email ? `
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-envelope" style="width:16px; color:var(--info); font-size:12px;"></i>
+            <a href="mailto:${c.email}" style="color:inherit; text-decoration:none; font-weight:500; font-size:12px; overflow:hidden; text-overflow:ellipsis;">${c.email}</a>
+        </div>
+        ` : ''}
+    </div>
     
-    <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:12px; margin-top:10px;">
-        <div class="prog-track" style="font-size:12px; margin-bottom:8px;">
-            <span style="opacity:0.8;">Total Payments</span>
-            <span style="font-weight:700;">${app.currency}${paid.toLocaleString(app.dateFormat)}</span>
+    <!-- Financial Overview Section -->
+    <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;">
+            <div style="display:flex; gap:20px;">
+                <div style="display:flex; flex-direction:column;">
+                    <span style="opacity:0.5; text-transform:uppercase; font-weight:800; font-size:9px; letter-spacing:0.5px;">Budget</span>
+                    <span style="font-weight:800; color:var(--info); font-size:15px; margin-top:2px;">${app.currency}${parseFloat(c.budget).toLocaleString()}</span>
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <span style="opacity:0.5; text-transform:uppercase; font-weight:800; font-size:9px; letter-spacing:0.5px;">Paid</span>
+                    <span style="font-weight:800; color:#4ade80; font-size:15px; margin-top:2px;">${app.currency}${paid.toLocaleString()}</span>
+                </div>
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:1px; height:24px; background:rgba(255,255,255,0.1);"></div>
+                <div style="display:flex; flex-direction:column; text-align:right;">
+                    <span style="opacity:0.5; text-transform:uppercase; font-weight:800; font-size:9px; letter-spacing:0.5px;">Balance</span>
+                    <span style="font-weight:800; color:${(c.budget - paid) < 0 ? '#f87171' : 'white'}; font-size:18px; line-height:1;">${app.currency}${(c.budget - paid).toLocaleString()}</span>
+                </div>
+            </div>
         </div>
-        <div class="budget-bar-container" style="height:8px; margin-bottom:8px; background:rgba(255,255,255,0.1);">
-            <div class="budget-bar-fill" style="width:${Math.min(percent, 100)}%; background:linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+        
+        <div class="budget-bar-container" style="height:10px; margin-bottom:10px; background:rgba(255,255,255,0.1); border-radius:5px; overflow:hidden;">
+            <div class="budget-bar-fill" style="width:${Math.min(percent, 100)}%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); box-shadow:0 0 10px rgba(var(--primary-rgb), 0.5);"></div>
         </div>
+        
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
-            <span style="opacity:0.6;">Budget: ${app.currency}${parseFloat(c.budget).toLocaleString(app.dateFormat)}</span>
-            <span style="font-weight:800; color:${percent > 90 ? 'var(--danger)' : percent > 70 ? 'var(--warning)' : 'var(--success)'}">
-                ${percent}%
+            <span style="opacity:0.6; font-weight:600;">Utilization</span>
+            <span style="font-weight:800; letter-spacing:0.5px; color:${percent > 90 ? '#f87171' : percent > 70 ? '#fbbf24' : '#4ade80'}">
+                ${percent}% Used
             </span>
         </div>
     </div>
@@ -4006,8 +4253,11 @@
                     name: document.getElementById('compName').value.trim(),
                     category: document.getElementById('compCategory').value,
                     contractor: document.getElementById('compContractor').value || '',
-                    workType: document.getElementById('compWorkType').value.trim() || '',
-                    cost: parseFloat(document.getElementById('compCost').value),
+                    newContName: document.getElementById('compNewContName').value.trim(),
+                    newContPhone: document.getElementById('compNewContPhone').value.trim(),
+                    proposedCost: parseFloat(document.getElementById('compProposedCost').value || 0),
+                    actualCost: parseFloat(document.getElementById('compActualCost').value || 0),
+                    workType: document.getElementById('compWorkType').value,
                     progress: parseInt(document.getElementById('compProgress').value),
                     status: document.getElementById('compStatus').value
                 };
@@ -4020,6 +4270,80 @@
                 showNotification('Component saved successfully!', 'success');
             }
 
+            // ========== INITIAL PLANNING LOGIC ==========
+            function renderPlanning() {
+                const sections = ['electricity', 'furniture', 'pop', 'painter', 'custom'];
+                sections.forEach(sec => {
+                    const tbody = document.getElementById(`body-${sec}`);
+                    if (!tbody) return;
+
+                    const data = app.planning[sec] || [];
+                    tbody.innerHTML = data.map((row, idx) => `
+                        <tr id="row-${sec}-${idx}">
+                            <td><input type="text" value="${row.name || ''}" onchange="updatePlanningField('${sec}', ${idx}, 'name', this.value)" placeholder="e.g. 10W LED"></td>
+                            <td><input type="text" value="${row.part || ''}" onchange="updatePlanningField('${sec}', ${idx}, 'part', this.value)" placeholder="e.g. Hall Right"></td>
+                            <td><input type="text" value="${row.units || ''}" onchange="updatePlanningField('${sec}', ${idx}, 'units', this.value)" placeholder="e.g. 5 Nos"></td>
+                            <td><input type="text" value="${row.type || ''}" onchange="updatePlanningField('${sec}', ${idx}, 'type', this.value)" placeholder="e.g. Warm White"></td>
+                            <td><input type="number" value="${row.proposed || 0}" onchange="updatePlanningField('${sec}', ${idx}, 'proposed', this.value)" style="width:100px;"></td>
+                            <td><input type="number" value="${row.actual || 0}" onchange="updatePlanningField('${sec}', ${idx}, 'actual', this.value)" style="width:100px;"></td>
+                            <td>
+                                <button class="btn btn-icon-small btn-danger" onclick="deletePlanningRow('${sec}', ${idx})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    if (data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; opacity:0.5; padding:20px;">No entries yet. Click "Add Row" to start.</td></tr>`;
+                    }
+                });
+            }
+
+            function addPlanningRow(section) {
+                if (!app.planning[section]) app.planning[section] = [];
+                app.planning[section].push({
+                    name: '',
+                    part: '',
+                    units: '',
+                    type: '',
+                    proposed: 0,
+                    actual: 0
+                });
+                renderPlanning();
+                saveData();
+            }
+
+            function updatePlanningField(section, index, field, value) {
+                if (!app.planning[section][index]) return;
+                if (field === 'proposed' || field === 'actual') {
+                    app.planning[section][index][field] = parseFloat(value) || 0;
+                } else {
+                    app.planning[section][index][field] = value;
+                }
+                saveData();
+            }
+
+            function deletePlanningRow(section, index) {
+                if (confirm('Delete this row?')) {
+                    app.planning[section].splice(index, 1);
+                    renderPlanning();
+                    saveData();
+                }
+            }
+
+            function exportPlanningToPDF() {
+                window.print();
+            }
+
+            function addComponent() {
+                document.getElementById('componentForm').reset();
+                document.getElementById('compId').value = '';
+                document.getElementById('compDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('compProgDisplay').innerText = '0%';
+                openModal('componentModal');
+            }
+
             function editComponent(id) {
                 const c = app.components.find(x => x.id === id);
                 if (!c) return;
@@ -4027,13 +4351,23 @@
                 document.getElementById('compDate').value = c.date;
                 document.getElementById('compName').value = c.name;
                 document.getElementById('compCategory').value = c.category;
-                document.getElementById('compContractor').value = c.contractor;
-                document.getElementById('compWorkType').value = c.workType;
-                document.getElementById('compCost').value = c.cost;
-                document.getElementById('compProgress').value = c.progress;
-                document.getElementById('compProgDisplay').innerText = c.progress + '%';
-                document.getElementById('compStatus').value = c.status;
-                openModal('componentModal');
+                document.getElementById('compProposedCost').value = c.proposedCost || 0;
+                document.getElementById('compActualCost').value = c.actualCost || 0;
+                document.getElementById('compWorkType').value = c.workType || 'Installation';
+                document.getElementById('compContractor').value = c.contractor || '';
+                document.getElementById('compNewContName').value = c.newContName || '';
+                document.getElementById('compNewContPhone').value = c.newContPhone || '';
+                document.getElementById('compProgress').value = c.progress || 0;
+                document.getElementById('compProgDisplay').innerText = (c.progress || 0) + '%';
+                document.getElementById('compStatus').value = c.status || 'Not Started';
+
+                toggleNewContractorFields();
+                openModal('componentModal', true);
+            }
+
+            function toggleNewContractorFields() {
+                const val = document.getElementById('compContractor').value;
+                document.getElementById('newContractorDetails').style.display = (val === '' || val === 'None') ? 'block' : 'none';
             }
 
             function deleteComponent(id) {
@@ -4050,18 +4384,32 @@
                 tbody.innerHTML = app.components.sort((a, b) => new Date(b.date) - new Date(a.date)).map(c => {
                     const statusClass = c.status === 'Completed' ? 'badge-completed' :
                         c.status === 'In Progress' ? 'badge-inprogress' : 'badge-pending';
+
+                    const proposed = parseFloat(c.proposedCost || c.cost || 0);
+                    const actual = parseFloat(c.actualCost || c.cost || 0);
+                    const variance = actual - proposed;
+                    const varianceColor = variance > 0 ? '#f87171' : (variance < 0 ? '#4ade80' : 'inherit');
+
                     return `
                 <tr>
                     <td data-sort="${c.date}">${formatDate(c.date)}</td>
-                    <td><b>${c.name}</b></td>
-                    <td>${c.category || 'Other'}</td>
-                    <td>${c.contractor || '-'}</td>
-                    <td>${c.workType || '-'}</td>
-                    <td>${app.currency}${parseFloat(c.cost).toLocaleString(app.dateFormat)}</td>
                     <td>
-                        <div class="budget-bar-container" style="height:20px">
+                        <div style="font-weight:800;">${c.name}</div>
+                        <div style="font-size:10px; opacity:0.6;">${c.category} | ${c.workType || 'Job'}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:11px;">${c.contractor || 'None'}</div>
+                        ${c.newContName ? `<div style="font-size:9px; color:var(--warning);">${c.newContName}</div>` : ''}
+                    </td>
+                    <td>${app.currency}${proposed.toLocaleString()}</td>
+                    <td>
+                        <div style="font-weight:700;">${app.currency}${actual.toLocaleString()}</div>
+                        ${variance !== 0 ? `<div style="font-size:9px; color:${varianceColor};">${variance > 0 ? '+' : ''}${variance.toLocaleString()}</div>` : ''}
+                    </td>
+                    <td>
+                        <div class="budget-bar-container" style="height:18px; position:relative;">
                             <div class="budget-bar-fill" style="width:${c.progress}%"></div>
-                            <div class="budget-bar-text">${c.progress}%</div>
+                            <div style="position:absolute; width:100%; text-align:center; font-size:9px; font-weight:800; top:50%; transform:translateY(-50%);">${c.progress}%</div>
                         </div>
                     </td>
                     <td><span class="badge ${statusClass}">${c.status}</span></td>
@@ -4096,6 +4444,13 @@
                 renderAll();
                 closeModal('faultModal');
                 showNotification('Fault report saved!', 'success');
+            }
+
+            function addFault() {
+                document.getElementById('faultForm').reset();
+                document.getElementById('faultId').value = '';
+                document.getElementById('faultDate').value = new Date().toISOString().split('T')[0];
+                openModal('faultModal');
             }
 
             function editFault(id) {
@@ -4150,19 +4505,46 @@
                 const relevant = filterName === 'all' ? app.contractors : app.contractors.filter(c => c.name === filterName);
 
                 const exportBtn = document.getElementById('btnExportContractorPDF');
-                if (exportBtn) {
-                    exportBtn.style.display = filterName === 'all' ? 'none' : 'inline-flex';
-                }
+                const whatsappBtn = document.getElementById('btnShareWhatsApp');
+                if (exportBtn) exportBtn.style.display = filterName === 'all' ? 'none' : 'inline-flex';
+                if (whatsappBtn) whatsappBtn.style.display = filterName === 'all' ? 'none' : 'inline-flex';
 
                 container.innerHTML = relevant.map(c => {
-                    const paid = app.expenses.filter(e => e.contractor === c.name).reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+                    const contractorTxs = app.expenses.filter(e => e.contractor === c.name);
+                    const paid = contractorTxs.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
                     const percent = c.budget > 0 ? ((paid / c.budget) * 100).toFixed(1) : 0;
+                    const balance = c.budget - paid;
+
                     return `
-                <div class="payment-summary-card">
-                    <div style="font-weight:bold; font-size:15px">${c.name}</div>
-                    <div class="prog-track"><span>${app.currency}${paid.toLocaleString(app.dateFormat)}</span><span>${percent}%</span></div>
-                    <div class="budget-bar-container" style="height:14px">
-                        <div class="budget-bar-fill" style="width:${Math.min(percent, 100)}%"></div>
+                <div class="payment-summary-card" style="padding:20px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h4 style="margin:0; font-size:18px; font-weight:800;">${c.name}</h4>
+                        <span style="font-size:12px; font-weight:700; background:rgba(255,255,255,0.1); padding:4px 12px; border-radius:20px;">
+                            ${percent}% Utilized
+                        </span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; margin-bottom:20px;">
+                        <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; opacity:0.6; margin-bottom:4px; font-weight:700;">Allocated</div>
+                            <div style="font-size:15px; font-weight:800; color:var(--info);">${app.currency}${parseFloat(c.budget).toLocaleString()}</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; opacity:0.6; margin-bottom:4px; font-weight:700;">Paid</div>
+                            <div style="font-size:15px; font-weight:800; color:var(--success);">${app.currency}${paid.toLocaleString()}</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; opacity:0.6; margin-bottom:4px; font-weight:700;">Balance</div>
+                            <div style="font-size:15px; font-weight:800; color:${balance < 0 ? 'var(--danger)' : '#f59e0b'};">${app.currency}${balance.toLocaleString()}</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; opacity:0.6; margin-bottom:4px; font-weight:700;">Total Transactions</div>
+                            <div style="font-size:15px; font-weight:800; color:var(--warning);">${contractorTxs.length}</div>
+                        </div>
+                    </div>
+
+                    <div class="budget-bar-container" style="height:10px; background:rgba(255,255,255,0.1); border-radius:5px; overflow:hidden;">
+                        <div class="budget-bar-fill" style="width:${Math.min(percent, 100)}%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); box-shadow:0 0 10px var(--primary);"></div>
                     </div>
                 </div>`;
                 }).join('');
@@ -4180,6 +4562,120 @@
                     <td>${e.mode}</td>
                 </tr>
             `).join('');
+            }
+
+            async function shareOnWhatsApp() {
+                const contractorName = document.getElementById('paymentFilter').value;
+                if (!contractorName || contractorName === 'all') {
+                    showNotification('Please select a specific contractor first', 'info');
+                    return;
+                }
+
+                const contractor = app.contractors.find(c => c.name === contractorName);
+                const payments = app.expenses.filter(e => e.contractor === contractorName)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                if (payments.length === 0) {
+                    showNotification('No payments to share', 'info');
+                    return;
+                }
+
+                showNotification('Preparing statement for sharing...', 'info');
+
+                try {
+                    // 1. Generate the PDF blob using jsPDF logic
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+
+                    const formatForPDF = (text) => {
+                        if (!text) return '';
+                        return text.toString().replace(/₹/g, 'Rs.').replace(/[^\x00-\x7F]/g, '');
+                    };
+
+                    const primaryColor = [102, 126, 234];
+                    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                    doc.rect(0, 0, 210, 40, 'F');
+                    doc.setFontSize(22);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('Payment Statement', 20, 20);
+                    doc.setFontSize(14);
+                    doc.text(formatForPDF(contractorName), 20, 30);
+
+                    // Financial Summary Box
+                    const totalPaid = payments.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+                    const budget = contractor?.budget || 0;
+                    const balance = budget - totalPaid;
+
+                    doc.setFillColor(245, 247, 251);
+                    doc.rect(20, 50, 170, 25, 'F');
+                    doc.setTextColor(40, 40, 40);
+                    doc.setFontSize(10);
+                    doc.text(`Total Paid: Rs.${totalPaid.toLocaleString()}`, 25, 65);
+                    doc.text(`Budget: Rs.${budget.toLocaleString()}`, 80, 65);
+                    doc.text(`Balance: Rs.${balance.toLocaleString()}`, 135, 65);
+
+                    // Table
+                    let yPos = 85;
+                    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                    doc.rect(20, yPos, 170, 10, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('Date', 25, yPos + 7);
+                    doc.text('Work Type', 55, yPos + 7);
+                    doc.text('Amount', 150, yPos + 7);
+
+                    yPos += 15;
+                    doc.setTextColor(60, 60, 60);
+                    payments.forEach((p, i) => {
+                        if (i % 2 === 0) {
+                            doc.setFillColor(248, 249, 252);
+                            doc.rect(20, yPos - 5, 170, 10, 'F');
+                        }
+                        doc.text(formatForPDF(new Date(p.date).toLocaleDateString()), 25, yPos);
+                        doc.text(formatForPDF(p.workType || 'General'), 55, yPos);
+                        doc.text(`Rs.${parseFloat(p.amount).toLocaleString()}`, 150, yPos);
+                        yPos += 10;
+                    });
+
+                    const pdfBlob = doc.output('blob');
+                    const fileName = `Statement_${contractorName.replace(/\s+/g, '_')}.pdf`;
+                    const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+                    // 2. Try Web Share API (Mobile Support)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Payment Statement',
+                            text: `Payment Statement for ${contractorName} - Interior Budget Pro`
+                        });
+                        showNotification('Statement shared!', 'success');
+                    } else {
+                        // 3. Fallback to WhatsApp Text + Download
+                        const paid = payments.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+                        const balance = contractor.budget - paid;
+
+                        let message = `*Interior Project: ${app.projectName}*\n`;
+                        message += `*Contractor Payment Receipt*\n\n`;
+                        message += `*Name:* ${contractor.name}\n`;
+                        message += `*Summary:* Total Paid: ${app.currency}${paid.toLocaleString()}, Balance: ${app.currency}${balance.toLocaleString()}\n\n`;
+                        message += `_Statement PDF generating for download..._`;
+
+                        const phone = contractor.phone ? contractor.phone.replace(/\D/g, '') : '';
+                        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+
+                        // Also trigger PDF download since direct cloud file sharing failed
+                        doc.save(fileName);
+                        showNotification('Opening WhatsApp & Downloading PDF...', 'success');
+                    }
+                } catch (err) {
+                    console.error('Sharing failed:', err);
+                    showNotification('Sharing failed. Try downloading PDF instead.', 'error');
+                }
+            }
+
+            function exportContractorPaymentsPDF() {
+                const filterName = document.getElementById('paymentFilter').value;
+                if (filterName === 'all') return;
+                exportContractorPDF(filterName);
             }
 
             // ========== CALENDAR FUNCTIONS ==========
@@ -4838,39 +5334,7 @@
             `;
             }
 
-            // ========== MODAL FUNCTIONS ==========
-            function openModal(id) {
-                document.getElementById(id).classList.add('active');
-                if (id === 'expenseModal') {
-                    document.getElementById('expDate').valueAsDate = new Date();
-                    document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-                }
-                if (id === 'componentModal') {
-                    document.getElementById('compDate').valueAsDate = new Date();
-                    document.getElementById('compDate').value = new Date().toISOString().split('T')[0];
-                    document.getElementById('compProgress').value = 0;
-                    document.getElementById('compProgDisplay').innerText = '0%';
-                }
-                if (id === 'faultModal') {
-                    document.getElementById('faultDate').valueAsDate = new Date();
-                    document.getElementById('faultDate').value = new Date().toISOString().split('T')[0];
-                }
-                if (id === 'contractorModal') {
-                    document.getElementById('contBudget').value = 0;
-                    document.getElementById('contRating').value = 0;
-                    setContractorRating(0);
-                }
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                // Reset forms
-                const form = document.querySelector(`#${id} form`);
-                if (form) form.reset();
-                document.querySelectorAll(`#${id} [type=hidden]`).forEach(h => h.value = '');
-            }
-
-            // =========
+            // ========== DATA PERSISTENCE ==========
             // ========== EXPENSE TABLE RENDERING ==========
             function renderExpenses() {
                 const tbody = document.getElementById('expenseTableBody');
@@ -5168,6 +5632,7 @@ Backup includes:
                         Phone: c.phone,
                         Email: c.email,
                         Company: c.company,
+                        Rating: c.rating || 0,
                         'Allocated Budget': c.budget,
                         Details: c.details
                     }));
@@ -5589,7 +6054,7 @@ Backup includes:
             // ========== APP RESET ==========
             function resetApp() {
                 if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
-                    localStorage.removeItem('ibp_ultimate');
+                    localStorage.removeItem('ibpultimate');
                     app = {
                         budget: 0,
                         projectName: 'Interior Budget Pro',
@@ -5600,6 +6065,13 @@ Backup includes:
                         expenses: [],
                         contractors: [],
                         components: [],
+                        planning: {
+                            electricity: [],
+                            furniture: [],
+                            pop: [],
+                            painter: [],
+                            custom: []
+                        },
                         faults: [],
                         notes: [],
                         theme: 'purple',
@@ -5807,6 +6279,13 @@ Backup includes:
                             expenses: jsonData.expenses || [],
                             contractors: jsonData.contractors || [],
                             components: jsonData.components || [],
+                            planning: jsonData.planning || {
+                                electricity: [],
+                                furniture: [],
+                                pop: [],
+                                painter: [],
+                                custom: []
+                            },
                             faults: jsonData.faults || [],
                             notes: jsonData.notes || [],
                             theme: jsonData.theme || "purple",
@@ -5913,6 +6392,13 @@ Backup includes:
                         const saved = JSON.parse(localStorage.getItem('ibpultimate'));
                         app = { ...app, ...saved };
                         if (!app.components) app.components = [];
+                        if (!app.planning) app.planning = {
+                            electricity: [],
+                            furniture: [],
+                            pop: [],
+                            painter: [],
+                            custom: []
+                        };
                         if (!app.notes) app.notes = [];
                         if (!app.paymentSources) app.paymentSources = ["Self"];
                         if (!app.projectAddress) app.projectAddress = "";
@@ -5927,6 +6413,7 @@ Backup includes:
                 updateDisplays();
                 populateSelects();
                 renderAll();
+                initInteractiveElements();
                 initEventListeners();
                 initTableSorting();
 
@@ -6002,6 +6489,53 @@ Backup includes:
             if (clockEl) {
                 clockEl.textContent = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
             }
+        }
+
+        // Initialize table sorting
+        function initTableSorting() {
+            document.querySelectorAll('th[data-sortable="true"]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const thIndex = Array.from(th.parentNode.children).indexOf(th);
+                    const isAsc = th.classList.contains('asc');
+
+                    // Reset all headers
+                    table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc'));
+
+                    // Toggle current header
+                    th.classList.toggle('asc', !isAsc);
+                    th.classList.toggle('desc', isAsc);
+
+                    const multiplier = !isAsc ? 1 : -1;
+
+                    rows.sort((a, b) => {
+                        const aCell = a.children[thIndex];
+                        const bCell = b.children[thIndex];
+                        const aVal = aCell.getAttribute('data-sort') || aCell.innerText.trim();
+                        const bVal = bCell.getAttribute('data-sort') || bCell.innerText.trim();
+
+                        // Date sorting
+                        if (!isNaN(Date.parse(aVal)) && !isNaN(Date.parse(bVal)) && isNaN(aVal)) {
+                            return (new Date(aVal) - new Date(bVal)) * multiplier;
+                        }
+
+                        // Numeric sorting (remove currency symbols)
+                        const aNum = parseFloat(aVal.replace(/[^0-9.-]+/g, ''));
+                        const bNum = parseFloat(bVal.replace(/[^0-9.-]+/g, ''));
+
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return (aNum - bNum) * multiplier;
+                        }
+
+                        // String sorting
+                        return aVal.localeCompare(bVal) * multiplier;
+                    });
+
+                    tbody.append(...rows);
+                });
+            });
         }
     </script>
 </body>
