@@ -2263,7 +2263,8 @@ body.theme-cyber {
     </style>
 </head>
 
-<body class="theme-purple">
+<body>
+
     <!-- LOGIN OVERLAY - Add this right after opening body tag -->
     <div id="loginOverlay"
         style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
@@ -5971,7 +5972,7 @@ if (bar) {
 
             // ========== THEME MANAGEMENT ==========
             function setTheme(name) {
-                document.body.className = 'theme-' + name;
+              document.body.className = `theme-${name}`;
                 app.theme = name;
                 saveData();
                 showNotification(`Theme changed to ${name}`, 'info');
@@ -6745,7 +6746,8 @@ Backup includes:
             }, 500);
 
             // Initialize minimal UI
-            if (typeof setTheme === 'function') setTheme('purple');
+
+
             if (typeof initTableSorting === 'function') initTableSorting();
 
             // Initialize Supabase
