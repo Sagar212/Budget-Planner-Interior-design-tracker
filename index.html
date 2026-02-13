@@ -16,63 +16,162 @@
     <style>
         /* ========== CORE VARIABLES & THEMES ========== */
         :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f2d348;
+            --primary: #eff2fe;
+            --secondary: #9d4eec;
+            --accent: #f2d75d;
             --success: #10b981;
             --warning: #f59e0b;
-            --danger: #ef4444;
+            --danger: #f22626;
             --info: #06b6d4;
             --dark: #1e293b;
             --text-light: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(230, 235, 98, 0.8);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+/* Enhanced Theme System - Fully Modernized & Standardized (2024–2026 Trends) */
+/* Every theme now has a COMPLETE, consistent set of variables:
+   - --bg-grad: Smooth, vibrant gradient with lighter end for glassmorphism depth
+   - --primary: Main brand color (used for buttons, accents)
+   - --btn-primary: Primary button base (often same as --primary, with slight darken option)
+   - --secondary: Complementary color
+   - --accent: Highlight/yellow-orange for warnings, progress, icons
+   - --success: Green variant (tinted to theme harmony)
+   - --warning: Amber/orange variant
+   - --danger: Red variant
+   - --info: Blue/cyan variant
+   - --dark: Deep neutral for shadows/text
+   - --card-bg: Low-opacity tint from primary for glass cards
+   - --text-light: Primary text color
+   - --text-muted: Secondary/subtle text
+   - --border-color: Subtle borders (new variable for consistency)
+   - --shadow-color: Soft shadow tint (new variable for depth)
+*/
 
-        /* Enhanced Theme System */
-        body.theme-purple {
-            --bg-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --btn-primary: #667eea;
-            --card-bg: rgba(102, 126, 234, 0.15);
-        }
+body.theme-purple {
+    --bg-grad: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%); /* Indigo → soft violet */
+    --primary: #6366f1;
+    --btn-primary: #4f46e5;
+    --secondary: #8b5cf6;
+    --accent: #fbbf24;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --dark: #1e1b4b;
+    --card-bg: rgba(99, 102, 241, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(99, 102, 241, 0.25);
+}
 
-        body.theme-blue {
-            --bg-grad: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-            --btn-primary: #3b82f6;
-            --card-bg: rgba(14, 165, 233, 0.15);
-        }
+body.theme-blue {
+    --bg-grad: linear-gradient(135deg, #2563eb 0%, #93c5fd 100%); /* Deep blue → sky */
+    --primary: #3b82f6;
+    --btn-primary: #2563eb;
+    --secondary: #60a5fa;
+    --accent: #fde047;
+    --success: #34d399;
+    --warning: #fde047;
+    --danger: #f87171;
+    --info: #7dd3fc;
+    --dark: #172554;
+    --card-bg: rgba(59, 130, 246, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(59, 130, 246, 0.25);
+}
 
-        body.theme-green {
-            --bg-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --btn-primary: #10b981;
-            --card-bg: rgba(16, 185, 129, 0.15);
-        }
+body.theme-green {
+    --bg-grad: linear-gradient(135deg, #059669 0%, #86efac 100%); /* Emerald → mint */
+    --primary: #10b981;
+    --btn-primary: #059669;
+    --secondary: #34d399;
+    --accent: #fde047;
+    --success: #6ee7b7;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #7dd3fc;
+    --dark: #064e3b;
+    --card-bg: rgba(16, 185, 129, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(16, 185, 129, 0.25);
+}
 
-        body.theme-orange {
-            --bg-grad: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            --btn-primary: #f59e0b;
-            --card-bg: rgba(245, 158, 11, 0.15);
-        }
+body.theme-orange {
+    --bg-grad: linear-gradient(135deg, #ea580c 0%, #fdba74 100%); /* Warm orange → peach */
+    --primary: #f97316;
+    --btn-primary: #ea580c;
+    --secondary: #fb923c;
+    --accent: #fde047;
+    --success: #34d399;
+    --warning: #fdba74;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --dark: #7c2d12;
+    --card-bg: rgba(249, 115, 22, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(249, 115, 22, 0.25);
+}
 
-        body.theme-teal {
-            --bg-grad: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
-            --btn-primary: #14b8a6;
-            --card-bg: rgba(20, 184, 166, 0.15);
-        }
+body.theme-teal {
+    --bg-grad: linear-gradient(135deg, #0f766e 0%, #5eead4 100%); /* Deep teal → aqua */
+    --primary: #14b8a6;
+    --btn-primary: #0f766e;
+    --secondary: #2dd4bf;
+    --accent: #fde047;
+    --success: #5eead4;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #7dd3fc;
+    --dark: #134e4a;
+    --card-bg: rgba(20, 184, 166, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(20, 184, 166, 0.25);
+}
 
-        body.theme-midnight {
-            --bg-grad: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --btn-primary: #64748b;
-            --card-bg: rgba(100, 116, 139, 0.15);
-            --text-light: #e2e8f0;
-            --text-muted: rgba(226, 232, 240, 0.8);
-        }
+body.theme-midnight {
+    --bg-grad: linear-gradient(135deg, #020617 0%, #1e293b 100%); /* Ultra-deep slate */
+    --primary: #64748b;
+    --btn-primary: #475569;
+    --secondary: #94a3b8;
+    --accent: #e2e8f0;
+    --success: #6ee7b7;
+    --warning: #fde047;
+    --danger: #fca5a5;
+    --info: #93c5fd;
+    --dark: #0f172a;
+    --card-bg: rgba(71, 85, 105, 0.22);
+    --text-light: #f1f5f9;
+    --text-muted: rgba(241, 245, 249, 0.85);
+    --border-color: rgba(241, 245, 249, 0.15);
+    --shadow-color: rgba(15, 23, 42, 0.4);
+}
 
-        body.theme-royal {
-            --bg-grad: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-            --btn-primary: #8b5cf6;
-            --card-bg: rgba(139, 92, 246, 0.15);
-        }
+body.theme-royal {
+    --bg-grad: linear-gradient(135deg, #581c87 0%, #c4b5fd 100%); /* Deep royal purple → soft lavender */
+    --primary: #7c3aed;
+    --btn-primary: #6d28d9;
+    --secondary: #a78bfa;
+    --accent: #fde047;
+    --success: #86efac;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #93c5fd;
+    --dark: #4c1d95;
+    --card-bg: rgba(124, 58, 237, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(124, 58, 237, 0.25);
+}
 
         body.theme-modern-purple {
             --bg-grad: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -81,44 +180,107 @@
             --text-light: #2d3436;
             --text-muted: rgba(45, 52, 54, 0.8);
             --dark: #2d3436;
-            --primary: #6c5ce7;
-            --secondary: #a29bfe;
+            --primary: #c6c2e4;
+            --secondary: #a9c9e6;
             --accent: #eba337;
             --success: #00b894;
             --warning: #fdcb6e;
             --danger: #e17055;
             --info: #0984e3;
         }
+/* Additional Modern Themes - Fully Standardized & Enhanced (2024–2026 Trends) */
+/* Consistent with the previous themes: full variable set, lighter gradient ends for glassmorphism depth,
+   harmonious semantic colors, slightly darkened btn-primary, higher card opacity, and new border/shadow vars */
 
-        body.theme-sunset {
-            --bg-grad: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            --btn-primary: #f97316;
-            --card-bg: rgba(249, 115, 22, 0.15);
-        }
+body.theme-sunset {
+    --bg-grad: linear-gradient(135deg, #ea580c 0%, #fdba74 100%); /* Warm sunset orange → soft peach glow */
+    --primary: #f97316;
+    --btn-primary: #ea580c;
+    --secondary: #fb923c;
+    --accent: #fde047;       /* Bright sun-like yellow */
+    --success: #86efac;
+    --warning: #fdba74;      /* Matches theme warmth */
+    --danger: #f87171;
+    --info: #93c5fd;
+    --dark: #7c2d12;
+    --card-bg: rgba(249, 115, 22, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.88);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(249, 115, 22, 0.28);
+}
 
-        body.theme-ocean {
-            --bg-grad: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-            --btn-primary: #0891b2;
-            --card-bg: rgba(8, 145, 178, 0.15);
-        }
+body.theme-ocean {
+    --bg-grad: linear-gradient(135deg, #0891b2 0%, #7dd3fc 100%); /* Deep ocean cyan → light sky aqua */
+    --primary: #06b6d4;
+    --btn-primary: #0891b2;
+    --secondary: #22d3ee;
+    --accent: #fde047;
+    --success: #86efac;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #7dd3fc;         /* Strong ocean-tinted info */
+    --dark: #164e63;
+    --card-bg: rgba(6, 182, 212, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.88);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(6, 182, 212, 0.28);
+}
 
-        body.theme-forest {
-            --bg-grad: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            --btn-primary: #16a34a;
-            --card-bg: rgba(22, 163, 74, 0.15);
-        }
+body.theme-forest {
+    --bg-grad: linear-gradient(135deg, #15803d 0%, #86efac 100%); /* Deep forest green → fresh mint */
+    --primary: #16a34a;
+    --btn-primary: #15803d;
+    --secondary: #22c55e;
+    --accent: #fde047;
+    --success: #86efac;      /* Perfect forest harmony */
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #93c5fd;
+    --dark: #14532d;
+    --card-bg: rgba(22, 163, 74, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.88);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(22, 163, 74, 0.28);
+}
 
-        body.theme-rose {
-            --bg-grad: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
-            --btn-primary: #e11d48;
-            --card-bg: rgba(225, 29, 72, 0.15);
-        }
+body.theme-rose {
+    --bg-grad: linear-gradient(135deg, #be123c 0%, #fda4af 100%); /* Deep rose → soft pink blush */
+    --primary: #e11d48;
+    --btn-primary: #be123c;
+    --secondary: #f43f5e;
+    --accent: #fde047;
+    --success: #86efac;
+    --warning: #fbbf24;
+    --danger: #fda4af;       /* Rose-tinted danger for theme cohesion */
+    --info: #93c5fd;
+    --dark: #881337;
+    --card-bg: rgba(225, 29, 72, 0.18);
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.88);
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(225, 29, 72, 0.28);
+}
 
-        body.theme-cyber {
-            --bg-grad: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            --btn-primary: #06b6d4;
-            --card-bg: rgba(6, 182, 212, 0.15);
-        }
+body.theme-cyber {
+    --bg-grad: linear-gradient(135deg, #06b6d4 0%, #a5f3fc 100%); /* Electric cyan → bright neon glow */
+    --primary: #06b6d4;
+    --btn-primary: #0891b2;
+    --secondary: #22d3ee;
+    --accent: #a5f3fc;       /* Neon cyan accent for cyberpunk feel */
+    --success: #86efac;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #a5f3fc;         /* Full neon info */
+    --dark: #164e63;
+    --card-bg: rgba(6, 182, 212, 0.20); /* Slightly higher opacity for neon pop */
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.90);
+    --border-color: rgba(165, 243, 252, 0.25); /* Neon border glow */
+    --shadow-color: rgba(6, 182, 212, 0.35);
+}
 
         /* ========== GLOBAL STYLES ========== */
         * {
@@ -685,7 +847,7 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             opacity: 0.8;
-            color: var(--text-muted);
+            color: var (--text-muted);
             font-weight: 600;
         }
 
@@ -699,28 +861,31 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-    .budget-bar-fill {
+   .budget-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #0acf70, #07d091);  /* Pure green to dark green */
+    background: linear-gradient(90deg, var(--success), var(--info));
     width: 0%;
     transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
 }
-
-        .budget-bar-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg,
-                    transparent,
-                    rgba(255, 255, 255, 0.3),
-                    transparent);
-            animation: shimmer 2s infinite;
-        }
+      .budget-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.6) 30%,
+            rgba(255, 255, 255, 0.9) 50%,
+            rgba(255, 255, 255, 0.6) 70%,
+            transparent);
+    animation: shimmer 2s infinite;
+    z-index: 2;              /* Ensures it stays above the fill gradient */
+    pointer-events: none;    /* Lets clicks pass through to the bar */
+}
 
         @keyframes shimmer {
             0% {
@@ -732,18 +897,18 @@
             }
         }
 
-        .budget-bar-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 800;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-            color: var(--text-light);
-            letter-spacing: 0.5px;
-        }
+       .budget-bar-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    color: #ffffff;  /* pure white for maximum contrast */
+    letter-spacing: 0.5px;
+}
 
         /* ========== TABLES ========== */
         .table-wrap {
@@ -2023,7 +2188,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #ef4444;
+            background: #ff0808;
             animation: statusPulse 2s infinite;
         }
 
@@ -2256,7 +2421,7 @@
                 <!-- Budget Stats Grid -->
                 <div class="stats-grid">
                     <div class="glass-card stat-card">
-                        <i class="fas fa-money-bill-wave" style="color:var(--primary)"></i>
+                        <i class="fas fa-money-bill-wave" style="color:var(--success)"></i>
                         <div class="stat-label">Total Budget</div>
                         <div class="stat-value" id="d-budget">₹0</div>
                         <div class="budget-bar-container">
@@ -4162,7 +4327,7 @@ function renderDashboard() {
         const compLabelEl = compTotalEl.nextElementSibling;
         if (compLabelEl) {
             const diff = compActual - compProposed;
-            const diffColor = diff > 0 ? '#ef4444' : '#10b981';
+            const diffColor = diff > 0 ? '#ff0808' : '#10b981';
             compLabelEl.innerHTML = `
                 <div style="font-size: 11px; opacity: 0.8;">
                     Proposed: ${app.currency}${compProposed.toLocaleString()} 
@@ -4172,14 +4337,16 @@ function renderDashboard() {
     }
 
     // 5. PROGRESS BAR (Payment Only)
-    const bar = document.getElementById('d-bar');
-    if (bar) {
-        bar.style.width = Math.min(paymentPercent, 100) + '%';
-        bar.style.background = paymentPercent > 100 ? 'var(--danger)' : 'var(--primary)';
-    }
+   const bar = document.getElementById('d-bar');
+if (bar) {
+    bar.style.width = Math.min(paymentPercent, 100) + '%';
+    bar.style.background = paymentPercent > 100 
+        ? 'linear-gradient(90deg, var(--danger), color-mix(in srgb, var(--danger) 80%, black))' 
+        : '';  // empty string falls back to the CSS class gradient
+}
     const dPercentLabel = document.getElementById('d-percent');
     if (dPercentLabel) {
-        dPercentLabel.innerHTML = `<span style="font-weight:700; color:var(--accent);">${paymentPercent}%</span> of Payment Budget Used`;
+        dPercentLabel.innerHTML = `<span style="font-weight:700; color:var(--accent);">${paymentPercent}%</span> of Budget Used`;
     }
 
     // 6. QUICK STATS (Verified Fixed)
@@ -5294,7 +5461,7 @@ function renderDashboard() {
                             data: Object.values(catData),
                             backgroundColor: [
                                 '#667eea', '#764ba2', '#f093fb', '#10b981', '#f59e0b',
-                                '#ef4444', '#06b6d4', '#8b5cf6', '#f97316', '#84cc16'
+                                '#ff0808', '#06b6d4', '#8b5cf6', '#f97316', '#84cc16'
                             ],
                             borderWidth: 2,
                             borderColor: 'rgba(255,255,255,0.1)'
@@ -5342,7 +5509,7 @@ function renderDashboard() {
                         datasets: [{
                             data: Object.values(contData),
                             backgroundColor: [
-                                '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#06b6d4',
+                                '#0ea5e9', '#10b981', '#f59e0b', '#ff0808', '#06b6d4',
                                 '#f093fb', '#8b5cf6', '#f97316', '#84cc16', '#e11d48'
                             ],
                             borderWidth: 2,
@@ -5438,7 +5605,7 @@ function renderDashboard() {
                         datasets: [{
                             label: 'Components',
                             data: Object.values(compStatus),
-                            backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                            backgroundColor: ['#ff0808', '#f59e0b', '#10b981'],
                             borderWidth: 2,
                             borderColor: 'rgba(255,255,255,0.2)',
                             borderRadius: 8,
@@ -5545,7 +5712,7 @@ function renderDashboard() {
                                 label: 'Actual Spend',
                                 data: [totalSpent],
                                 backgroundColor: totalSpent > app.budget ? 'rgba(239, 68, 68, 0.7)' : 'rgba(16, 185, 129, 0.7)',
-                                borderColor: totalSpent > app.budget ? '#ef4444' : '#10b981',
+                                borderColor: totalSpent > app.budget ? '#ff0808' : '#10b981',
                                 borderWidth: 2
                             }
                         ]
