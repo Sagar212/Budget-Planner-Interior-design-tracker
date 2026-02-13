@@ -699,14 +699,14 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .budget-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--info));
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            overflow: hidden;
-        }
+    .budget-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0acf70, #07d091);  /* Pure green to dark green */
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
 
         .budget-bar-fill::after {
             content: '';
@@ -2094,6 +2094,7 @@
         .btn-restore {
             background: linear-gradient(135deg, #06b6d4, #0891b2);
         }
+         
     </style>
 </head>
 
@@ -2281,6 +2282,12 @@
                         <div class="stat-value" id="d-remain">₹0</div>
                         <div class="stat-label">Available Funds</div>
                     </div>
+                    <div class="glass-card stat-card">
+    <i class="fas fa-receipt" style="color: var(--accent);"></i>
+    <div class="stat-label">TOTAL PROJECT SPENDING</div>
+    <div class="stat-value" id="d-combined-total">₹0</div>
+    <div class="stat-label" id="d-combined-breakdown"></div>
+</div>
                 </div>
 
                 <!-- Quick Stats -->
@@ -4116,28 +4123,77 @@
                 initTableSorting();
             }
 
-            function renderDashboard() {
-                const spent = app.expenses.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
-                const compCost = app.components.reduce((a, b) => a + parseFloat(b.cost || 0), 0);
+function renderDashboard() {
+    // 1. CALCULATIONS
+    const spent = app.expenses.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+    const compProposed = app.components.reduce((a, b) => a + parseFloat(b.proposedCost || b.cost || 0), 0);
+    const compActual = app.components.reduce((a, b) => a + parseFloat(b.actualCost || 0), 0);
+    
+    // Logic: Components do NOT affect Remaining Balance (per your request)
+    const remain = app.budget - spent; 
+    const paymentPercent = app.budget > 0 ? ((spent / app.budget) * 100).toFixed(1) : 0;
+    
+    // Combined Total Spending (Labor + Materials)
+    const totalSpending = spent + compActual;
 
-                const totalOut = spent + compCost;
-                const remain = app.budget - totalOut;
-                const percent = app.budget > 0 ? ((totalOut / app.budget) * 100).toFixed(1) : 0;
+    // 2. UPDATE STANDARD STATS
+    document.getElementById('d-budget').innerText = `${app.currency}${parseFloat(app.budget).toLocaleString(app.dateFormat)}`;
+    document.getElementById('d-spent').innerText = `${app.currency}${spent.toLocaleString(app.dateFormat)}`;
+    document.getElementById('d-remain').innerText = `${app.currency}${remain.toLocaleString(app.dateFormat)}`;
 
-                document.getElementById('d-budget').innerText = `${app.currency}${parseFloat(app.budget).toLocaleString(app.dateFormat)}`;
-                document.getElementById('d-spent').innerText = `${app.currency}${spent.toLocaleString(app.dateFormat)}`;
-                document.getElementById('d-comp-total').innerText = `${app.currency}${compCost.toLocaleString(app.dateFormat)}`;
-                document.getElementById('d-remain').innerText = `${app.currency}${remain.toLocaleString(app.dateFormat)}`;
+    // 3. UPDATE TOTAL SPENDING CARD
+    const totalSpendingEl = document.getElementById('d-combined-total');
+    if (totalSpendingEl) {
+        totalSpendingEl.innerText = `${app.currency}${totalSpending.toLocaleString(app.dateFormat)}`;
+        
+        const breakdownEl = document.getElementById('d-combined-breakdown');
+        if (breakdownEl) {
+            breakdownEl.innerHTML = `
+                <span style="color: var(--primary); font-weight:600;">LABOR: ${app.currency}${spent.toLocaleString()}</span>
+                <span style="color: var(--accent); font-weight:600;">COMPONENTS: ${app.currency}${compActual.toLocaleString()}</span>
+            `;
+        }
+    }
 
-                const bar = document.getElementById('d-bar');
-                bar.style.width = Math.min(percent, 100) + '%';
-                document.getElementById('d-percent').innerText = percent + '% Used';
+    // 4. COMPONENT CARD (Proposed vs Actual)
+    const compTotalEl = document.getElementById('d-comp-total');
+    if (compTotalEl) {
+        compTotalEl.innerText = `${app.currency}${compActual.toLocaleString(app.dateFormat)}`;
+        const compLabelEl = compTotalEl.nextElementSibling;
+        if (compLabelEl) {
+            const diff = compActual - compProposed;
+            const diffColor = diff > 0 ? '#ef4444' : '#10b981';
+            compLabelEl.innerHTML = `
+                <div style="font-size: 11px; opacity: 0.8;">
+                    Proposed: ${app.currency}${compProposed.toLocaleString()} 
+                    <span style="color:${diffColor}; margin-left:5px;">(${diff > 0 ? '+' : ''}${diff.toLocaleString()})</span>
+                </div>`;
+        }
+    }
 
-                document.getElementById('qs-contractors').innerText = app.contractors.length;
-                document.getElementById('qs-payments').innerText = app.expenses.length;
-                document.getElementById('qs-components').innerText = app.components.length;
-                document.getElementById('qs-faults').innerText = app.faults.filter(f => f.status !== 'Resolved').length;
-            }
+    // 5. PROGRESS BAR (Payment Only)
+    const bar = document.getElementById('d-bar');
+    if (bar) {
+        bar.style.width = Math.min(paymentPercent, 100) + '%';
+        bar.style.background = paymentPercent > 100 ? 'var(--danger)' : 'var(--primary)';
+    }
+    const dPercentLabel = document.getElementById('d-percent');
+    if (dPercentLabel) {
+        dPercentLabel.innerHTML = `<span style="font-weight:700; color:var(--accent);">${paymentPercent}%</span> of Payment Budget Used`;
+    }
+
+    // 6. QUICK STATS (Verified Fixed)
+    const stats = {
+        'qs-contractors': app.contractors.length,
+        'qs-payments': app.expenses.length,
+        'qs-components': app.components.length,
+        'qs-faults': app.faults.filter(f => f.status !== 'Resolved').length
+    };
+    Object.keys(stats).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = stats[id];
+    });
+}
 
             function renderRecentActivity() {
                 const container = document.getElementById('recentActivity');
