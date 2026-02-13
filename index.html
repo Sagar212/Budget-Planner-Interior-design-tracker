@@ -3565,7 +3565,8 @@ body.theme-cyber {
                     } else {
                         document.getElementById('userManagementSection').style.display = 'none';
                     }
-
+// SAVE user context for reload persistence
+  localStorage.setItem("ibp_last_user", JSON.stringify(user));
                     // Load Data
                     SupabaseBackup.autoLoadFromCloud();
                 },
@@ -6751,13 +6752,48 @@ Backup includes:
             if (typeof SupabaseBackup !== 'undefined' && SupabaseBackup.init) SupabaseBackup.init();
 
             // Show Login Overlay logic
-            const appContent = document.getElementById('appContent');
-            const loginOverlay = document.getElementById('loginOverlay');
+          // Improved Login Persistence Logic
+const appContent = document.getElementById('appContent');
+const loginOverlay = document.getElementById('loginOverlay');
 
-            if (appContent) appContent.style.display = 'none';
-            if (loginOverlay) {
-                loginOverlay.style.display = 'flex';
-            }
+const isLoggedIn = localStorage.getItem('ibp_logged_in') === 'true';
+
+if (isLoggedIn) {
+  if (appContent) appContent.style.display = 'block';
+  if (loginOverlay) loginOverlay.style.display = 'none';
+  
+  // CRITICAL: Re-initialize user session
+  if (typeof UserManager !== 'undefined' && UserManager.currentUser) {
+    UserManager.initSession();
+  } else {
+    // Fallback: restore last user context from localStorage
+    const lastUser = localStorage.getItem("ibp_last_user");
+    if (lastUser) {
+      try {
+        const userData = JSON.parse(lastUser);
+        if (UserManager) {
+          UserManager.currentUser = userData;
+          UserManager.initSession();
+        }
+      } catch(e) {
+        console.error("Failed to restore user context", e);
+      }
+    }
+  }
+  
+  // Load project data via cloud sync (handles local fallback automatically)
+  if (typeof SupabaseBackup !== 'undefined') {
+    SupabaseBackup.autoLoadFromCloud();
+  }
+}
+else {
+    // Not logged in
+    if (appContent) appContent.style.display = 'none';
+    if (loginOverlay) {
+        loginOverlay.style.display = 'flex';
+        loginOverlay.style.opacity = '1';
+    }
+}
 
             // Add shake animation style
             if (!document.getElementById('shakeStyle')) {
@@ -6807,7 +6843,50 @@ Backup includes:
                 if (typeof showNotification === 'function') showNotification('Logged out successfully', 'info');
             }
         }
-
+// ========== LOGIN HANDLER ==========
+document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    // Simple demo validation - accept any non-empty credentials
+    // Replace with real validation (e.g., hardcoded admin, or Supabase auth) if needed
+    if (username && password) {
+        // THIS IS THE KEY LINE - SET THE SESSION FLAG
+        localStorage.setItem('ibp_logged_in', 'true');
+        
+        // Hide login, show app
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+        // ===== ADD THIS: Load saved data on fresh login too =====
+const savedData = localStorage.getItem('ibpultimate');
+if (savedData) {
+    try {
+        Object.assign(app, JSON.parse(savedData));
+        showNotification('Welcome back! Your project data loaded.', 'success');
+    } catch (e) {
+        showNotification('Failed to load saved data', 'error');
+    }
+}
+// =====================================================//
+        // Re-initialize app
+        if (typeof renderAll === 'function') renderAll();
+        if (typeof switchTab === 'function') switchTab('dashboard');
+        
+        showNotification(`Welcome, ${username}!`, 'success');
+        
+        // Clear form
+        this.reset();
+    } else {
+        showNotification('Please enter username and password', 'error');
+        // Optional: shake animation
+        document.querySelector('#loginOverlay .glass-card').style.animation = 'shake 0.5s';
+        setTimeout(() => {
+            document.querySelector('#loginOverlay .glass-card').style.animation = '';
+        }, 500);
+    }
+});
         // Header Clock
         function updateHeaderClock() {
             const now = new Date();
