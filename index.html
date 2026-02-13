@@ -139,7 +139,7 @@ body.theme-teal {
 
 body.theme-midnight {
     --bg-grad: linear-gradient(135deg, #020617 0%, #1e293b 100%); /* Ultra-deep slate */
-    --primary: #64748b;
+    --primary: #eef1f5;
     --btn-primary: #475569;
     --secondary: #94a3b8;
     --accent: #e2e8f0;
@@ -180,7 +180,7 @@ body.theme-royal {
             --text-light: #2d3436;
             --text-muted: rgba(45, 52, 54, 0.8);
             --dark: #2d3436;
-            --primary: #c6c2e4;
+            --primary: #f2f1f8;
             --secondary: #a9c9e6;
             --accent: #eba337;
             --success: #00b894;
@@ -2667,7 +2667,7 @@ body.theme-cyber {
                     <div class="glass-card" style="margin-bottom:32px;">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                            <h3 style="color:#38bdf8;"><i class="fas fa-bolt"></i> Electricity Planning</h3>
+                            <h3 style="color:#e6eef1;"><i class="fas fa-bolt"></i> Electricity Planning</h3>
                             <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('electricity')"
                                 title="Add Row">
                                 <i class="fas fa-plus"></i> Add Row
@@ -2695,7 +2695,7 @@ body.theme-cyber {
                     <div class="glass-card" style="margin-bottom:32px;">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                            <h3 style="color:#a78bfa;"><i class="fas fa-couch"></i> Furniture Planning</h3>
+                            <h3 style="color:#e3e0ec;"><i class="fas fa-couch"></i> Furniture Planning</h3>
                             <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('furniture')"
                                 title="Add Row">
                                 <i class="fas fa-plus"></i> Add Row
@@ -2723,7 +2723,7 @@ body.theme-cyber {
                     <div class="glass-card" style="margin-bottom:32px;">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                            <h3 style="color:#2dd4bf;"><i class="fas fa-layer-group"></i> POP Planning</h3>
+                            <h3 style="color:#e1e5e4;"><i class="fas fa-layer-group"></i> POP Planning</h3>
                             <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('pop')"
                                 title="Add Row">
                                 <i class="fas fa-plus"></i> Add Row
@@ -2751,7 +2751,7 @@ body.theme-cyber {
                     <div class="glass-card" style="margin-bottom:32px;">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                            <h3 style="color:#f0abfc;"><i class="fas fa-paint-roller"></i> Painter Planning</h3>
+                            <h3 style="color:#e0d7e2;"><i class="fas fa-paint-roller"></i> Painter Planning</h3>
                             <button class="btn btn-icon-small btn-success" onclick="addPlanningRow('painter')"
                                 title="Add Row">
                                 <i class="fas fa-plus"></i> Add Row
@@ -4782,31 +4782,48 @@ if (bar) {
             }
 
             // ========== CRUD OPERATIONS FOR COMPONENTS ==========
-            function saveComponent(e) {
-                e.preventDefault();
-                const id = document.getElementById('compId').value || Date.now();
-                const data = {
-                    id: parseInt(id),
-                    date: document.getElementById('compDate').value,
-                    name: document.getElementById('compName').value.trim(),
-                    category: document.getElementById('compCategory').value,
-                    contractor: document.getElementById('compContractor').value || '',
-                    newContName: document.getElementById('compNewContName').value.trim(),
-                    newContPhone: document.getElementById('compNewContPhone').value.trim(),
-                    proposedCost: parseFloat(document.getElementById('compProposedCost').value || 0),
-                    actualCost: parseFloat(document.getElementById('compActualCost').value || 0),
-                    workType: document.getElementById('compWorkType').value,
-                    progress: parseInt(document.getElementById('compProgress').value),
-                    status: document.getElementById('compStatus').value
-                };
-                const idx = app.components.findIndex(x => x.id === data.id);
-                if (idx > -1) app.components[idx] = data;
-                else app.components.push(data);
-                saveData();
-                renderAll();
-                closeModal('componentModal');
-                showNotification('Component saved successfully!', 'success');
-            }
+          function saveComponent(e) {
+  e.preventDefault();
+  
+  const id = document.getElementById('compId').value || Date.now();
+  const selectedContractor = document.getElementById('compContractor').value;
+  const newName = document.getElementById('compNewContName').value.trim();
+  const newPhone = document.getElementById('compNewContPhone').value.trim();
+  
+  // ✅ If "None" is selected and new contractor details are provided, use them
+  let finalContractor = selectedContractor;
+  if (selectedContractor === 'None' && newName) {
+    finalContractor = newName; // Use the new contractor name instead of "None"
+  }
+  
+  const data = {
+    id: parseInt(id),
+    date: document.getElementById('compDate').value,
+    name: document.getElementById('compName').value.trim(),
+    category: document.getElementById('compCategory').value,
+    contractor: finalContractor, // ✅ This will be the new name if "None" was selected
+    newContName: newName, // ✅ Keep this for reference/editing
+    newContPhone: newPhone, // ✅ Keep this for reference
+    proposedCost: parseFloat(document.getElementById('compProposedCost').value) || 0,
+    actualCost: parseFloat(document.getElementById('compActualCost').value) || 0,
+    workType: document.getElementById('compWorkType').value,
+    progress: parseInt(document.getElementById('compProgress').value),
+    status: document.getElementById('compStatus').value
+  };
+  
+  const idx = app.components.findIndex(x => x.id === data.id);
+  if (idx > -1) {
+    app.components[idx] = data;
+  } else {
+    app.components.push(data);
+  }
+  
+  saveData();
+  renderAll();
+  closeModal('componentModal');
+  showNotification('Component saved successfully!', 'success');
+}
+
 
             // ========== INITIAL PLANNING LOGIC ==========
             function renderPlanning() {
@@ -4935,10 +4952,13 @@ if (bar) {
                         <div style="font-weight:800;">${c.name}</div>
                         <div style="font-size:10px; opacity:0.6;">${c.category} | ${c.workType || 'Job'}</div>
                     </td>
-                    <td>
-                        <div style="font-size:11px;">${c.contractor || 'None'}</div>
-                        ${c.newContName ? `<div style="font-size:9px; color:var(--warning);">${c.newContName}</div>` : ''}
-                    </td>
+  <td>
+  <div style="font-size:11px">${c.contractor || c.newContName }</div>
+  ${c.newContPhone ? `<div style="font-size:9px;opacity:0.7">📞 ${c.newContPhone}</div>` : ''}
+</td>
+
+
+
                     <td>${app.currency}${proposed.toLocaleString()}</td>
                     <td>
                         <div style="font-weight:700;">${app.currency}${actual.toLocaleString()}</div>
