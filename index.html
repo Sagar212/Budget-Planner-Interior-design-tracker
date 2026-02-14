@@ -3283,8 +3283,13 @@
 
                 <!-- Password Change Section -->
                 <div class="glass-card" style="border-left: 5px solid var(--warning);">
-                    <h3 style="margin-bottom:24px;">
-                        <i class="fas fa-lock"></i> Change Password
+                    <h3 style="margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+                        <span><i class="fas fa-lock"></i> Change Password</span>
+                        <span
+                            style="font-size:14px; font-weight:600; color:var(--accent); display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-user-circle" style="font-size:16px;"></i>
+                            <span id="passwordChangeUsername">--</span>
+                        </span>
                     </h3>
                     <div class="form-grid">
                         <div class="form-group">
@@ -3849,10 +3854,17 @@
 
                     const passwordHash = await this.hashPassword(password);
 
-                    // Query users table
+                    // Query users table with project data
                     const { data, error } = await SupabaseBackup.client
                         .from('users')
-                        .select('id, username, email, role, permissions')
+                        .select(`
+                            id, 
+                            username, 
+                            email, 
+                            role, 
+                            permissions,
+                            project:projects(project_name, shared_unique_key)
+                        `)
                         .eq('username', username)
                         .eq('password_hash', passwordHash)
                         .single();
@@ -3865,9 +3877,11 @@
                                 username: 'admin',
                                 email: 'admin@demo.com',
                                 role: 'admin',
-                                permissions: { canEdit: true, canDelete: true }
+                                permissions: { canEdit: true, canDelete: true },
+                                project: { project_name: 'Demo Project', shared_unique_key: 'DEMO-KEY' }
                             };
                             this.currentUser = adminUser;
+                            console.log('Admin demo login - User data:', adminUser);
                             this.initSession(adminUser);
                             return true;
                         } else if (username === 'user' && password === 'user123') {
@@ -3876,9 +3890,11 @@
                                 username: 'user',
                                 email: 'user@demo.com',
                                 role: 'user',
-                                permissions: { canEdit: true, canDelete: true }
+                                permissions: { canEdit: true, canDelete: true },
+                                project: { project_name: 'User Project', shared_unique_key: 'USER-KEY' }
                             };
                             this.currentUser = normalUser;
+                            console.log('User demo login - User data:', normalUser);
                             this.initSession(normalUser);
                             return true;
                         }
@@ -3887,6 +3903,7 @@
                     }
 
                     this.currentUser = data;
+                    console.log('Database login successful - User data:', data);
                     this.initSession(data);
                     return true;
                 },
@@ -3912,10 +3929,29 @@
                     const displayNameEl = document.getElementById('displayActualName');
                     const displayProjectEl = document.getElementById('displayProjectName');
 
+                    console.log('initSession - Updating UI elements:');
+                    console.log('  - sessionUser.username:', sessionUser.username);
+                    console.log('  - app.projectName:', app.projectName);
+                    console.log('  - displayNameEl exists:', !!displayNameEl);
+                    console.log('  - displayProjectEl exists:', !!displayProjectEl);
+
                     if (userNameEl) userNameEl.innerText = sessionUser.username;
                     if (projectNameEl) projectNameEl.innerText = app.projectName;
-                    if (displayNameEl) displayNameEl.innerText = sessionUser.username;
-                    if (displayProjectEl) displayProjectEl.innerText = app.projectName;
+                    if (displayNameEl) {
+                        displayNameEl.innerText = sessionUser.username;
+                        console.log('  - Set displayActualName to:', sessionUser.username);
+                    }
+                    if (displayProjectEl) {
+                        displayProjectEl.innerText = app.projectName;
+                        console.log('  - Set displayProjectName to:', app.projectName);
+                    }
+
+                    // Update password change section username
+                    const passwordChangeUsernameEl = document.getElementById('passwordChangeUsername');
+                    if (passwordChangeUsernameEl) {
+                        passwordChangeUsernameEl.innerText = sessionUser.username;
+                        console.log('  - Set passwordChangeUsername to:', sessionUser.username);
+                    }
 
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('appContent').style.display = 'block';
@@ -3937,7 +3973,7 @@
                         const roleText = this.isAdmin() ? 'ADMIN' : 'USER';
                         const roleColor = this.isAdmin() ? 'var(--success)' : 'var(--info)';
                         const roleIcon = this.isAdmin() ? 'fa-user-shield' : 'fa-user';
-                        roleDisplay.innerHTML = `<i class="fas ${roleIcon}" style="color:${roleColor};"></i> <span style="color:${roleColor}; font-weight:700;">${roleText}</span>`;
+                        roleDisplay.innerHTML = `<i class="fas ${roleIcon}" style="color:${roleColor};"></i> <span style="color:white; font-weight:700;">${roleText}</span>`;
                     }
 
                     // Update current user type badge in profile settings
@@ -3947,7 +3983,7 @@
                         const badgeClass = this.isAdmin() ? 'badge-primary' : 'badge-secondary';
                         const roleIcon = this.isAdmin() ? 'fa-user-shield' : 'fa-user';
                         userTypeBadge.className = `badge ${badgeClass}`;
-                        userTypeBadge.innerHTML = `<i class="fas ${roleIcon}"></i> ${roleText}`;
+                        userTypeBadge.innerHTML = `<i class="fas ${roleIcon}"></i> <span style="color:white;">${roleText}</span>`;
                     }
 
                     // Show password toggle for admin in user modal
@@ -7704,6 +7740,15 @@ Backup includes:
                             if (UserManager) {
                                 UserManager.currentUser = userData;
                                 UserManager.initSession();
+
+                                // Explicitly update header displays
+                                const displayNameEl = document.getElementById('displayActualName');
+                                const displayProjectEl = document.getElementById('displayProjectName');
+                                const passwordChangeUsernameEl = document.getElementById('passwordChangeUsername');
+
+                                if (displayNameEl) displayNameEl.innerText = userData.username || '--';
+                                if (displayProjectEl) displayProjectEl.innerText = userData.project?.project_name || 'My Interior Project';
+                                if (passwordChangeUsernameEl) passwordChangeUsernameEl.innerText = userData.username || '--';
                             }
                         } catch (e) {
                             console.error("Failed to restore user context", e);
@@ -7795,6 +7840,13 @@ Backup includes:
                 const success = await UserManager.login(username, password);
 
                 if (success) {
+                    localStorage.setItem('ibp_logged_in', 'true');
+
+                    // Save user data to localStorage for session restoration
+                    if (UserManager.currentUser) {
+                        localStorage.setItem('ibp_last_user', JSON.stringify(UserManager.currentUser));
+                    }
+
                     showNotification(`Welcome, ${username}!`, 'success');
                     this.reset();
 
@@ -7803,11 +7855,12 @@ Backup includes:
                     if (typeof switchTab === 'function') switchTab('dashboard');
                 } else {
                     showNotification('Invalid username or password', 'error');
-                    // Shake animation
-                    const card = document.querySelector('#loginOverlay .glass-card');
-                    if (card) {
-                        card.style.animation = 'shake 0.5s';
-                        setTimeout(() => { card.style.animation = ''; }, 500);
+
+                    // Shake animation for login box
+                    const loginBox = document.querySelector('#loginOverlay .glass-card'); // Changed to target the glass-card
+                    if (loginBox) {
+                        loginBox.style.animation = 'shake 0.5s';
+                        setTimeout(() => loginBox.style.animation = '', 500);
                     }
                 }
             } catch (err) {
