@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interior Budget Pro - Ultimate Edition</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- External Libraries -->
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -303,6 +305,56 @@
             --border-color: rgba(165, 243, 252, 0.25);
             /* Neon border glow */
             --shadow-color: rgba(6, 182, 212, 0.35);
+        }
+
+        :root {
+            /* Dark Mode (Default) */
+            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-light: rgba(255, 255, 255, 0.6);
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --accent: #f093fb;
+            --primary-rgb: 102, 126, 234;
+            --secondary-rgb: 118, 75, 162;
+            --btn-primary: linear-gradient(135deg, #667eea, #764ba2);
+            --btn-success: linear-gradient(135deg, #10b981, #059669);
+            --btn-warning: linear-gradient(135deg, #f59e0b, #d97706);
+            --btn-danger: linear-gradient(135deg, #ef4444, #dc2626);
+            --btn-info: linear-gradient(135deg, #3b82f6, #2563eb);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-primary: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 50%, #bcccdc 100%);
+            --bg-secondary: rgba(0, 0, 0, 0.03);
+            --text-primary: #1a202c;
+            --text-secondary: rgba(0, 0, 0, 0.8);
+            --text-light: rgba(0, 0, 0, 0.6);
+            --primary: #5a67d8;
+            --secondary: #6b46c1;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #2563eb;
+            --accent: #d946ef;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Smooth theme transition */
+        body {
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         /* ========== GLOBAL STYLES ========== */
@@ -1211,6 +1263,147 @@
                 0 25px 60px rgba(0, 0, 0, 0.6),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
             animation: modalSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Backup Manager Modal Specific Styles */
+        #backupManagerModal .modal-box {
+            max-width: 1000px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #backupManagerContent {
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 8px;
+            margin-top: 12px;
+        }
+
+        /* Custom Scrollbar for Backup Manager */
+        #backupManagerContent::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #backupManagerContent::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        #backupManagerContent::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #backupManagerContent::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--secondary), var(--primary));
+        }
+
+        /* Firefox Scrollbar */
+        #backupManagerContent {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) rgba(255, 255, 255, 0.05);
+        }
+
+        /* Backup Manager Table Styling */
+        #backupManagerContent .table-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #backupManagerContent table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #backupManagerContent table thead {
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.3), rgba(var(--secondary-rgb), 0.3));
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #backupManagerContent table thead th {
+            padding: 16px 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #backupManagerContent table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        #backupManagerContent table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.01);
+        }
+
+        #backupManagerContent table tbody td {
+            padding: 14px 12px;
+            font-size: 13px;
+        }
+
+        #backupManagerContent .btn-icon {
+            padding: 8px 10px;
+            margin: 0 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        #backupManagerContent .btn-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Scrollable Table Container Styles */
+        .scrollable-table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .scrollable-table-container table {
+            width: 100%;
+        }
+
+        .scrollable-table-container thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.4), rgba(var(--secondary-rgb), 0.4));
+        }
+
+        .scrollable-table-container thead th {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Custom Scrollbar for Tables */
+        .scrollable-table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .scrollable-table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .scrollable-table-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+
+        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--secondary), var(--primary));
         }
 
         @keyframes modalSlideUp {
@@ -2386,19 +2579,28 @@
 
                     <div
                         style="background:rgba(0,0,0,0.35); padding:10px 15px; border-radius:12px; font-size:13px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; min-width:180px;">
-                        <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:var(--accent);">
-                            <i class="fas fa-project-diagram" style="font-size:11px;"></i>
-                            <span id="displayProjectName">--</span>
+                        <div
+                            style="display:flex; align-items:center; gap:8px; font-weight:700; color:var(--accent); font-size:14px;">
+                            <i class="fas fa-user-circle" style="font-size:16px;"></i>
+                            <span id="displayActualName">--</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px; opacity:0.9;">
+                        <div style="display:flex; align-items:center; gap:8px; opacity:0.9; font-size:12px;">
                             <i class="fas fa-user-shield" style="font-size:11px;"></i>
                             <span id="displayUserRole">--</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px; opacity:0.8; font-size:11px;">
-                            <i class="fas fa-user-circle"></i>
-                            <span id="displayActualName">--</span>
+                            <i class="fas fa-project-diagram" style="font-size:10px;"></i>
+                            <span id="displayProjectName">--</span>
                         </div>
                     </div>
+
+                    <!-- Theme Toggle Button -->
+                    <button id="themeToggle" class="btn btn-info" onclick="toggleTheme()"
+                        style="padding:10px 15px; border-radius:12px; display:flex; align-items:center; gap:8px;"
+                        title="Toggle Dark/Light Mode">
+                        <i id="themeIcon" class="fas fa-moon"></i>
+                        <span id="themeText">Dark</span>
+                    </button>
 
                     <button class="btn btn-danger" onclick="logout()" style="padding:10px 15px; border-radius:12px;">
                         <i class="fas fa-sign-out-alt"></i> Logout
@@ -2543,7 +2745,32 @@
                         <i class="fas fa-plus"></i> Add Expense
                     </button>
                 </div>
-                <div class="glass-card table-wrap">
+
+                <!-- Table Controls -->
+                <div class="glass-card" style="margin-bottom:16px; padding:16px;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <label style="font-size:13px; opacity:0.8;">Show:</label>
+                            <select id="expenseRowsPerPage" onchange="updateExpenseTableDisplay()"
+                                style="padding:8px 12px; border-radius:8px; background:rgba(255,255,255,0.1); color:var(--text-light); border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
+                                <option value="10">10 rows</option>
+                                <option value="25" selected>25 rows</option>
+                                <option value="50">50 rows</option>
+                                <option value="100">100 rows</option>
+                                <option value="all">All rows</option>
+                            </select>
+                            <span id="expenseTableInfo" style="font-size:13px; opacity:0.7; margin-left:8px;">Showing 0
+                                of 0 entries</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="exportExpensesToExcel()" title="Export to Excel">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Table Container -->
+                <div class="glass-card table-wrap scrollable-table-container">
                     <table id="expensesTable">
                         <thead>
                             <tr>
@@ -3015,6 +3242,7 @@
                                     <th>Role</th>
                                     <th>Project</th>
                                     <th>Shared Key</th>
+                                    <th>Password</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -3024,8 +3252,11 @@
                 </div>
 
                 <div class="glass-card">
-                    <h3 style="margin-bottom:24px;">
-                        <i class="fas fa-user-circle"></i> Profile Settings
+                    <h3 style="margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+                        <span><i class="fas fa-user-circle"></i> Profile Settings</span>
+                        <span id="currentUserTypeBadge" class="badge badge-secondary" style="font-size:12px;">
+                            <i class="fas fa-user"></i> USER
+                        </span>
                     </h3>
                     <div class="form-grid">
                         <div class="form-group">
@@ -3048,6 +3279,39 @@
                     <button class="btn btn-primary" onclick="saveProfile()">
                         <i class="fas fa-save"></i> Save Profile
                     </button>
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="glass-card" style="border-left: 5px solid var(--warning);">
+                    <h3 style="margin-bottom:24px;">
+                        <i class="fas fa-lock"></i> Change Password
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <div style="position:relative;">
+                                <input type="password" id="currentPassword" placeholder="Enter current password">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <div style="position:relative;">
+                                <input type="password" id="newPassword" placeholder="Enter new password">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <div style="position:relative;">
+                                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="changePassword()">
+                        <i class="fas fa-key"></i> Update Password
+                    </button>
+                    <p style="margin-top:12px; font-size:12px; opacity:0.7;">
+                        <i class="fas fa-info-circle"></i> Password must be at least 6 characters long
+                    </p>
                 </div>
 
                 <div class="glass-card">
@@ -3439,17 +3703,17 @@
 
         <!-- Cloud Backup Manager Modal -->
         <div id="backupManagerModal" class="modal">
-            <div class="modal-box" style="max-width:900px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                    <h3 style="display:flex; align-items:center; gap:12px;">
+            <div class="modal-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="display:flex; align-items:center; gap:12px; margin:0;">
                         <i class="fas fa-cloud" style="color:var(--info);"></i>
                         Cloud Backup Manager
                     </h3>
-                    <button class="btn btn-danger btn-icon" onclick="SupabaseBackup.closeManager()">
+                    <button class="btn btn-danger btn-icon" onclick="SupabaseBackup.closeManager()" title="Close">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div id="backupManagerContent" style="min-height:200px;">
+                <div id="backupManagerContent">
                     <p style="text-align:center; opacity:0.6; padding:40px;">Loading backups...</p>
                 </div>
             </div>
@@ -3469,8 +3733,19 @@
                         <div class="form-group"><label>Email</label><input type="email" id="userEmail" required></div>
                     </div>
                     <div class="form-grid">
-                        <div class="form-group"><label>Password</label><input type="password" id="userPassword"
-                                placeholder="Leave blank to keep current"></div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div style="position:relative;">
+                                <input type="password" id="userPassword" placeholder="Leave blank to keep current"
+                                    style="padding-right:40px;">
+                                <button type="button" id="toggleUserPassword" class="admin-only"
+                                    style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-light); cursor:pointer; display:none;"
+                                    onclick="togglePasswordVisibility('userPassword', 'toggleUserPassword')"
+                                    title="Show/Hide Password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
                         <div class="form-group"><label>Role</label>
                             <select id="userRole">
                                 <option value="user">User</option>
@@ -3536,78 +3811,182 @@
             const UserManager = {
                 currentUser: null,
 
-                // SHA-256 Hashing
+                // Helper methods for role-based access control
+                isAdmin() {
+                    return this.currentUser?.role === 'admin';
+                },
+
+                canEdit(resourceOwnerId = null) {
+                    if (this.isAdmin()) return true;
+                    if (!this.currentUser?.permissions?.canEdit) return false;
+                    // Normal users can only edit their own resources
+                    if (resourceOwnerId) return this.currentUser.id === resourceOwnerId;
+                    return true;
+                },
+
+                canDelete(resourceOwnerId = null) {
+                    if (this.isAdmin()) return true;
+                    if (!this.currentUser?.permissions?.canDelete) return false;
+                    // Normal users can only delete their own resources
+                    if (resourceOwnerId) return this.currentUser.id === resourceOwnerId;
+                    return true;
+                },
+
                 async hashPassword(password) {
-                    const msgBuffer = new TextEncoder().encode(password);
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                    // Simple hash for demo - in production use proper bcrypt or similar
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(password);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
                     const hashArray = Array.from(new Uint8Array(hashBuffer));
                     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
                 },
 
-                // Login Logic
                 async login(username, password) {
-                    try {
-                        const hash = await this.hashPassword(password);
-
-                        // Check Supabase 'users' table
-                        const { data: user, error } = await SupabaseBackup.client
-                            .from('users')
-                            .select('*')
-                            .eq('username', username)
-                            .eq('password_hash', hash)
-                            .single();
-
-                        if (error || !user) throw new Error('Invalid credentials');
-
-                        // Fetch Project Details
-                        const { data: project } = await SupabaseBackup.client
-                            .from('projects')
-                            .select('*')
-                            .eq('user_id', user.id)
-                            .single();
-
-                        this.currentUser = { ...user, project: project || {} };
-
-                        // Update UI & State
-                        this.initSession();
-                        return true;
-
-                    } catch (err) {
-                        console.error('Login failed:', err);
+                    if (!SupabaseBackup.client) {
+                        showNotification('Database not connected', 'error');
                         return false;
                     }
+
+                    const passwordHash = await this.hashPassword(password);
+
+                    // Query users table
+                    const { data, error } = await SupabaseBackup.client
+                        .from('users')
+                        .select('id, username, email, role, permissions')
+                        .eq('username', username)
+                        .eq('password_hash', passwordHash)
+                        .single();
+
+                    if (error || !data) {
+                        // Fallback for demo: allow admin/admin123 and user/user123
+                        if (username === 'admin' && password === 'admin123') {
+                            const adminUser = {
+                                id: 'demo-admin-id',
+                                username: 'admin',
+                                email: 'admin@demo.com',
+                                role: 'admin',
+                                permissions: { canEdit: true, canDelete: true }
+                            };
+                            this.currentUser = adminUser;
+                            this.initSession(adminUser);
+                            return true;
+                        } else if (username === 'user' && password === 'user123') {
+                            const normalUser = {
+                                id: 'demo-user-id',
+                                username: 'user',
+                                email: 'user@demo.com',
+                                role: 'user',
+                                permissions: { canEdit: true, canDelete: true }
+                            };
+                            this.currentUser = normalUser;
+                            this.initSession(normalUser);
+                            return true;
+                        }
+                        console.error('Login failed:', error);
+                        return false;
+                    }
+
+                    this.currentUser = data;
+                    this.initSession(data);
+                    return true;
                 },
 
                 // Initialize Session after Login
-                initSession() {
-                    const user = this.currentUser;
-                    if (!user) return;
+                initSession(user) {
+                    // Use passed user or fallback to currentUser
+                    const sessionUser = user || this.currentUser;
+                    if (!sessionUser) return;
+
+                    // Store as currentUser if not already set
+                    if (!this.currentUser) this.currentUser = sessionUser;
 
                     // Update Global State
-                    app.userName = user.username;
+                    app.userName = sessionUser.username;
                     // Use shared key if available for project ID, otherwise use username-project combo
-                    SupabaseBackup.PROJECT_ID = user.project?.shared_unique_key || user.project?.project_name || 'MyProject';
-                    app.projectName = user.project?.project_name || 'My Interior Project';
+                    SupabaseBackup.PROJECT_ID = sessionUser.project?.shared_unique_key || sessionUser.project?.project_name || sessionUser.username + '_project';
+                    app.projectName = sessionUser.project?.project_name || 'My Interior Project';
 
                     // UI Updates
-                    document.getElementById('userNameDisplay').innerText = user.username;
-                    document.getElementById('projectNameDisplay').innerText = app.projectName;
+                    const userNameEl = document.getElementById('userNameDisplay');
+                    const projectNameEl = document.getElementById('projectNameDisplay');
+                    const displayNameEl = document.getElementById('displayActualName');
+                    const displayProjectEl = document.getElementById('displayProjectName');
+
+                    if (userNameEl) userNameEl.innerText = sessionUser.username;
+                    if (projectNameEl) projectNameEl.innerText = app.projectName;
+                    if (displayNameEl) displayNameEl.innerText = sessionUser.username;
+                    if (displayProjectEl) displayProjectEl.innerText = app.projectName;
+
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('appContent').style.display = 'block';
 
-                    // Admin Privileges
-                    if (user.role === 'admin') {
-                        document.getElementById('userManagementSection').style.display = 'block';
-                        this.loadUsers();
-                    } else {
-                        document.getElementById('userManagementSection').style.display = 'none';
+                    // Apply UI visibility based on role
+                    const userMgmtSection = document.getElementById('userManagementSection');
+                    if (userMgmtSection) {
+                        if (this.isAdmin()) {
+                            userMgmtSection.style.display = 'block';
+                            this.loadUsers(); // Load users for admin
+                        } else {
+                            userMgmtSection.style.display = 'none';
+                        }
                     }
+
+                    // Update role indicator in header
+                    const roleDisplay = document.getElementById('displayUserRole');
+                    if (roleDisplay) {
+                        const roleText = this.isAdmin() ? 'ADMIN' : 'USER';
+                        const roleColor = this.isAdmin() ? 'var(--success)' : 'var(--info)';
+                        const roleIcon = this.isAdmin() ? 'fa-user-shield' : 'fa-user';
+                        roleDisplay.innerHTML = `<i class="fas ${roleIcon}" style="color:${roleColor};"></i> <span style="color:${roleColor}; font-weight:700;">${roleText}</span>`;
+                    }
+
+                    // Update current user type badge in profile settings
+                    const userTypeBadge = document.getElementById('currentUserTypeBadge');
+                    if (userTypeBadge) {
+                        const roleText = this.isAdmin() ? 'ADMIN' : 'USER';
+                        const badgeClass = this.isAdmin() ? 'badge-primary' : 'badge-secondary';
+                        const roleIcon = this.isAdmin() ? 'fa-user-shield' : 'fa-user';
+                        userTypeBadge.className = `badge ${badgeClass}`;
+                        userTypeBadge.innerHTML = `<i class="fas ${roleIcon}"></i> ${roleText}`;
+                    }
+
+                    // Show password toggle for admin in user modal
+                    if (this.isAdmin()) {
+                        const toggleBtn = document.getElementById('toggleUserPassword');
+                        if (toggleBtn) toggleBtn.style.display = 'block';
+                    }
+
+                    // Apply profile field restrictions for normal users
+                    this.applyProfileRestrictions();
+
                     // SAVE user context for reload persistence
-                    localStorage.setItem("ibp_last_user", JSON.stringify(user));
-                    // Example addition to your handleLogin logic
-                    localStorage.setItem('userRole', data.role); // 'Admin' or 'Project Manager'
+                    localStorage.setItem("ibp_last_user", JSON.stringify(sessionUser));
+                    localStorage.setItem('ibp_logged_in', 'true');
+
                     // Load Data
-                    SupabaseBackup.autoLoadFromCloud();
+                    if (typeof SupabaseBackup !== 'undefined' && SupabaseBackup.autoLoadFromCloud) {
+                        SupabaseBackup.autoLoadFromCloud();
+                    }
+                },
+
+                // Apply profile field restrictions based on user role
+                applyProfileRestrictions() {
+                    if (!this.currentUser) return;
+
+                    const isAdmin = this.isAdmin();
+                    const profileFields = ['setProjectName', 'setUserName', 'setProjectAddress', 'setProjectTimeline'];
+
+                    profileFields.forEach(fieldId => {
+                        const field = document.getElementById(fieldId);
+                        if (field) {
+                            if (!isAdmin) {
+                                // Normal users can edit their profile but with some restrictions
+                                field.classList.add('user-editable');
+                            } else {
+                                field.classList.remove('user-editable');
+                            }
+                        }
+                    });
                 },
 
                 async loadUsers() {
@@ -3626,20 +4005,60 @@
                         return;
                     }
 
-                    this.renderUsersTable(users);
+                    this.renderUserTable(users || []);
                 },
 
-                renderUsersTable(users) {
+                renderUserTable(users) {
                     const tbody = document.getElementById('usersTableBody');
-                    tbody.innerHTML = users.map(u => `
+                    if (!tbody) return;
+
+                    const isAdmin = this.isAdmin();
+
+                    tbody.innerHTML = users.map((user, index) => `
                         <tr>
-                            <td>${u.username}</td>
-                            <td><span class="badge ${u.role === 'admin' ? 'badge-completed' : 'badge-inprogress'}">${u.role}</span></td>
-                            <td>${u.projects?.[0]?.project_name || '-'}</td>
-                            <td><code style="font-size:10px;">${u.projects?.[0]?.shared_unique_key || '-'}</code></td>
                             <td>
-                                <button class="btn-icon btn-edit" onclick="UserManager.editUser('${u.id}')"><i class="fas fa-edit"></i></button>
-                                ${u.username !== 'admin' ? `<button class="btn-icon btn-delete" onclick="UserManager.deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-user-circle" style="font-size:20px; color:var(--primary);"></i>
+                                    <div>
+                                        <div style="font-weight:600;">${user.username || 'N/A'}</div>
+                                        <div style="font-size:11px; opacity:0.7;">${user.email || ''}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-secondary'}" style="text-transform:uppercase;">
+                                    <i class="fas ${user.role === 'admin' ? 'fa-user-shield' : 'fa-user'}"></i>
+                                    ${user.role || 'user'}
+                                </span>
+                            </td>
+                            <td>${user.projects?.project_name || (user.projects && user.projects[0] ? user.projects[0].project_name : 'No Project')}</td>
+                            <td>
+                                <code style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:4px; font-size:11px;">
+                                    ${user.projects?.shared_unique_key || (user.projects && user.projects[0] ? user.projects[0].shared_unique_key : 'N/A')}
+                                </code>
+                            </td>
+                            <td>
+                                ${isAdmin ? `
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <input type="password" id="userPwd_${index}" value="********" readonly 
+                                            style="width:120px; padding:4px 8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:var(--text-light); font-size:11px;">
+                                        <button class="btn-icon btn-info" onclick="toggleUserPasswordInTable('userPwd_${index}')" title="Show/Hide Password" style="padding:4px 8px;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                ` : '<span style="opacity:0.5; font-size:11px;">Hidden</span>'}
+                            </td>
+                            <td>
+                                ${isAdmin ? `
+                                    <button class="btn-icon btn-primary" onclick="UserManager.editUser('${user.id}')" title="Edit User">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    ${user.role !== 'admin' ? `
+                                        <button class="btn-icon btn-danger" onclick="UserManager.deleteUser('${user.id}')" title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : '<span style="opacity:0.5; font-size:11px;">Protected</span>'}
+                                ` : '<span style="opacity:0.5;">No Access</span>'}
                             </td>
                         </tr>
                     `).join('');
@@ -3846,11 +4265,20 @@
                             btn.disabled = true;
                         }
                         saveData(); // Ensure latest local data is saved first
+
+                        // Get current user info
+                        const currentUser = UserManager.currentUser;
+                        const userId = currentUser?.id || null;
+                        const userName = currentUser?.username || 'Unknown';
+
                         const backupPayload = {
                             project_name: this.PROJECT_ID,
                             backup_data: { ...app, cloudBackupDate: new Date().toISOString() },
                             backup_size: JSON.stringify(app).length,
-                            version: '2.0'
+                            version: '2.0',
+                            created_by_user_id: userId,
+                            created_by_name: userName,
+                            project_id: currentUser?.project?.project_id || null
                         };
                         const { data, error } = await this.client
                             .from(this.TABLE_NAME)
@@ -3870,15 +4298,24 @@
                     }
                 },
 
-                // Get all backups from cloud
+                // Get all backups from cloud (filtered by user role)
                 async getBackups() {
                     if (!this.client) return [];
                     try {
-                        const { data, error } = await this.client
+                        const currentUser = UserManager.currentUser;
+                        const isAdmin = UserManager.isAdmin();
+
+                        let query = this.client
                             .from(this.TABLE_NAME)
-                            .select('id, created_at, project_name, backup_size, version')
-                            .eq('project_name', this.PROJECT_ID)
-                            .order('created_at', { ascending: false });
+                            .select('id, created_at, project_name, backup_size, version, created_by_name, created_by_user_id');
+
+                        // Admin sees all backups, normal users see only their own
+                        if (!isAdmin && currentUser?.id) {
+                            query = query.eq('created_by_user_id', currentUser.id);
+                        }
+
+                        const { data, error } = await query.order('created_at', { ascending: false });
+
                         if (error) throw error;
                         return data || [];
                     } catch (err) {
@@ -4007,36 +4444,106 @@
                     content.innerHTML = '<p style="text-align:center; opacity:0.6; padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><br>Loading backups...</p>';
                     const backups = await this.getBackups();
                     if (backups.length === 0) {
-                        content.innerHTML = '<p style="text-align:center; opacity:0.6; padding:40px;"><i class="fas fa-cloud" style="font-size:48px; display:block; margin-bottom:16px;"></i>No cloud backups found. Save your first backup!</p>';
+                        content.innerHTML = '<p style="text-align:center; opacity:0.6; padding:40px;"><i class="fas fa-cloud-upload-alt" style="font-size:48px; opacity:0.3;"></i><br><br>No cloud backups found.<br><small>Create your first backup from the Settings tab.</small></p>';
                         return;
                     }
-                    let html = '<div class="table-wrap" style="border-radius:12px;"><table class="backup-manager-table"><thead><tr>';
-                    html += '<th>#</th><th>Date & Time</th><th>Project</th><th>Size</th><th>Ver</th><th>Actions</th>';
-                    html += '</tr></thead><tbody>';
-                    backups.forEach((b, i) => {
-                        const date = new Date(b.created_at);
-                        const dateStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-                        const timeStr = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                        const sizeKB = b.backup_size ? (b.backup_size / 1024).toFixed(1) + ' KB' : 'N/A';
-                        html += `<tr>
-                        <td>${i + 1}</td>
-                        <td>${dateStr}<br><small style="opacity:0.7;">${timeStr}</small></td>
-                        <td>${b.project_name || 'Unknown'}</td>
-                        <td>${sizeKB}</td>
-                        <td>${b.version || '-'}</td>
-                        <td style="white-space:nowrap;">
-                            <button class="btn btn-restore" style="padding:8px 14px; font-size:12px;" onclick="SupabaseBackup.restoreBackup(${b.id})">
-                                <i class="fas fa-undo"></i> Restore
-                            </button>
-                            <button class="btn btn-danger" style="padding:8px 14px; font-size:12px;" onclick="SupabaseBackup.deleteBackup(${b.id})">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    </tr>`;
+
+                    const isAdmin = UserManager.isAdmin();
+
+                    let html = `
+                        <div class="table-wrap">
+                            <table style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Project</th>
+                                        ${isAdmin ? '<th>Username</th>' : ''}
+                                        <th>Size</th>
+                                        <th>Version</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    backups.forEach(b => {
+                        const date = new Date(b.created_at).toLocaleString();
+                        const size = ((b.backup_size || 0) / 1024).toFixed(2) + ' KB';
+                        const username = b.created_by_name || 'Unknown';
+                        html += `
+                            <tr>
+                                <td>${date}</td>
+                                <td>${b.project_name || '-'}</td>
+                                ${isAdmin ? `<td><span class="badge badge-inprogress">${username}</span></td>` : ''}
+                                <td>${size}</td>
+                                <td>${b.version || '1.0'}</td>
+                                <td>
+                                    <button class="btn-icon btn-restore" onclick="SupabaseBackup.restoreBackup('${b.id}')" title="Restore">
+                                        <i class="fas fa-cloud-download-alt"></i>
+                                    </button>
+                                    <button class="btn-icon btn-primary" onclick="SupabaseBackup.exportBackup('${b.id}')" title="Export">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn-icon btn-delete" onclick="SupabaseBackup.deleteBackup('${b.id}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
                     });
-                    html += '</tbody></table></div>';
-                    html += `<p style="opacity:0.6; font-size:12px; margin-top:16px; text-align:center;">${backups.length} backup(s) found</p>`;
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
                     content.innerHTML = html;
+                },
+
+                // Export a specific backup as JSON file
+                async exportBackup(id) {
+                    try {
+                        const { data, error } = await this.client
+                            .from(this.TABLE_NAME)
+                            .select('*')
+                            .eq('id', id)
+                            .single();
+
+                        if (error) throw error;
+                        if (!data) {
+                            showNotification('Backup not found.', 'error');
+                            return;
+                        }
+
+                        // Create JSON file
+                        const exportData = {
+                            id: data.id,
+                            created_at: data.created_at,
+                            project_name: data.project_name,
+                            backup_data: data.backup_data,
+                            backup_size: data.backup_size,
+                            version: data.version,
+                            created_by_name: data.created_by_name,
+                            created_by_user_id: data.created_by_user_id
+                        };
+
+                        const jsonString = JSON.stringify(exportData, null, 2);
+                        const blob = new Blob([jsonString], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+
+                        // Create download link
+                        const a = document.createElement('a');
+                        a.href = url;
+                        const filename = `backup_${data.project_name || 'project'}_${new Date(data.created_at).toISOString().split('T')[0]}.json`;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        showNotification('☁️ Backup exported successfully!', 'success');
+                    } catch (err) {
+                        console.error('☁️ Export error:', err);
+                        showNotification('☁️ Export failed: ' + err.message, 'error');
+                    }
                 },
 
                 // Close backup manager modal
@@ -6736,6 +7243,359 @@ Backup includes:
                 showNotification('Demo data loaded successfully! Explore all features.', 'success');
             }
 
+            // ========== TABLE CONTROLS & EXCEL EXPORT ==========
+
+            // Global variables for table pagination
+            let currentExpenseRowLimit = 25;
+            let currentPaymentRowLimit = 25;
+
+            // Update expense table display based on row limit
+            function updateExpenseTableDisplay() {
+                const selector = document.getElementById('expenseRowsPerPage');
+                const limit = selector.value;
+                currentExpenseRowLimit = limit === 'all' ? Infinity : parseInt(limit);
+
+                // Re-render the expense table with new limit
+                if (typeof renderAll === 'function') {
+                    renderAll();
+                }
+
+                // Update info text
+                updateExpenseTableInfo();
+            }
+
+            // Update expense table info text
+            function updateExpenseTableInfo() {
+                const tbody = document.getElementById('expenseTableBody');
+                const totalRows = app.expenses ? app.expenses.length : 0;
+                const visibleRows = Math.min(currentExpenseRowLimit, totalRows);
+                const infoEl = document.getElementById('expenseTableInfo');
+
+                if (infoEl) {
+                    infoEl.textContent = `Showing ${visibleRows} of ${totalRows} entries`;
+                }
+            }
+
+            // Export expenses to Excel
+            function exportExpensesToExcel() {
+                if (!app.expenses || app.expenses.length === 0) {
+                    showNotification('No expense data to export', 'warning');
+                    return;
+                }
+
+                try {
+                    // Prepare data for export
+                    const exportData = app.expenses.map(exp => ({
+                        'Date': exp.date || '',
+                        'Category': exp.category || '',
+                        'Contractor': exp.contractor || '',
+                        'Work Type': exp.workType || '',
+                        'Amount': exp.amount || 0,
+                        'Paid By': exp.paidBy || '',
+                        'Payment Mode': exp.mode || '',
+                        'Status': exp.status || '',
+                        'Notes': exp.notes || ''
+                    }));
+
+                    // Create worksheet
+                    const ws = XLSX.utils.json_to_sheet(exportData);
+
+                    // Set column widths
+                    ws['!cols'] = [
+                        { wch: 12 }, // Date
+                        { wch: 15 }, // Category
+                        { wch: 20 }, // Contractor
+                        { wch: 25 }, // Work Type
+                        { wch: 12 }, // Amount
+                        { wch: 15 }, // Paid By
+                        { wch: 15 }, // Payment Mode
+                        { wch: 12 }, // Status
+                        { wch: 30 }  // Notes
+                    ];
+
+                    // Create workbook
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Expenses');
+
+                    // Generate filename with current date
+                    const dateStr = new Date().toISOString().split('T')[0];
+                    const filename = `Expense_Tracker_${app.projectName || 'Project'}_${dateStr}.xlsx`;
+
+                    // Save file
+                    XLSX.writeFile(wb, filename);
+
+                    showNotification('Excel file exported successfully!', 'success');
+                } catch (error) {
+                    console.error('Excel export error:', error);
+                    showNotification('Failed to export Excel file. Make sure SheetJS library is loaded.', 'error');
+                }
+            }
+
+            // Export payments/transactions to Excel
+            function exportPaymentsToExcel() {
+                if (!app.expenses || app.expenses.length === 0) {
+                    showNotification('No transaction data to export', 'warning');
+                    return;
+                }
+
+                try {
+                    // Group expenses by contractor
+                    const contractorData = {};
+                    app.expenses.forEach(exp => {
+                        const contractor = exp.contractor || 'Unknown';
+                        if (!contractorData[contractor]) {
+                            contractorData[contractor] = {
+                                contractor: contractor,
+                                totalPaid: 0,
+                                transactions: []
+                            };
+                        }
+                        contractorData[contractor].totalPaid += parseFloat(exp.amount) || 0;
+                        contractorData[contractor].transactions.push(exp);
+                    });
+
+                    // Create summary sheet
+                    const summaryData = Object.values(contractorData).map(data => ({
+                        'Contractor': data.contractor,
+                        'Total Paid': data.totalPaid,
+                        'Transaction Count': data.transactions.length
+                    }));
+
+                    // Create detailed transactions sheet
+                    const detailData = app.expenses.map(exp => ({
+                        'Date': exp.date || '',
+                        'Contractor': exp.contractor || '',
+                        'Work Type': exp.workType || '',
+                        'Category': exp.category || '',
+                        'Amount': exp.amount || 0,
+                        'Paid By': exp.paidBy || '',
+                        'Payment Mode': exp.mode || '',
+                        'Status': exp.status || ''
+                    }));
+
+                    // Create workbook with multiple sheets
+                    const wb = XLSX.utils.book_new();
+
+                    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+                    const wsDetail = XLSX.utils.json_to_sheet(detailData);
+
+                    XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+                    XLSX.utils.book_append_sheet(wb, wsDetail, 'Transactions');
+
+                    // Generate filename
+                    const dateStr = new Date().toISOString().split('T')[0];
+                    const filename = `Transaction_History_${app.projectName || 'Project'}_${dateStr}.xlsx`;
+
+                    // Save file
+                    XLSX.writeFile(wb, filename);
+
+                    showNotification('Transaction history exported successfully!', 'success');
+                } catch (error) {
+                    console.error('Excel export error:', error);
+                    showNotification('Failed to export Excel file. Make sure SheetJS library is loaded.', 'error');
+                }
+            }
+
+            // ========== PASSWORD MANAGEMENT ==========
+
+            // Toggle password visibility (admin only)
+            function togglePasswordVisibility(inputId, buttonId) {
+                const input = document.getElementById(inputId);
+                const button = document.getElementById(buttonId);
+
+                if (!input || !button) return;
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    button.querySelector('i').classList.remove('fa-eye');
+                    button.querySelector('i').classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    button.querySelector('i').classList.remove('fa-eye-slash');
+                    button.querySelector('i').classList.add('fa-eye');
+                }
+            }
+
+            // Toggle password visibility in user table (admin only)
+            function toggleUserPasswordInTable(inputId) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+
+                const button = event.target.closest('button');
+                const icon = button?.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    if (icon) {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                } else {
+                    input.type = 'password';
+                    if (icon) {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+            }
+
+            // Change password for current user
+            async function changePassword() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Validation
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    showNotification('Please fill in all password fields', 'warning');
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    showNotification('New password must be at least 6 characters long', 'warning');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    showNotification('New passwords do not match', 'error');
+                    return;
+                }
+
+                if (!UserManager.currentUser) {
+                    showNotification('No user logged in', 'error');
+                    return;
+                }
+
+                try {
+                    // Verify current password
+                    const currentHash = await UserManager.hashPassword(currentPassword);
+                    const { data: user, error: verifyError } = await SupabaseBackup.client
+                        .from('users')
+                        .select('password_hash')
+                        .eq('id', UserManager.currentUser.id)
+                        .single();
+
+                    if (verifyError || !user || user.password_hash !== currentHash) {
+                        showNotification('Current password is incorrect', 'error');
+                        return;
+                    }
+
+                    // Update password
+                    const newHash = await UserManager.hashPassword(newPassword);
+                    const { error: updateError } = await SupabaseBackup.client
+                        .from('users')
+                        .update({ password_hash: newHash })
+                        .eq('id', UserManager.currentUser.id);
+
+                    if (updateError) {
+                        showNotification('Failed to update password: ' + updateError.message, 'error');
+                        return;
+                    }
+
+                    // Clear fields
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+
+                    showNotification('Password updated successfully!', 'success');
+                } catch (error) {
+                    console.error('Password change error:', error);
+                    showNotification('Failed to change password', 'error');
+                }
+            }
+
+            // ========== THEME TOGGLE ==========
+
+            // Update header clock with proper day/night icon
+            function updateHeaderClock() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+
+                // Format time as HH:MM:SS AM/PM
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours % 12 || 12;
+                const timeString = `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`;
+
+                // Update clock display
+                const clockEl = document.getElementById('headerClock');
+                if (clockEl) clockEl.textContent = timeString;
+
+                // Update icon based on time of day (6 AM - 6 PM = sun, otherwise moon)
+                const iconEl = document.getElementById('headerClockIcon');
+                if (iconEl) {
+                    const isDayTime = hours >= 6 && hours < 18;
+                    if (isDayTime) {
+                        iconEl.innerHTML = '<i class="fas fa-sun" style="color:#f59e0b;"></i>';
+                    } else {
+                        iconEl.innerHTML = '<i class="fas fa-moon" style="color:#a78bfa;"></i>';
+                    }
+                }
+            }
+
+            // Start clock updates
+            setInterval(updateHeaderClock, 1000);
+            updateHeaderClock(); // Initial call
+
+            // Toggle between dark and light mode
+            function toggleTheme() {
+                const body = document.body;
+                const themeIcon = document.getElementById('themeIcon');
+                const themeText = document.getElementById('themeText');
+                const themeToggle = document.getElementById('themeToggle');
+
+                // Toggle light mode class
+                body.classList.toggle('light-mode');
+
+                // Get current theme
+                const isLightMode = body.classList.contains('light-mode');
+
+                // Update button appearance
+                if (isLightMode) {
+                    // Light mode active - show sun icon
+                    themeIcon.className = 'fas fa-sun';
+                    themeText.textContent = 'Light';
+                    themeToggle.className = 'btn btn-warning';
+                } else {
+                    // Dark mode active - show moon icon
+                    themeIcon.className = 'fas fa-moon';
+                    themeText.textContent = 'Dark';
+                    themeToggle.className = 'btn btn-info';
+                }
+
+                // Save preference to localStorage
+                localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+
+                showNotification(`${isLightMode ? 'Light' : 'Dark'} mode activated`, 'info');
+            }
+
+            // Initialize theme based on saved preference or time of day
+            function initializeTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const themeIcon = document.getElementById('themeIcon');
+                const themeText = document.getElementById('themeText');
+                const themeToggle = document.getElementById('themeToggle');
+
+                // Get current hour to determine day/night
+                const currentHour = new Date().getHours();
+                const isDayTime = currentHour >= 6 && currentHour < 18; // 6 AM to 6 PM
+
+                // Determine theme: use saved preference, or auto-detect based on time
+                let useLightMode = savedTheme ? savedTheme === 'light' : isDayTime;
+
+                if (useLightMode) {
+                    document.body.classList.add('light-mode');
+                    themeIcon.className = 'fas fa-sun';
+                    themeText.textContent = 'Light';
+                    themeToggle.className = 'btn btn-warning';
+                } else {
+                    themeIcon.className = 'fas fa-moon';
+                    themeText.textContent = 'Dark';
+                    themeToggle.className = 'btn btn-info';
+                }
+            }
+
             // Initialize the app
             setTimeout(() => {
                 renderAll();
@@ -6747,6 +7607,9 @@ Backup includes:
                     // Optional: Uncomment to auto-load demo data on first run
                     // setTimeout(loadDemoData, 1000);
                 }
+
+                // Initialize theme
+                initializeTheme();
             }, 100);
         </script>
     </div> <!-- Close the appContent div -->
@@ -6911,47 +7774,48 @@ Backup includes:
             }
         }
         // ========== LOGIN HANDLER ==========
-        document.getElementById('loginForm')?.addEventListener('submit', function (e) {
+        document.getElementById('loginForm')?.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
+            const btn = this.querySelector('button[type="submit"]');
+            const originalHtml = btn.innerHTML;
 
-            // Simple demo validation - accept any non-empty credentials
-            // Replace with real validation (e.g., hardcoded admin, or Supabase auth) if needed
-            if (username && password) {
-                // THIS IS THE KEY LINE - SET THE SESSION FLAG
-                localStorage.setItem('ibp_logged_in', 'true');
+            if (!username || !password) {
+                showNotification('Please enter username and password', 'error');
+                return;
+            }
 
-                // Hide login, show app
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appContent').style.display = 'block';
-                // ===== ADD THIS: Load saved data on fresh login too =====
-                const savedData = localStorage.getItem('ibpultimate');
-                if (savedData) {
-                    try {
-                        Object.assign(app, JSON.parse(savedData));
-                        showNotification('Welcome back! Your project data loaded.', 'success');
-                    } catch (e) {
-                        showNotification('Failed to load saved data', 'error');
+            try {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                btn.disabled = true;
+
+                // Use UserManager login
+                const success = await UserManager.login(username, password);
+
+                if (success) {
+                    showNotification(`Welcome, ${username}!`, 'success');
+                    this.reset();
+
+                    // Re-initialize app
+                    if (typeof renderAll === 'function') renderAll();
+                    if (typeof switchTab === 'function') switchTab('dashboard');
+                } else {
+                    showNotification('Invalid username or password', 'error');
+                    // Shake animation
+                    const card = document.querySelector('#loginOverlay .glass-card');
+                    if (card) {
+                        card.style.animation = 'shake 0.5s';
+                        setTimeout(() => { card.style.animation = ''; }, 500);
                     }
                 }
-                // =====================================================//
-                // Re-initialize app
-                if (typeof renderAll === 'function') renderAll();
-                if (typeof switchTab === 'function') switchTab('dashboard');
-
-                showNotification(`Welcome, ${username}!`, 'success');
-
-                // Clear form
-                this.reset();
-            } else {
-                showNotification('Please enter username and password', 'error');
-                // Optional: shake animation
-                document.querySelector('#loginOverlay .glass-card').style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    document.querySelector('#loginOverlay .glass-card').style.animation = '';
-                }, 500);
+            } catch (err) {
+                console.error('Login error:', err);
+                showNotification('Login failed: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
             }
         });
         // Header Clock
